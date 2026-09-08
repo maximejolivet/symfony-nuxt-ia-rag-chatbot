@@ -33,5 +33,10 @@ final class ConversationGrid
             ->addActionGroup(MainActionGroup::create(CreateAction::create()))
             ->addActionGroup(ItemActionGroup::create(ShowAction::create(), UpdateAction::create(), DeleteAction::create()))
         ;
+        // No bulk action group: Sylius's generic bulkDeleteAction doesn't
+        // work for grid-backed HTML resources (see
+        // ConversationBulkDeleteController's docblock). Bulk purge is
+        // wired to that dedicated controller/route instead, from
+        // templates/admin/conversation/index.html.twig.
     }
 }
