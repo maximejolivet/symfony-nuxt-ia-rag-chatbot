@@ -48,7 +48,7 @@ final class PurgeConversationsCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $days = (int) $input->getOption('days');
+        $days = (int) self::requireString($input->getOption('days'), 'days');
         if ($days < 1) {
             $io->error('--days must be a positive integer.');
 
@@ -71,13 +71,13 @@ final class PurgeConversationsCommand extends Command
             return Command::SUCCESS;
         }
 
-        if ($input->getOption('dry-run')) {
+        if ((bool) $input->getOption('dry-run')) {
             $io->info(sprintf('%d conversation(s) inactive for more than %d day(s) would be deleted (dry run -- nothing was deleted).', $count, $days));
 
             return Command::SUCCESS;
         }
 
-        if (!$input->getOption('force')) {
+        if (!(bool) $input->getOption('force')) {
             if (!$input->isInteractive()) {
                 $io->error('Refusing to delete without --force in a non-interactive run (e.g. cron). Pass --dry-run to preview, or --force to actually purge.');
 
@@ -99,5 +99,14 @@ final class PurgeConversationsCommand extends Command
         $io->success(sprintf('Purged %d conversation(s) inactive for more than %d day(s) (messages cascade-deleted at the database level).', $deleted, $days));
 
         return Command::SUCCESS;
+    }
+
+    private static function requireString(mixed $value, string $name): string
+    {
+        if (!\is_string($value)) {
+            throw new \InvalidArgumentException(sprintf('Expected "%s" to be a string.', $name));
+        }
+
+        return $value;
     }
 }

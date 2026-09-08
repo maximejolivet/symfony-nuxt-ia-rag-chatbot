@@ -51,8 +51,14 @@ final class ConversationBulkDeleteController extends AbstractController
             throw new HttpException(403, 'Invalid CSRF token.');
         }
 
-        $ids = array_map('intval', (array) $request->request->all('ids'));
-        $conversations = $ids ? $repository->findBy(['id' => $ids]) : [];
+        $ids = array_values(array_filter(
+            array_map(
+                static fn(mixed $id): int => is_numeric($id) ? (int) $id : 0,
+                $request->request->all('ids'),
+            ),
+            static fn(int $id): bool => $id > 0,
+        ));
+        $conversations = [] !== $ids ? $repository->findBy(['id' => $ids]) : [];
 
         foreach ($conversations as $conversation) {
             $eventDispatcher->dispatch(new ResourceControllerEvent($conversation), 'app.conversation.pre_delete');
