@@ -26,7 +26,7 @@ body:json {
     "provider": "api_endpoint",
     "apiEndpoint": "https://openrouter.ai/api/v1/chat/completions",
     "apiKey": "{{openrouter_api_key}}",
-    "model": "minimax/minimax-m2.7:free",
+    "model": "liquid/lfm-2.5-2.6b:free",
     "isActive": true,
     "isDefault": true
   }
@@ -41,15 +41,20 @@ docs {
   (the model originally configured in .env.prod) started 404ing ("model
   unavailable for free") during this scenario's setup on 2026-08-28;
   "minimax/minimax-m3:free" was tried next but also started 404ing/429ing
-  within the same day. "minimax/minimax-m2.7:free" is what's actually
-  configured and live-tested working as of 2026-08-28, picked after
-  live-testing several free chat models directly against
+  within the same day. "minimax/minimax-m2.7:free" replaced it and worked
+  until it vanished from the catalog entirely by 2026-09-08 (chat requests
+  404ing). "liquid/lfm-2.5-2.6b:free" is what's actually configured and
+  live-tested working as of 2026-09-08, picked after live-testing several
+  free chat models directly against
   https://openrouter.ai/api/v1/chat/completions (curl) for one that actually
   returns a clean, non-empty completion instead of erroring or burning its
-  token budget on hidden reasoning tokens. OpenRouter's free tier is
-  unstable enough that this model may also stop working later -- curl
-  https://openrouter.ai/api/v1/models | jq to list current free models and
-  re-test before assuming this value is still correct.
+  token budget on hidden reasoning tokens -- "google/gemma-4-*:free" were
+  429-rate-limited upstream and "nvidia/nemotron-3-nano-omni-30b-a3b-
+  reasoning:free" hit a worker resource-exhaustion error at test time.
+  OpenRouter's free tier is unstable enough that this model may also stop
+  working later -- curl https://openrouter.ai/api/v1/models | jq to list
+  current free models and re-test before assuming this value is still
+  correct.
 
   isDefault: true puts this ahead of any other active chat config in the
   fallback chain (ProviderSelectionService, priority = isDefault DESC,
