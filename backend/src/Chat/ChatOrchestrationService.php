@@ -53,10 +53,19 @@ final readonly class ChatOrchestrationService
     private const int MAX_TOOL_ITERATIONS = 3; // guards against a runaway tool-call loop
 
     // Keeps chat replies short regardless of how verbose the underlying
-    // model tends to be -- a hard cap, not a substitute for the system
-    // prompt's own conciseness instruction (which shapes *what* gets said,
-    // this only bounds *how much*).
-    private const int CHAT_MAX_TOKENS = 250;
+    // model tends to be -- a safety-net cap, not a substitute for the
+    // system prompt's own conciseness instruction (which shapes *what*
+    // gets said, this only bounds *how much*). Deliberately not tight:
+    // liquid/lfm-2.5-2.6b:free (the current default chat model) always
+    // emits mandatory hidden reasoning tokens before any real content --
+    // reasoning alone measured 250-314 tokens in testing, and OpenRouter
+    // rejects requests that try to disable it ("Reasoning is mandatory for
+    // this endpoint"). A cap much below ~900 risks the reasoning tokens
+    // alone exhausting the budget, which silently returns an *empty*
+    // response (finish_reason "length", content null) -- confirmed in prod
+    // on 2026-09-09 with a 250 cap. If the active chat model changes to one
+    // without mandatory reasoning, this can likely come down again.
+    private const int CHAT_MAX_TOKENS = 900;
 
     public function __construct(
         private ProviderSelectionService $providerSelectionService,
