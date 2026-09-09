@@ -22,7 +22,7 @@ final readonly class RagContextService
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function buildContext(string $query, ?AiAgent $agent = null, int $limit = 5): array
+    public function buildContext(string $query, ?AiAgent $agent = null, int $limit = 3): array
     {
         // The agent's own collection is the primary source (e.g. a CV
         // vectorized under a recruitment agent). When no agent is resolved,

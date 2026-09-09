@@ -40,6 +40,8 @@ final readonly class ChatOrchestrationService
         Tu es un assistant IA utile et bienveillant spécialisé dans l'aide aux utilisateurs.
         Tu réponds en français de manière claire et concise.
 
+        Format de réponse (règle stricte): 3 à 5 phrases maximum, environ 100 mots. Pas de listes à puces ni de titres, sauf si l'utilisateur les demande explicitement. Va droit au but, sans répéter la question ni le contexte fourni.
+
         Instructions importantes:
         - Utilise les documents pertinents fournis dans le contexte pour donner des réponses précises et informées
         - Ne mentionne jamais tes sources ni les documents en tant que tels (pas de "selon le document X", pas de nom de fichier) -- intègre l'information directement dans ta réponse
@@ -49,6 +51,12 @@ final readonly class ChatOrchestrationService
         PROMPT;
 
     private const int MAX_TOOL_ITERATIONS = 3; // guards against a runaway tool-call loop
+
+    // Keeps chat replies short regardless of how verbose the underlying
+    // model tends to be -- a hard cap, not a substitute for the system
+    // prompt's own conciseness instruction (which shapes *what* gets said,
+    // this only bounds *how much*).
+    private const int CHAT_MAX_TOKENS = 600;
 
     public function __construct(
         private ProviderSelectionService $providerSelectionService,
@@ -110,7 +118,7 @@ final readonly class ChatOrchestrationService
         $toolTrace = [];
 
         for ($i = 0; $i < self::MAX_TOOL_ITERATIONS; ++$i) {
-            $result = $llmClient->complete($messages, $toolSpecs ?: null);
+            $result = $llmClient->complete($messages, $toolSpecs ?: null, maxTokens: self::CHAT_MAX_TOKENS);
             $messages[] = $result->message;
 
             if (!$result->message->toolCalls) {
@@ -154,7 +162,7 @@ final readonly class ChatOrchestrationService
         }
 
         // Iteration budget exhausted -- force a final answer without further tool access.
-        $final = $llmClient->complete($messages);
+        $final = $llmClient->complete($messages, maxTokens: self::CHAT_MAX_TOKENS);
         if (null !== $onDelta) {
             $onDelta($final->message->content);
         }
@@ -176,7 +184,7 @@ final readonly class ChatOrchestrationService
     private function generateStreamingReply(LlmClientInterface $llmClient, array $messages, callable $onDelta, array $sources): ChatReplyResult
     {
         $content = '';
-        foreach ($llmClient->stream($messages) as $chunk) {
+        foreach ($llmClient->stream($messages, maxTokens: self::CHAT_MAX_TOKENS) as $chunk) {
             $content .= $chunk;
             $onDelta($chunk);
         }
