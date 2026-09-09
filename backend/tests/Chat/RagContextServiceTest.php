@@ -32,7 +32,7 @@ final class RagContextServiceTest extends TestCase
         $vectorSearchService = $this->createMock(VectorSearchService::class);
         $vectorSearchService->expects(self::once())
             ->method('search')
-            ->with(query: 'hello', collectionName: 'agent_42_collection', limit: 5)
+            ->with(query: 'hello', collectionName: 'agent_42_collection', limit: 3)
             ->willReturn([['document_id' => 1]]);
 
         $service = new RagContextService($collectionService, $vectorSearchService, $this->createStub(LoggerInterface::class));
@@ -52,7 +52,7 @@ final class RagContextServiceTest extends TestCase
         $vectorSearchService = $this->createMock(VectorSearchService::class);
         $vectorSearchService->expects(self::once())
             ->method('search')
-            ->with(query: 'hello', collectionName: 'common_collection', limit: 5)
+            ->with(query: 'hello', collectionName: 'common_collection', limit: 3)
             ->willReturn([]);
 
         $service = new RagContextService($collectionService, $vectorSearchService, $this->createStub(LoggerInterface::class));
@@ -72,7 +72,7 @@ final class RagContextServiceTest extends TestCase
         $vectorSearchService = $this->createMock(VectorSearchService::class);
         $vectorSearchService->expects(self::once())
             ->method('search')
-            ->with(query: 'hello', collectionName: 'common_collection', limit: 5)
+            ->with(query: 'hello', collectionName: 'common_collection', limit: 3)
             ->willReturn([]);
 
         $service = new RagContextService($collectionService, $vectorSearchService, $this->createStub(LoggerInterface::class));
