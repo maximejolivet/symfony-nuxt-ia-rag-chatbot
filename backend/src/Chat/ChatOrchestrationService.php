@@ -37,10 +37,10 @@ use App\Workflow\WorkflowExecutionService;
 final readonly class ChatOrchestrationService
 {
     public const string DEFAULT_SYSTEM_PROMPT = <<<'PROMPT'
+        Format de réponse (règle stricte, prioritaire sur tout le reste): 3 à 5 phrases maximum, environ 100 mots. Pas de listes à puces ni de titres, sauf si l'utilisateur les demande explicitement. Va droit au but, sans répéter la question ni le contexte fourni.
+
         Tu es un assistant IA utile et bienveillant spécialisé dans l'aide aux utilisateurs.
         Tu réponds en français de manière claire et concise.
-
-        Format de réponse (règle stricte): 3 à 5 phrases maximum, environ 100 mots. Pas de listes à puces ni de titres, sauf si l'utilisateur les demande explicitement. Va droit au but, sans répéter la question ni le contexte fourni.
 
         Instructions importantes:
         - Utilise les documents pertinents fournis dans le contexte pour donner des réponses précises et informées
@@ -56,7 +56,7 @@ final readonly class ChatOrchestrationService
     // model tends to be -- a hard cap, not a substitute for the system
     // prompt's own conciseness instruction (which shapes *what* gets said,
     // this only bounds *how much*).
-    private const int CHAT_MAX_TOKENS = 600;
+    private const int CHAT_MAX_TOKENS = 250;
 
     public function __construct(
         private ProviderSelectionService $providerSelectionService,
