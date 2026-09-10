@@ -1,6 +1,6 @@
 # Documentation — Chatbot IA
 
-![docs](https://img.shields.io/badge/docs-11%20pages-informational)
+![docs](https://img.shields.io/badge/docs-12%20pages-informational)
 ![format](https://img.shields.io/badge/format-Markdown-000000?logo=markdown&logoColor=white)
 
 Index de tous les fichiers Markdown du dépôt.
@@ -18,6 +18,7 @@ Index de tous les fichiers Markdown du dépôt.
 - [docs/backend/SPECIFICATION.md](backend/SPECIFICATION.md) — cahier des charges du backend
 - [docs/backend/ADMIN.md](backend/ADMIN.md) — guide des pages du backoffice `/admin` (Menu et Pages hors menu)
 - [docs/backend/AI_MODEL_BENCHMARK.md](backend/AI_MODEL_BENCHMARK.md) — journal de benchmark des modèles de chat gratuits OpenRouter (disponibilité, tool-calling, concision)
+- [docs/backend/VECTOR_DB_ALTERNATIVES.md](backend/VECTOR_DB_ALTERNATIVES.md) — comparatif des bases vectorielles managées face à Qdrant Cloud (paliers gratuits, compatibilité avec le multi-agent)
 
 ## Frontend
 
