@@ -1,10 +1,7 @@
 <template>
   <div
-    :class="[
-      themeClass,
-      className,
-      variant === 'page' ? 'flex w-full flex-1 flex-col min-h-0' : '',
-    ]"
+    :data-theme="theme"
+    :class="[className, variant === 'page' ? 'flex w-full flex-1 flex-col min-h-0' : '']"
   >
     <div
       :class="[
@@ -173,16 +170,15 @@
               />
             </svg>
           </NuxtLink>
-          <span
-            class="rounded-full border border-accent/60 px-2 py-0.5 font-mono text-[11px] leading-none text-foreground"
-          >
-            {{ $t('chatbot.betaBadge') }}
-          </span>
+          <BetaBadge />
         </div>
 
         <div class="flex flex-1 flex-col justify-center gap-5 py-6">
           <div class="relative h-24 w-24">
-            <div class="absolute -inset-1.5 rounded-full border border-primary/50" aria-hidden="true" />
+            <div
+              class="absolute -inset-1.5 rounded-full border border-primary/50"
+              aria-hidden="true"
+            />
             <NuxtImg
               src="/maximejolivet.jpg"
               alt="Maxime"
@@ -196,7 +192,9 @@
             <h1 class="mb-1.5 font-sans text-3xl font-bold tracking-tight text-foreground">
               {{ title }}<span class="text-accent">.</span>
             </h1>
-            <p class="text-sm leading-relaxed text-muted-foreground">{{ $t('chatbot.emptyGreeting') }}</p>
+            <p class="text-sm leading-relaxed text-muted-foreground">
+              {{ $t('chatbot.emptyGreeting') }}
+            </p>
           </div>
           <p class="flex items-center gap-2 font-mono text-xs text-muted-foreground">
             <span
@@ -212,7 +210,10 @@
             {{ llmStatusLabel }}
           </p>
 
-          <div v-if="suggestedQuestions.length > 0" class="mt-1 flex flex-col border-t border-border pt-5">
+          <div
+            v-if="suggestedQuestions.length > 0"
+            class="mt-1 flex flex-col border-t border-border pt-5"
+          >
             <span class="mb-1 px-2 font-mono text-xs text-muted-foreground">
               {{ $t('chatbot.emptyTitle') }}
             </span>
@@ -220,11 +221,13 @@
               v-for="suggestion in suggestedQuestions"
               :key="suggestion"
               type="button"
-              class="group flex min-h-11 items-baseline gap-3 rounded-lg px-2 py-2.5 text-left font-mono text-[13px] leading-snug transition-colors hover:bg-panel-2 focus:outline-none focus-visible:bg-panel-2 focus-visible:ring-2 focus-visible:ring-accent-ink"
+              class="group flex min-h-11 items-baseline gap-3 rounded-lg px-2 py-2.5 text-left font-mono text-[13px] leading-snug transition-colors hover:bg-panel-2 focus:outline-hidden focus-visible:bg-panel-2 focus-visible:ring-2 focus-visible:ring-accent-ink"
               @click="sendMessage(suggestion)"
             >
               <span class="text-primary" aria-hidden="true">&gt;</span>
-              <span class="group-hover:link-dashed">{{ suggestion.replace(/ ([?!:;])/g, '\u00A0$1') }}</span>
+              <span class="group-hover:link-dashed">{{
+                suggestion.replace(/ ([?!:;])/g, '\u00A0$1')
+              }}</span>
             </button>
           </div>
         </div>
@@ -376,11 +379,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5">
               <span class="truncate font-sans font-bold text-foreground">{{ title }}</span>
-              <span
-                class="shrink-0 rounded-full border border-accent/60 px-2 py-0.5 font-mono text-[11px] leading-none text-foreground"
-              >
-                {{ $t('chatbot.betaBadge') }}
-              </span>
+              <BetaBadge size="md" />
             </div>
             <p class="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
               <span
@@ -422,23 +421,24 @@
               v-if="showMobileMenu"
               class="absolute top-full right-1.5 z-30 mt-1 w-60 overflow-hidden rounded-2xl border border-border bg-panel-2 p-1.5 shadow-xl"
             >
-              <!-- Same two links as the site header (SiteHeader.vue), which only
+              <!-- Same two CTAs as the site header (SiteHeader.vue), which only
                    shows from lg up -- this menu is where they live below it. -->
               <a
                 :href="CV_URL"
                 target="_blank"
                 rel="noopener"
-                class="mb-1 flex min-h-11 w-full items-center gap-2.5 rounded-xl bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink"
+                class="group mb-1 flex min-h-11 w-full items-center justify-between gap-2.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-accent focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink"
                 @click="showMobileMenu = false"
               >
                 {{ $t('header.cv') }}
+                <CtaArrow />
                 <span class="sr-only">{{ $t('header.newTab') }}</span>
               </a>
               <a
                 href="https://maxime.bzh"
-                class="flex min-h-11 w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink"
+                class="flex min-h-11 w-full items-center rounded-full bg-panel-foreground px-4 py-2.5 text-sm font-semibold text-panel-2 hover:bg-accent hover:text-accent-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink"
               >
-                {{ $t('header.portfolio') }}
+                {{ $t('header.portfolioShort') }}
               </a>
               <div class="my-1 border-t border-border" role="separator" />
               <button
@@ -477,7 +477,9 @@
                     d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
                   />
                 </svg>
-                {{ scheme === 'dark' ? $t('chatbot.themeToggleLight') : $t('chatbot.themeToggleDark') }}
+                {{
+                  scheme === 'dark' ? $t('chatbot.themeToggleLight') : $t('chatbot.themeToggleDark')
+                }}
               </button>
               <button
                 type="button"
@@ -571,211 +573,211 @@
         <!-- Messages -->
         <div
           ref="messagesContainerRef"
-        :class="[
-          'flex-1 overflow-y-auto',
-          variant !== 'page' || scheme === 'dark' ? 'bg-background' : '',
-        ]"
-        role="log"
-        aria-live="polite"
-        aria-relevant="additions"
-        @scroll="onMessagesScroll"
-      >
-        <div class="mx-auto flex min-h-full w-full max-w-3xl flex-col space-y-3 p-4 sm:px-6">
-          <div
-            v-if="isRestoringHistory"
-            class="flex flex-1 flex-col justify-end gap-3"
-            aria-hidden="true"
-          >
-            <div class="flex justify-start">
-              <div
-                class="h-14 w-2/3 max-w-xs animate-pulse rounded-3xl bg-card motion-reduce:animate-none"
+          :class="[
+            'flex-1 overflow-y-auto',
+            variant !== 'page' || scheme === 'dark' ? 'bg-background' : '',
+          ]"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+          @scroll="onMessagesScroll"
+        >
+          <div class="mx-auto flex min-h-full w-full max-w-3xl flex-col space-y-3 p-4 sm:px-6">
+            <div
+              v-if="isRestoringHistory"
+              class="flex flex-1 flex-col justify-end gap-3"
+              aria-hidden="true"
+            >
+              <div class="flex justify-start">
+                <div
+                  class="h-14 w-2/3 max-w-xs animate-pulse rounded-3xl bg-card motion-reduce:animate-none"
+                />
+              </div>
+              <div class="flex justify-end">
+                <div
+                  class="h-10 w-1/2 max-w-[12rem] animate-pulse rounded-3xl bg-muted motion-reduce:animate-none"
+                />
+              </div>
+              <div class="flex justify-start">
+                <div
+                  class="h-16 w-3/4 max-w-sm animate-pulse rounded-3xl bg-card motion-reduce:animate-none"
+                />
+              </div>
+            </div>
+            <div
+              v-else-if="messages.length === 0"
+              :class="[
+                'flex flex-1 flex-col items-center gap-6 py-4 text-center',
+                // Desktop page variant already shows this same identity/greeting
+                // content persistently in the left panel (see <aside> above) --
+                // showing it a second time in the empty conversation area would
+                // just duplicate it, so it's mobile/widget-only there.
+                variant === 'page' ? 'lg:hidden' : '',
+              ]"
+            >
+              <NuxtImg
+                src="/maximejolivet.jpg"
+                alt="Maxime"
+                width="80"
+                height="80"
+                format="webp"
+                class="mt-auto h-14 w-14 rounded-full object-cover motion-reduce:animate-none sm:h-20 sm:w-20"
               />
+              <div class="space-y-1.5">
+                <h2 class="font-sans text-xl font-bold tracking-tight text-foreground">
+                  {{ $t('chatbot.emptyTitle') }}
+                </h2>
+                <p class="max-w-xs text-sm text-muted-foreground">
+                  {{ $t('chatbot.emptyGreeting') }}
+                </p>
+              </div>
+              <div class="mb-auto flex flex-wrap justify-center gap-2">
+                <button
+                  v-for="suggestion in suggestedQuestions"
+                  :key="suggestion"
+                  type="button"
+                  class="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3.5 py-2 font-mono text-xs text-card-foreground transition-colors hover:border-accent hover:text-accent-ink focus:outline-hidden focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent-ink"
+                  @click="sendMessage(suggestion)"
+                >
+                  {{ suggestion.replace(/ ([?!:;])/g, '\u00A0$1') }}
+                </button>
+              </div>
             </div>
-            <div class="flex justify-end">
-              <div
-                class="h-10 w-1/2 max-w-[12rem] animate-pulse rounded-3xl bg-muted motion-reduce:animate-none"
-              />
-            </div>
-            <div class="flex justify-start">
-              <div
-                class="h-16 w-3/4 max-w-sm animate-pulse rounded-3xl bg-card motion-reduce:animate-none"
-              />
-            </div>
-          </div>
-          <div
-            v-else-if="messages.length === 0"
-            :class="[
-              'flex flex-1 flex-col items-center gap-6 py-4 text-center',
-              // Desktop page variant already shows this same identity/greeting
-              // content persistently in the left panel (see <aside> above) --
-              // showing it a second time in the empty conversation area would
-              // just duplicate it, so it's mobile/widget-only there.
-              variant === 'page' ? 'lg:hidden' : '',
-            ]"
-          >
-            <NuxtImg
-              src="/maximejolivet.jpg"
-              alt="Maxime"
-              width="80"
-              height="80"
-              format="webp"
-              class="mt-auto h-14 w-14 rounded-full object-cover motion-reduce:animate-none sm:h-20 sm:w-20"
-            />
-            <div class="space-y-1.5">
-              <h2 class="font-sans text-xl font-bold tracking-tight text-foreground">
-                {{ $t('chatbot.emptyTitle') }}
-              </h2>
-              <p class="max-w-xs text-sm text-muted-foreground">
-                {{ $t('chatbot.emptyGreeting') }}
-              </p>
-            </div>
-            <div class="mb-auto flex flex-wrap justify-center gap-2">
-              <button
-                v-for="suggestion in suggestedQuestions"
-                :key="suggestion"
-                type="button"
-                class="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3.5 py-2 font-mono text-xs text-card-foreground transition-colors hover:border-accent hover:text-accent-ink focus:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent-ink"
-                @click="sendMessage(suggestion)"
-              >
-                {{ suggestion.replace(/ ([?!:;])/g, '\u00A0$1') }}
-              </button>
-            </div>
-          </div>
-          <template v-else>
-            <template v-for="item in messageItems" :key="item.message.id">
-              <!-- w-full bg-background on the wrapper (not just the pill): a
+            <template v-else>
+              <template v-for="item in messageItems" :key="item.message.id">
+                <!-- w-full bg-background on the wrapper (not just the pill): a
               sticky element inside this scrolling list always has message
               text scrolled up behind it once pinned, unlike the page-level
               nav bar above (which only ever has the ambient page background
               behind it) -- without an opaque full-width backdrop here, that
               text stays legible on both sides of the pill instead of being
               covered by it. -->
-              <div
-                v-if="item.dateLabel"
-                class="sticky top-0 z-10 flex w-full justify-center bg-background py-2"
-              >
-                <span
-                  class="rounded-full bg-card px-3 py-1 font-mono text-[11px] text-muted-foreground shadow-sm shadow-foreground/5"
+                <div
+                  v-if="item.dateLabel"
+                  class="sticky top-0 z-10 flex w-full justify-center bg-background py-2"
                 >
-                  {{ item.dateLabel }}
-                </span>
-              </div>
-              <MessageBubble
-                :message="item.message"
-                :plain="variant === 'page'"
-                :is-grouped="item.isGrouped"
-                :is-speaking="speakingId === item.message.id"
-                :awaiting-identity="awaitingIdentity"
-                :awaiting-email="awaitingEmail"
-                :is-last="item.message.id === messages[messages.length - 1]?.id"
-                :is-streaming="
-                  isLoading &&
-                  'assistant' === item.message.role &&
-                  item.message.id === messages[messages.length - 1]?.id
-                "
-                @speak="speak"
-                @feedback="setFeedback"
-                @regenerate="regenerateLastReply"
-                @identity="onSubmitIdentity"
-                @email="onSubmitEmail"
-              />
+                  <span
+                    class="rounded-full bg-card px-3 py-1 font-mono text-[11px] text-muted-foreground shadow-xs shadow-foreground/5"
+                  >
+                    {{ item.dateLabel }}
+                  </span>
+                </div>
+                <MessageBubble
+                  :message="item.message"
+                  :plain="variant === 'page'"
+                  :is-grouped="item.isGrouped"
+                  :is-speaking="speakingId === item.message.id"
+                  :awaiting-identity="awaitingIdentity"
+                  :awaiting-email="awaitingEmail"
+                  :is-last="item.message.id === messages[messages.length - 1]?.id"
+                  :is-streaming="
+                    isLoading &&
+                    'assistant' === item.message.role &&
+                    item.message.id === messages[messages.length - 1]?.id
+                  "
+                  @speak="speak"
+                  @feedback="setFeedback"
+                  @regenerate="regenerateLastReply"
+                  @identity="onSubmitIdentity"
+                  @email="onSubmitEmail"
+                />
+              </template>
             </template>
-          </template>
-          <TypingIndicator
-            v-if="isLoading && 'assistant' !== messages[messages.length - 1]?.role"
-            :label="toolCallLabel"
-          />
-          <div ref="messagesEndRef" />
+            <TypingIndicator
+              v-if="isLoading && 'assistant' !== messages[messages.length - 1]?.role"
+              :label="toolCallLabel"
+            />
+            <div ref="messagesEndRef" />
+          </div>
         </div>
-      </div>
 
-      <!-- Annonce la réponse assistant complète aux lecteurs d'écran, une
+        <!-- Annonce la réponse assistant complète aux lecteurs d'écran, une
            seule fois (voir le watch sur `isLoading` plus bas) -- le
            conteneur de messages ci-dessus n'annonce plus que les nouvelles
            bulles ajoutées (`aria-relevant="additions"`), jamais leur
            contenu qui se remplit progressivement. -->
-      <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        {{ srAnnouncement }}
-      </div>
+        <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {{ srAnnouncement }}
+        </div>
 
-      <!-- Bouton "remonter en haut" -- symétrique de la pastille "nouveau
+        <!-- Bouton "remonter en haut" -- symétrique de la pastille "nouveau
            message" plus bas, visible dès que le visiteur a défilé assez loin
            dans l'historique (voir onMessagesScroll). -->
-      <Transition
-        enter-active-class="transition duration-150 ease-out"
-        enter-from-class="opacity-0 -translate-y-1"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-100 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 -translate-y-1"
-      >
-        <button
-          v-if="showScrollToTop"
-          type="button"
-          :aria-label="$t('chatbot.scrollToTop')"
-          :title="$t('chatbot.scrollToTop')"
-          class="absolute top-32 left-1/2 z-20 -translate-x-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-card text-muted-foreground shadow-lg shadow-foreground/10 transition-colors hover:text-accent-ink"
-          @click="jumpToTop"
+        <Transition
+          enter-active-class="transition duration-150 ease-out"
+          enter-from-class="opacity-0 -translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition duration-100 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-1"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 10l7-7m0 0l7 7m-7-7v18"
-            />
-          </svg>
-        </button>
-      </Transition>
+          <button
+            v-if="showScrollToTop"
+            type="button"
+            :aria-label="$t('chatbot.scrollToTop')"
+            :title="$t('chatbot.scrollToTop')"
+            class="absolute top-32 left-1/2 z-20 -translate-x-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-card text-muted-foreground shadow-lg shadow-foreground/10 transition-colors hover:text-accent-ink"
+            @click="jumpToTop"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
+            </svg>
+          </button>
+        </Transition>
 
-      <!-- Toast "connexion rétablie" -->
-      <Transition
-        enter-active-class="transition duration-150 ease-out"
-        enter-from-class="opacity-0 -translate-y-1"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-100 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 -translate-y-1"
-      >
-        <p
-          v-if="showBackOnlineToast"
-          class="absolute top-30 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-3.5 py-1.5 text-xs font-medium text-accent-foreground shadow-lg shadow-foreground/10"
+        <!-- Toast "connexion rétablie" -->
+        <Transition
+          enter-active-class="transition duration-150 ease-out"
+          enter-from-class="opacity-0 -translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition duration-100 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-1"
         >
-          {{ $t('chatbot.backOnline') }}
-        </p>
-      </Transition>
+          <p
+            v-if="showBackOnlineToast"
+            class="absolute top-30 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-3.5 py-1.5 text-xs font-medium text-primary-foreground shadow-lg shadow-foreground/10"
+          >
+            {{ $t('chatbot.backOnline') }}
+          </p>
+        </Transition>
 
-      <!-- Pastille "nouveau message" -- visible seulement si le visiteur a
+        <!-- Pastille "nouveau message" -- visible seulement si le visiteur a
            remonté dans l'historique (autoScroll désactivé) et qu'un message
            est arrivé pendant ce temps -- voir onMessagesScroll/le watch sur
            messages plus bas. -->
-      <Transition
-        enter-active-class="transition duration-150 ease-out"
-        enter-from-class="opacity-0 translate-y-1"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-100 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 translate-y-1"
-      >
-        <button
-          v-if="hasNewMessage"
-          type="button"
-          class="absolute bottom-20 left-1/2 z-20 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-medium text-primary-foreground shadow-lg shadow-foreground/10 transition-colors hover:bg-accent hover:text-accent-foreground"
-          @click="jumpToLatest"
+        <Transition
+          enter-active-class="transition duration-150 ease-out"
+          enter-from-class="opacity-0 translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition duration-100 ease-in"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 translate-y-1"
         >
-          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
-          {{ $t('chatbot.newMessage') }}
-        </button>
-      </Transition>
+          <button
+            v-if="hasNewMessage"
+            type="button"
+            class="absolute bottom-20 left-1/2 z-20 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-medium text-primary-foreground shadow-lg shadow-foreground/10 transition-colors hover:bg-accent hover:text-primary-foreground"
+            @click="jumpToLatest"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
+            {{ $t('chatbot.newMessage') }}
+          </button>
+        </Transition>
 
-      <!-- Astuce de découverte, bannière d'erreur et formulaire de saisie
+        <!-- Astuce de découverte, bannière d'erreur et formulaire de saisie
            groupés dans un seul conteneur, en flux normal comme sibling de
            la zone de messages (flex-1 overflow-y-auto juste au-dessus) --
            PAS en `absolute bottom-0` : ça flottait par-dessus les messages
@@ -787,225 +789,306 @@
            réelle de ce groupe. `sticky bottom-0` en plus : reste collé en
            bas du panneau (qui, lui, ne scrolle jamais -- seule la zone de
            messages scrolle) même si un ancêtre venait à devenir scrollable. -->
-      <div class="sticky bottom-0 z-10 flex flex-col">
-        <!-- Astuce de découverte (commandes slash, Cmd/Ctrl+K) -- une seule
+        <div class="sticky bottom-0 z-10 flex flex-col">
+          <!-- Astuce de découverte (commandes slash, Cmd/Ctrl+K) -- une seule
            fois, voir maybeShowDiscoveryHint plus haut. -->
-        <Transition
-          enter-active-class="transition duration-150 ease-out"
-          enter-from-class="opacity-0 translate-y-1"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition duration-100 ease-in"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="opacity-0 translate-y-1"
-        >
-          <div
-            v-if="showDiscoveryHint"
-            class="border-t border-accent/20 bg-accent/5 px-4 py-2 sm:px-6"
+          <Transition
+            enter-active-class="transition duration-150 ease-out"
+            enter-from-class="opacity-0 translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition duration-100 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-1"
           >
-            <div class="mx-auto flex max-w-3xl items-center justify-between gap-3">
-              <p class="flex items-center gap-1.5 text-xs text-foreground">
-                <span class="shrink-0">💡</span>
-                {{ $t('chatbot.discoveryHint') }}
-              </p>
-              <button
-                type="button"
-                :aria-label="$t('chatbot.close')"
-                class="-my-2 flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-accent-ink"
-                @click="dismissDiscoveryHint"
-              >
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </Transition>
-
-        <!-- Erreur -->
-        <Transition
-          enter-active-class="transition duration-150 ease-out"
-          enter-from-class="opacity-0 -translate-y-1"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition duration-100 ease-in"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="opacity-0 -translate-y-1"
-        >
-          <div
-            v-if="error"
-            role="alert"
-            :class="[
-              'px-4 py-2 sm:px-6',
-              variant !== 'page' ? 'border-t border-destructive/20 bg-destructive/10' : '',
-            ]"
-          >
-            <div class="mx-auto flex max-w-3xl items-center justify-between gap-3">
-              <p class="flex items-center gap-1.5 text-xs text-destructive">
-                <span class="shrink-0" aria-hidden="true">⚠️</span>
-                {{ error }}
-              </p>
-              <button
-                type="button"
-                class="shrink-0 whitespace-nowrap rounded-full border border-destructive/40 px-4 py-2 min-h-11 font-mono text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
-                @click="retryLastMessage"
-              >
-                {{ $t('chatbot.retry') }}
-              </button>
-            </div>
-          </div>
-        </Transition>
-
-        <!-- Saisie -->
-        <form
-          @submit="onSubmit"
-          :class="[
-            'px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6',
-            variant !== 'page' ? 'border-t border-border bg-card' : '',
-          ]"
-        >
-          <div class="relative mx-auto w-full max-w-3xl">
-            <!-- Sélecteur d'emoji -->
-            <Transition
-              enter-active-class="transition duration-150 ease-out"
-              enter-from-class="opacity-0 translate-y-2"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition duration-100 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 translate-y-2"
+            <div
+              v-if="showDiscoveryHint"
+              class="border-t border-accent/20 bg-accent/5 px-4 py-2 sm:px-6"
             >
-              <div
-                v-if="showEmojiPicker"
-                class="absolute bottom-full left-0 z-20 mb-2 flex h-80 w-72 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl"
-              >
-                <div class="border-b border-border p-2">
-                  <input
-                    v-model="emojiSearch"
-                    type="text"
-                    :placeholder="$t('chatbot.emojiSearchPlaceholder')"
-                    class="w-full rounded-full border-0 bg-muted px-4 py-2.5 text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
-                    @keydown="onEmojiSearchKeydown"
-                  />
-                </div>
-                <div
-                  v-if="!emojiSearch"
-                  class="flex shrink-0 gap-0.5 overflow-x-auto border-b border-border px-1.5 py-1.5"
-                >
-                  <button
-                    v-for="group in emojiGroups"
-                    :key="group.slug"
-                    type="button"
-                    :title="group.name"
-                    :class="[
-                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base transition-colors',
-                      emojiCategory === group.slug ? 'bg-primary/40' : 'hover:bg-muted',
-                    ]"
-                    @click="emojiCategory = group.slug"
-                  >
-                    {{ group.icon }}
-                  </button>
-                </div>
-                <div
-                  class="grid grid-cols-6 content-start gap-0.5 overflow-y-auto p-2"
-                  role="grid"
-                  @keydown="onEmojiGridKeydown"
-                >
-                  <p
-                    v-if="emojiDataLoading"
-                    class="col-span-6 mt-6 text-center text-xs text-muted-foreground"
-                  >
-                    {{ $t('chatbot.emojiLoading') }}
-                  </p>
-                  <template v-else>
-                    <button
-                      v-for="(item, index) in visibleEmojis"
-                      :key="item.slug"
-                      :ref="(el) => setEmojiButtonRef(el as Element | null, index)"
-                      type="button"
-                      :title="item.name"
-                      :tabindex="index === focusedEmojiIndex ? 0 : -1"
-                      class="flex h-9 w-9 items-center justify-center rounded-full text-lg hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink"
-                      @click="insertEmoji(item.emoji)"
-                      @focus="focusedEmojiIndex = index"
-                    >
-                      {{ item.emoji }}
-                    </button>
-                    <p
-                      v-if="visibleEmojis.length === 0"
-                      class="col-span-6 mt-6 text-center text-xs text-muted-foreground"
-                    >
-                      {{ $t('chatbot.emojiSearchEmpty') }}
-                    </p>
-                  </template>
-                </div>
-              </div>
-            </Transition>
-
-            <!-- Menu des commandes slash -->
-            <Transition
-              enter-active-class="transition duration-150 ease-out"
-              enter-from-class="opacity-0 translate-y-2"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition duration-100 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 translate-y-2"
-            >
-              <div
-                v-if="showSlashMenu"
-                role="listbox"
-                class="absolute bottom-full left-0 z-20 mb-2 w-72 overflow-hidden rounded-2xl border border-border bg-card shadow-xl"
-              >
-                <ul class="max-h-56 overflow-y-auto p-1.5">
-                  <li v-for="(command, index) in filteredSlashCommands" :key="command.name">
-                    <button
-                      type="button"
-                      role="option"
-                      :aria-selected="index === focusedSlashIndex"
-                      :class="[
-                        'flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-colors',
-                        index === focusedSlashIndex
-                          ? 'bg-muted text-foreground'
-                          : 'text-foreground hover:bg-muted',
-                      ]"
-                      @mouseenter="focusedSlashIndex = index"
-                      @click="runSlashCommand(command)"
-                    >
-                      <span class="shrink-0 font-mono text-xs">/{{ command.name }}</span>
-                      <span
-                        :class="[
-                          'truncate text-xs',
-                          index === focusedSlashIndex ? 'text-foreground' : 'text-muted-foreground',
-                        ]"
-                        >{{ command.description }}</span
-                      >
-                    </button>
-                  </li>
-                  <li
-                    v-if="filteredSlashCommands.length === 0"
-                    class="px-3 py-4 text-center text-xs text-muted-foreground"
-                  >
-                    {{ $t('chatbot.slashEmpty') }}
-                  </li>
-                </ul>
-              </div>
-            </Transition>
-
-            <!-- Barre pilule (plein écran, cf. capture goria.ai/chat) -->
-            <div v-if="variant === 'page'" class="flex items-center gap-2">
-              <div
-                class="flex flex-1 items-center gap-1 rounded-3xl bg-card pl-5 pr-2 shadow-lg shadow-foreground/10 transition-shadow focus-within:shadow-xl focus-within:ring-2 focus-within:ring-accent-ink"
-              >
+              <div class="mx-auto flex max-w-3xl items-center justify-between gap-3">
+                <p class="flex items-center gap-1.5 text-xs text-foreground">
+                  <span class="shrink-0">💡</span>
+                  {{ $t('chatbot.discoveryHint') }}
+                </p>
                 <button
                   type="button"
-                  @click="toggleEmojiPicker"
-                  :aria-label="$t('chatbot.insertEmoji')"
-                  class="flex h-11 w-11 shrink-0 items-center justify-center text-lg text-muted-foreground transition-colors hover:text-accent-ink"
+                  :aria-label="$t('chatbot.close')"
+                  class="-my-2 flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-accent-ink"
+                  @click="dismissDiscoveryHint"
                 >
-                  🙂
+                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
                 </button>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Erreur -->
+          <Transition
+            enter-active-class="transition duration-150 ease-out"
+            enter-from-class="opacity-0 -translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition duration-100 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-1"
+          >
+            <div
+              v-if="error"
+              role="alert"
+              :class="[
+                'px-4 py-2 sm:px-6',
+                variant !== 'page' ? 'border-t border-destructive/20 bg-destructive/10' : '',
+              ]"
+            >
+              <div class="mx-auto flex max-w-3xl items-center justify-between gap-3">
+                <p class="flex items-center gap-1.5 text-xs text-destructive">
+                  <span class="shrink-0" aria-hidden="true">⚠️</span>
+                  {{ error }}
+                </p>
+                <button
+                  type="button"
+                  class="shrink-0 whitespace-nowrap rounded-full border border-destructive/40 px-4 py-2 min-h-11 font-mono text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                  @click="retryLastMessage"
+                >
+                  {{ $t('chatbot.retry') }}
+                </button>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Saisie -->
+          <form
+            @submit="onSubmit"
+            :class="[
+              'px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6',
+              variant !== 'page' ? 'border-t border-border bg-card' : '',
+            ]"
+          >
+            <div class="relative mx-auto w-full max-w-3xl">
+              <!-- Sélecteur d'emoji -->
+              <Transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="opacity-0 translate-y-2"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-2"
+              >
+                <div
+                  v-if="showEmojiPicker"
+                  class="absolute bottom-full left-0 z-20 mb-2 flex h-80 w-72 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xl"
+                >
+                  <div class="border-b border-border p-2">
+                    <input
+                      v-model="emojiSearch"
+                      type="text"
+                      :placeholder="$t('chatbot.emojiSearchPlaceholder')"
+                      class="w-full rounded-full border-0 bg-muted px-4 py-2.5 text-base text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-accent-ink"
+                      @keydown="onEmojiSearchKeydown"
+                    />
+                  </div>
+                  <div
+                    v-if="!emojiSearch"
+                    class="flex shrink-0 gap-0.5 overflow-x-auto border-b border-border px-1.5 py-1.5"
+                  >
+                    <button
+                      v-for="group in emojiGroups"
+                      :key="group.slug"
+                      type="button"
+                      :title="group.name"
+                      :class="[
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base transition-colors',
+                        emojiCategory === group.slug ? 'bg-primary/40' : 'hover:bg-muted',
+                      ]"
+                      @click="emojiCategory = group.slug"
+                    >
+                      {{ group.icon }}
+                    </button>
+                  </div>
+                  <div
+                    class="grid grid-cols-6 content-start gap-0.5 overflow-y-auto p-2"
+                    role="grid"
+                    @keydown="onEmojiGridKeydown"
+                  >
+                    <p
+                      v-if="emojiDataLoading"
+                      class="col-span-6 mt-6 text-center text-xs text-muted-foreground"
+                    >
+                      {{ $t('chatbot.emojiLoading') }}
+                    </p>
+                    <template v-else>
+                      <button
+                        v-for="(item, index) in visibleEmojis"
+                        :key="item.slug"
+                        :ref="(el) => setEmojiButtonRef(el as Element | null, index)"
+                        type="button"
+                        :title="item.name"
+                        :tabindex="index === focusedEmojiIndex ? 0 : -1"
+                        class="flex h-9 w-9 items-center justify-center rounded-full text-lg hover:bg-muted focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink"
+                        @click="insertEmoji(item.emoji)"
+                        @focus="focusedEmojiIndex = index"
+                      >
+                        {{ item.emoji }}
+                      </button>
+                      <p
+                        v-if="visibleEmojis.length === 0"
+                        class="col-span-6 mt-6 text-center text-xs text-muted-foreground"
+                      >
+                        {{ $t('chatbot.emojiSearchEmpty') }}
+                      </p>
+                    </template>
+                  </div>
+                </div>
+              </Transition>
+
+              <!-- Menu des commandes slash -->
+              <Transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="opacity-0 translate-y-2"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-2"
+              >
+                <div
+                  v-if="showSlashMenu"
+                  role="listbox"
+                  class="absolute bottom-full left-0 z-20 mb-2 w-72 overflow-hidden rounded-2xl border border-border bg-card shadow-xl"
+                >
+                  <ul class="max-h-56 overflow-y-auto p-1.5">
+                    <li v-for="(command, index) in filteredSlashCommands" :key="command.name">
+                      <button
+                        type="button"
+                        role="option"
+                        :aria-selected="index === focusedSlashIndex"
+                        :class="[
+                          'flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-colors',
+                          index === focusedSlashIndex
+                            ? 'bg-muted text-foreground'
+                            : 'text-foreground hover:bg-muted',
+                        ]"
+                        @mouseenter="focusedSlashIndex = index"
+                        @click="runSlashCommand(command)"
+                      >
+                        <span class="shrink-0 font-mono text-xs">/{{ command.name }}</span>
+                        <span
+                          :class="[
+                            'truncate text-xs',
+                            index === focusedSlashIndex
+                              ? 'text-foreground'
+                              : 'text-muted-foreground',
+                          ]"
+                          >{{ command.description }}</span
+                        >
+                      </button>
+                    </li>
+                    <li
+                      v-if="filteredSlashCommands.length === 0"
+                      class="px-3 py-4 text-center text-xs text-muted-foreground"
+                    >
+                      {{ $t('chatbot.slashEmpty') }}
+                    </li>
+                  </ul>
+                </div>
+              </Transition>
+
+              <!-- Barre pilule (plein écran, cf. capture goria.ai/chat) -->
+              <div v-if="variant === 'page'" class="flex items-center gap-2">
+                <div
+                  class="flex flex-1 items-center gap-1 rounded-3xl bg-card pl-5 pr-2 shadow-lg shadow-foreground/10 transition-shadow focus-within:shadow-xl focus-within:ring-2 focus-within:ring-accent-ink"
+                >
+                  <button
+                    type="button"
+                    @click="toggleEmojiPicker"
+                    :aria-label="$t('chatbot.insertEmoji')"
+                    class="flex h-11 w-11 shrink-0 items-center justify-center text-lg text-muted-foreground transition-colors hover:text-accent-ink"
+                  >
+                    🙂
+                  </button>
+                  <textarea
+                    ref="textareaRef"
+                    :value="inputValue"
+                    @input="onInputInput"
+                    @keydown="onInputKeydown"
+                    rows="1"
+                    :placeholder="placeholder"
+                    :disabled="isLoading || awaitingIdentity || awaitingEmail"
+                    class="max-h-[120px] min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent px-1 py-3.5 text-base text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+                  ></textarea>
+                  <button
+                    v-if="micSupported"
+                    type="button"
+                    @click="toggleListening"
+                    :disabled="isLoading"
+                    :aria-pressed="isListening"
+                    :title="isListening ? $t('chatbot.micStop') : $t('chatbot.micStart')"
+                    :class="[
+                      'hidden h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 lg:flex',
+                      isListening
+                        ? 'animate-pulse-dot motion-reduce:animate-none text-destructive'
+                        : 'text-muted-foreground hover:text-accent-ink',
+                    ]"
+                  >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <button
+                  type="submit"
+                  :disabled="isLoading || awaitingIdentity || awaitingEmail || !inputValue.trim()"
+                  :aria-label="$t('chatbot.send')"
+                  class="-ml-3 z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-foreground/10 transition-colors hover:bg-accent hover:text-primary-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-border"
+                >
+                  <svg
+                    v-if="isLoading"
+                    class="h-4 w-4 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <svg
+                    v-else
+                    class="h-4 w-4 rotate-90"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Barre classique (widget flottant) -->
+              <div v-else class="flex items-center gap-2">
                 <textarea
                   ref="textareaRef"
                   :value="inputValue"
@@ -1014,129 +1097,60 @@
                   rows="1"
                   :placeholder="placeholder"
                   :disabled="isLoading || awaitingIdentity || awaitingEmail"
-                  class="max-h-[120px] min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent px-1 py-3.5 text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="max-h-[120px] min-h-11 min-w-0 flex-1 resize-none overflow-y-auto rounded-3xl border border-border bg-background px-4 py-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-accent-ink disabled:cursor-not-allowed disabled:opacity-50"
                 ></textarea>
                 <button
-                  v-if="micSupported"
-                  type="button"
-                  @click="toggleListening"
-                  :disabled="isLoading"
-                  :aria-pressed="isListening"
-                  :title="isListening ? $t('chatbot.micStop') : $t('chatbot.micStart')"
-                  :class="[
-                    'hidden h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 lg:flex',
-                    isListening
-                      ? 'animate-pulse-dot motion-reduce:animate-none text-destructive'
-                      : 'text-muted-foreground hover:text-accent-ink',
-                  ]"
+                  type="submit"
+                  :disabled="isLoading || awaitingIdentity || awaitingEmail || !inputValue.trim()"
+                  :aria-label="$t('chatbot.send')"
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-primary-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-border"
                 >
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    v-if="isLoading"
+                    class="h-4 w-4 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <svg
+                    v-else
+                    class="h-4 w-4 rotate-90"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
-                      d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
                     />
                   </svg>
                 </button>
               </div>
-              <button
-                type="submit"
-                :disabled="isLoading || awaitingIdentity || awaitingEmail || !inputValue.trim()"
-                :aria-label="$t('chatbot.send')"
-                class="-ml-3 z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-foreground/10 transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-border"
+              <p
+                v-if="showCharCount"
+                class="mt-1 text-right font-mono text-[11px] text-muted-foreground"
               >
-                <svg v-if="isLoading" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <svg
-                  v-else
-                  class="h-4 w-4 rotate-90"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
-              </button>
+                {{ inputValue.length }}
+              </p>
             </div>
-
-            <!-- Barre classique (widget flottant) -->
-            <div v-else class="flex items-center gap-2">
-              <textarea
-                ref="textareaRef"
-                :value="inputValue"
-                @input="onInputInput"
-                @keydown="onInputKeydown"
-                rows="1"
-                :placeholder="placeholder"
-                :disabled="isLoading || awaitingIdentity || awaitingEmail"
-                class="max-h-[120px] min-h-11 min-w-0 flex-1 resize-none overflow-y-auto rounded-3xl border border-border bg-background px-4 py-2 text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink disabled:cursor-not-allowed disabled:opacity-50"
-              ></textarea>
-              <button
-                type="submit"
-                :disabled="isLoading || awaitingIdentity || awaitingEmail || !inputValue.trim()"
-                :aria-label="$t('chatbot.send')"
-                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-border"
-              >
-                <svg v-if="isLoading" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <svg
-                  v-else
-                  class="h-4 w-4 rotate-90"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
-              </button>
-            </div>
-            <p
-              v-if="showCharCount"
-              class="mt-1 text-right font-mono text-[11px] text-muted-foreground"
-            >
-              {{ inputValue.length }}
-            </p>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
@@ -1506,7 +1520,7 @@ const { scheme, toggle: toggleColorScheme } = useColorScheme(
   props.theme ?? 'light',
   () => props.hostScheme,
 );
-const themeClass = computed(() => (scheme.value === 'dark' ? 'dark' : ''));
+const theme = computed(() => (scheme.value === 'dark' ? 'night' : undefined));
 
 const llmStatusLabel = computed(() => {
   if (llmStatus.value === 'online') return t('chatbot.statusOnline');
@@ -1559,9 +1573,15 @@ const buildBookingMessage = ({
 }: InterviewBookingSubmission): string => {
   let message = t('chatbot.identityMessage', { firstName, lastName, email, date });
   message +=
-    ' ' + t('telephone' === modalite ? 'chatbot.identityMessageTelephone' : 'chatbot.identityMessageVisio');
+    ' ' +
+    t(
+      'telephone' === modalite
+        ? 'chatbot.identityMessageTelephone'
+        : 'chatbot.identityMessageVisio',
+    );
   message += ' ' + t('chatbot.identityMessageObjet', { objet });
-  if ('telephone' === modalite) message += ' ' + t('chatbot.identityMessageTelephoneNumero', { telephone });
+  if ('telephone' === modalite)
+    message += ' ' + t('chatbot.identityMessageTelephoneNumero', { telephone });
   return message;
 };
 

@@ -4,13 +4,14 @@
     "description": "Un assistant conversationnel IA branché sur Maxime, disponible à tout moment."
   },
   "header": {
-    "portfolio": "Voir le portfolio",
     "portfolioShort": "Portfolio",
+    "nav": "Navigation principale",
     "cv": "Curriculum vitæ",
     "newTab": "(s'ouvre dans un nouvel onglet)"
   },
   "home": {
     "heading": "Un chatbot qui connaît Maxime par cœur.",
+    "badge": "Nouveau : discutez avec mon assistant IA",
     "subheading": "Réponses instantanées et fiables, branchées sur mes données, disponibles à toute heure."
   },
   "heroChatBar": {
