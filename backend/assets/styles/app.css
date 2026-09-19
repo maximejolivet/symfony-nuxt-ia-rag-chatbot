@@ -1,64 +1,99 @@
 @import "tailwindcss";
 
-/* Admin backoffice brand palette -- moved here from the inline
-   tailwind.config CDN script in templates/admin/layout.html.twig
-   (Tailwind v4 configures custom colors via @theme, not tailwind.config.js). */
-@theme {
-    --color-brand-50: #eef2ff;
-    --color-brand-100: #e0e7ff;
-    --color-brand-500: #6366f1;
-    --color-brand-600: #4f46e5;
-    --color-brand-700: #4338ca;
-    --color-brand-900: #312e81;
+/* Admin backoffice theme -- the maxime.bzh design-system tokens, same names
+   and values as frontend/assets/css/main.css (colors + radius scale), light
+   theme only (no toggle exists in this admin).
+   Not carried over on purpose:
+   - the frontend type scale (text-sm = 0.9375rem, ...): it is larger than
+     Tailwind's default and would loosen the dense admin tables;
+   - Space Grotesk / JetBrains Mono: /admin's CSP is font-src 'self' (see
+     SecurityHeadersListener), so they would have to be self-hosted first.
+   Used across every admin/*.html.twig template. */
+@theme inline {
+    --color-background: var(--bg);
+    --color-foreground: var(--ink);
+
+    /* Gold is a fill, never text on the cream background (~1.5:1): links use
+       text-accent-ink instead. */
+    --color-primary: var(--gold);
+    --color-primary-foreground: var(--on-primary);
+
+    --color-secondary: var(--card);
+    --color-secondary-foreground: var(--ink);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--bg);
+
+    /* Mint as *text*: --accent (#4fb39c) is only ~2.3:1 on cream, so text
+       uses a deeper mint (same trick as the frontend's text-accent-ink). */
+    --color-accent-ink: var(--accent-ink);
+
+    --color-highlight: var(--highlight);
+
+    --color-muted: var(--card);
+    --color-muted-foreground: var(--sub);
+    --color-subtle: var(--subtle);
+    --color-stripe: var(--stripe);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--ink);
+
+    --color-border: var(--line);
+    --color-input: var(--line);
+    --color-ring: var(--accent-ink);
+
+    /* Darker than the frontend's #c65b4f: as small text on the cream
+       background that one is only 3.8:1 (needs 4.5). Same for --color-ring:
+       the focus ring uses the deep mint, plain --accent is 2.3:1. */
+    --color-destructive: #b3382c;
+    --color-destructive-foreground: var(--on-panel);
+
+    /* The frontend's dark "panel" surface, used for the permanently dark
+       sidebar (templates/admin/layout.html.twig). */
+    --color-sidebar: var(--panel);
+    --color-sidebar-foreground: var(--on-panel);
+    --color-sidebar-primary: var(--gold);
+    --color-sidebar-primary-foreground: var(--on-primary);
+    --color-sidebar-accent: var(--panel-2);
+    --color-sidebar-accent-foreground: var(--on-panel);
+    --color-sidebar-border: rgba(243, 244, 240, 0.16);
+    --color-sidebar-ring: var(--accent);
+
+    --radius: 1rem;
+    --radius-sm: calc(var(--radius) - 0.5rem);
+    --radius-md: calc(var(--radius) - 0.25rem);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 0.25rem);
 }
 
-/* shadcn/ui design tokens (registry "new-york", "neutral" base color --
-   https://ui.shadcn.com), light mode only (no toggle exists in this admin).
-   Values match shadcn's own defaults exactly, except --color-primary/
-   --color-primary-foreground: kept as this app's existing brand indigo
-   (brand-600 above, already used by the sidebar/buttons) instead of
-   shadcn's near-black default, so a page built with these tokens still
-   reads as the same product as the rest of /admin, not a second app bolted
-   on. Everything else (surfaces, borders, radius scale) is genuine shadcn.
-   Used across every admin/*.html.twig template. */
-@theme {
-    --color-background: oklch(1 0 0);
-    --color-foreground: oklch(0.145 0 0);
-    --color-card: oklch(1 0 0);
-    --color-card-foreground: oklch(0.145 0 0);
-    --color-primary: var(--color-brand-600);
-    --color-primary-foreground: oklch(0.985 0 0);
-    --color-secondary: oklch(0.97 0 0);
-    --color-secondary-foreground: oklch(0.205 0 0);
-    --color-muted: oklch(0.97 0 0);
-    --color-muted-foreground: oklch(0.556 0 0);
-    --color-accent: oklch(0.97 0 0);
-    --color-accent-foreground: oklch(0.205 0 0);
-    --color-destructive: oklch(0.577 0.245 27.325);
-    --color-destructive-foreground: oklch(0.985 0 0);
-    --color-border: oklch(0.922 0 0);
-    --color-input: oklch(0.922 0 0);
-    --color-ring: oklch(0.708 0 0);
+:root {
+    --bg: #f3f4f0;
+    --ink: #1d3540;
+    --gold: #efc78a;
+    /* Always dark: text sitting on --gold. */
+    --on-primary: #1d3540;
+    /* Always light: text sitting on --panel / --panel-2. */
+    --on-panel: #f3f4f0;
+    --accent: #4fb39c;
+    --accent-ink: #277a68;
+    --highlight: #e08a5c;
+    --sub: rgba(29, 53, 64, 0.7);
+    --subtle: rgba(29, 53, 64, 0.58);
+    --line: rgba(29, 53, 64, 0.16);
+    --card: #fbfcfa;
+    --panel: #24414f;
+    --panel-2: #16303c;
+    --stripe: rgba(29, 53, 64, 0.09);
+    color-scheme: light;
+}
 
-    /* shadcn derives its rounded-{sm,md,lg,xl} scale from one --radius,
-       shifted by 2px steps (Card/Button use rounded-lg = --radius itself). */
-    --radius-sm: calc(0.625rem - 4px);
-    --radius-md: calc(0.625rem - 2px);
-    --radius-lg: 0.625rem;
-    --radius-xl: calc(0.625rem + 4px);
+@layer base {
+    * {
+        border-color: var(--color-border);
+    }
 
-    /* shadcn's dedicated Sidebar token set -- this admin's sidebar
-       (templates/admin/layout.html.twig) stays permanently dark regardless
-       of the light content area, so these reuse shadcn's own *dark-mode*
-       values scoped under --sidebar-*, rather than the light tokens above.
-       --sidebar-primary is brand-600 (not shadcn's default dark-mode blue)
-       for the same continuity reason as --color-primary. */
-    --color-sidebar: oklch(0.205 0 0);
-    --color-sidebar-foreground: oklch(0.985 0 0);
-    --color-sidebar-primary: var(--color-brand-600);
-    --color-sidebar-primary-foreground: oklch(0.985 0 0);
-    --color-sidebar-accent: oklch(0.269 0 0);
-    --color-sidebar-accent-foreground: oklch(0.985 0 0);
-    --color-sidebar-border: oklch(1 0 0 / 10%);
-    --color-sidebar-ring: oklch(0.439 0 0);
+    body {
+        background: var(--bg);
+        color: var(--ink);
+    }
 }

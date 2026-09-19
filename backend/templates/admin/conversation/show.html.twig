@@ -43,7 +43,7 @@
                                 </span>
                                 <span class="text-xs text-muted-foreground">{{ message.createdAt|date('d/m/Y H:i') }}</span>
                                 {% if message.feedback %}
-                                    <span class="text-xs {{ message.feedback.value == 'positive' ? 'text-emerald-600' : 'text-destructive' }}">
+                                    <span class="text-xs {{ message.feedback.value == 'positive' ? 'text-emerald-700' : 'text-destructive' }}">
                                         {{ message.feedback.value == 'positive' ? '👍' : '👎' }}
                                     </span>
                                 {% endif %}

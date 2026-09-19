@@ -62,6 +62,6 @@
 {% endblock %}
 
 {% block checkbox_widget %}
-    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' h-4 w-4 rounded-sm border border-input text-primary shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring')|trim}) -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' h-4 w-4 rounded-sm border border-input text-accent-ink shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring')|trim}) -%}
     {{- parent() -}}
 {% endblock %}

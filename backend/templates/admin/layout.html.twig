@@ -16,7 +16,7 @@
                 <nav class="flex-1 overflow-y-auto py-4 space-y-6">
                     {% for group in admin_nav() %}
                         <div class="px-3">
-                            <p class="px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50 mb-1">{{ group.label }}</p>
+                            <p class="px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70 mb-1">{{ group.label }}</p>
                             <ul class="space-y-0.5">
                                 {% for item in group.items %}
                                     <li>
@@ -30,7 +30,7 @@
                         </div>
                     {% endfor %}
                 </nav>
-                <div class="px-5 py-3 text-xs text-sidebar-foreground/50 border-t border-sidebar-border">
+                <div class="px-5 py-3 text-xs text-sidebar-foreground/70 border-t border-sidebar-border">
                     <a href="{{ path('app_admin_dashboard') }}" class="hover:text-sidebar-foreground">← Accueil admin</a><br>
                     <a href="/api" class="hover:text-sidebar-foreground">API Platform</a> · <a href="/doc" class="hover:text-sidebar-foreground">Swagger</a><br>
                     <a href="{{ path('app_admin_logout') }}" class="hover:text-sidebar-foreground">Se déconnecter</a>

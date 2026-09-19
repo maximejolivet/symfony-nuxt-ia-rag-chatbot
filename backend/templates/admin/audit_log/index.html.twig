@@ -14,9 +14,9 @@
 } %}
 
 {% set action_badges = {
-    create: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-    update: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    delete: 'bg-red-500/10 text-red-600 dark:text-red-400',
+    create: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+    update: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+    delete: 'bg-red-500/10 text-red-700 dark:text-red-400',
 } %}
 
 {% set action_labels = {
@@ -75,10 +75,10 @@
                 <span>Page {{ currentPage }} / {{ nbPages }} ({{ nbResults }} au total)</span>
                 <div class="space-x-2">
                     {% if hasPreviousPage %}
-                        <a href="{{ path('app_admin_audit_log_index', {page: currentPage - 1}) }}" class="text-primary hover:underline">← Précédent</a>
+                        <a href="{{ path('app_admin_audit_log_index', {page: currentPage - 1}) }}" class="text-accent-ink hover:underline">← Précédent</a>
                     {% endif %}
                     {% if hasNextPage %}
-                        <a href="{{ path('app_admin_audit_log_index', {page: currentPage + 1}) }}" class="text-primary hover:underline">Suivant →</a>
+                        <a href="{{ path('app_admin_audit_log_index', {page: currentPage + 1}) }}" class="text-accent-ink hover:underline">Suivant →</a>
                     {% endif %}
                 </div>
             </div>
