@@ -1,69 +1,252 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
+
+  --color-primary: var(--gold);
+  --color-primary-foreground: var(--on-primary);
+
+  --color-secondary: var(--card);
+  --color-secondary-foreground: var(--ink);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--bg);
+
+  --color-mint: var(--mint);
+
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--on-panel);
+
+  --color-muted: var(--card);
+  --color-muted-foreground: var(--sub);
+  --color-subtle: var(--subtle);
+  --color-stripe: var(--stripe);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--ink);
+
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-panel-foreground: var(--on-panel);
+
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--accent);
+
+  --color-destructive: #c65b4f;
+
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.3125rem;
+  --text-xl--line-height: 1.4;
+  --text-2xl: 1.5625rem;
+  --text-2xl--line-height: 1.3;
+  --text-3xl: 1.9375rem;
+  --text-3xl--line-height: 1.2;
+
+  --radius: 1rem;
+  --radius-sm: calc(var(--radius) - 0.5rem);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+
+  --animate-marquee: marquee 26s linear infinite;
+  --animate-blink: blink 1.1s step-end infinite;
+  --animate-pulse-dot: pulse-dot 1.6s ease-in-out infinite;
+  --animate-logo-letters: logo-letters 3s ease-in-out infinite;
+  --animate-intro-logo-in: intro-logo-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+:root {
+  --bg: #f3f4f0;
+  --ink: #1d3540;
+  --gold: #efc78a;
+  /* Always dark: text sitting on --gold, which stays light in both themes. */
+  --on-primary: #1d3540;
+  /* Always light: text sitting on --panel / --panel-2, which stay dark in both themes. */
+  --on-panel: #f3f4f0;
+  --accent: #4fb39c;
+  --mint: #4fb39c;
+  --highlight: #e08a5c;
+  --sub: rgba(29, 53, 64, 0.7);
+  --subtle: rgba(29, 53, 64, 0.58);
+  --line: rgba(29, 53, 64, 0.16);
+  --card: #fbfcfa;
+  --panel: #24414f;
+  --panel-2: #16303c;
+  --stripe: rgba(29, 53, 64, 0.09);
+  color-scheme: light;
+}
+
+:root[data-theme='night'] {
+  --bg: #152833;
+  --ink: #f3f4f0;
+  --accent: #4fb39c;
+  --highlight: #e08a5c;
+  --sub: rgba(243, 244, 240, 0.62);
+  --subtle: rgba(243, 244, 240, 0.5);
+  --line: rgba(243, 244, 240, 0.16);
+  --card: #1e3945;
+  --panel: #10202a;
+  --panel-2: #0d1b23;
+  --stripe: rgba(243, 244, 240, 0.07);
+  color-scheme: dark;
+}
+
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
+
+.card-hover-gradient {
+  transition: background-image 0.3s ease;
+}
+
+.card-hover-gradient:hover {
+  background-image: linear-gradient(
+    135deg,
+    var(--card),
+    color-mix(in srgb, var(--card) 88%, var(--accent) 12%)
+  );
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes logo-letters {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.82);
+  }
+}
+
+@keyframes intro-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+  }
+}
+
+/* ==========================================================================
+ * Project-specific additions.
+ *
+ * Everything above is the maxime.bzh design-system config, used verbatim.
+ * Everything below is what this app needs on top of it.
+ * ========================================================================== */
+
+@plugin '@tailwindcss/typography';
+
+@theme inline {
+  /*
+   * Mint as *text*: --accent (#4fb39c) is only ~2.3:1 on cream, so text-level
+   * mint (text-accent-ink, ring-accent-ink...) uses a deeper mint in the
+   * light theme and the plain mint in night, where it clears 6:1.
+   */
+  --color-accent-ink: var(--accent-ink);
+
+  --animate-pulse-ring: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-celebrate: celebrate 700ms ease-out;
+  --animate-loading-bar: loading-bar 1.2s ease-in-out infinite;
+}
+
+:root {
+  --accent-ink: #277a68;
+}
+
+/*
+ * The design system only switches to night on <html> (`:root[data-theme='night']`
+ * above). The chat widget also scopes its scheme to its own root element --
+ * app.vue and Chatbot.vue each set data-theme="night" on their own wrapper,
+ * since Chatbot.vue is embeddable standalone (composables/useColorScheme.ts) --
+ * so the same night values apply to any element carrying the attribute.
+ * Keep this block in sync with `:root[data-theme='night']` above.
+ */
+[data-theme='night'] {
+  --bg: #152833;
+  --ink: #f3f4f0;
+  --accent: #4fb39c;
+  --accent-ink: #4fb39c;
+  --highlight: #e08a5c;
+  --sub: rgba(243, 244, 240, 0.62);
+  --subtle: rgba(243, 244, 240, 0.5);
+  --line: rgba(243, 244, 240, 0.16);
+  --card: #1e3945;
+  --panel: #10202a;
+  --panel-2: #0d1b23;
+  --stripe: rgba(243, 244, 240, 0.07);
+  color-scheme: dark;
+}
 
 @layer base {
   /*
-   * Design tokens as RGB triplets (not hex) so tailwind.config.js can wrap
-   * them in rgb(var(--x) / <alpha-value>) and support opacity modifiers
-   * (bg-accent/10) -- see the comment there for the full rationale.
-   *
-   * Same system as maxime.bzh (its --bg/--ink/--gold/--mint/--panel and the
-   * `night` theme): warm cream + deep ink-teal, a gold action color, a mint
-   * accent and a terracotta highlight. Gold and mint stay fixed across light
-   * and dark; each always sits as a solid fill under ink, or as a dot/border.
-   *
-   * --accent (mint) is a *fill* color. As text on cream it is only ~2.3:1, so
-   * text-level mint uses --accent-ink: a deeper mint in light mode, the plain
-   * mint in dark mode (where it clears 6:1 on the night background).
-   *
-   * --muted-foreground follows the site's --sub (ink @ 70% over the page):
-   * ~4.9:1 on --background, where the previous 58% mix was ~3.4:1.
+   * Static height:100% chain (html -> body -> #__nuxt), so `h-full` on a
+   * page root (pages/chat.vue) resolves against a stable size instead of
+   * the viewport-relative `dvh`/`vh` units -- those recompute every time
+   * a mobile browser's address bar or on-screen keyboard shows/hides
+   * mid-conversation, visibly shrinking/growing the whole chat panel.
    */
-  :root {
-    --background: 243 244 240; /* #f3f4f0 */
-    --foreground: 29 53 64; /* #1d3540, ink */
-    --card: 251 252 250; /* #fbfcfa */
-    --card-foreground: 29 53 64;
-    --muted: 224 227 224; /* ink @ ~9% over background */
-    --muted-foreground: 93 110 117; /* #5d6e75, ink @ 70% over background */
-    --accent: 79 179 156; /* #4fb39c, mint -- fills, dots, borders */
-    --accent-ink: 39 122 104; /* #277a68, mint as text on cream, ~4.7:1 */
-    --accent-foreground: 29 53 64; /* always ink on a mint fill */
-    --primary: 239 199 138; /* #efc78a, gold */
-    --primary-foreground: 29 53 64; /* always ink -- gold stays fixed across themes */
-    --destructive: 179 38 30; /* not part of the palette -- the one semantic role it lacks */
-    --border: 29 53 64; /* = foreground, alpha applied in tailwind.config.js */
-    --highlight: 224 138 92; /* #e08a5c, terracotta */
-    --highlight-foreground: 29 53 64;
-    --panel: 36 65 79; /* #24414f, terminal-window surface, dark in both themes */
-    --panel-2: 22 48 60; /* #16303c, terminal-window title bar */
-    --panel-foreground: 243 244 240;
-  }
-
-  .dark {
-    --background: 21 40 51; /* #152833 */
-    --foreground: 243 244 240; /* #f3f4f0 */
-    --card: 30 57 69; /* #1e3945 */
-    --card-foreground: 243 244 240;
-    --muted: 37 54 64;
-    --muted-foreground: 165 173 174; /* ~7:1 on --background */
-    --accent-ink: 79 179 156; /* plain mint reads on night */
-    --border: 243 244 240;
-    --panel: 16 32 42; /* #10202a */
-    --panel-2: 13 27 35; /* #0d1b23 */
-    /* primary, accent, highlight intentionally not redefined (fixed fills).
-       --destructive is: it also renders as plain text on --background. */
-    --destructive: 248 113 113; /* #f87171 */
-  }
-
   html {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    /* Static height:100% chain (html -> body -> #__nuxt), so `h-full` on a
-       page root (pages/chat.vue) resolves against a stable size instead of
-       the viewport-relative `dvh`/`vh` units -- those recompute every time
-       a mobile browser's address bar or on-screen keyboard shows/hides
-       mid-conversation, visibly shrinking/growing the whole chat panel. */
     height: 100%;
   }
 
@@ -73,8 +256,14 @@
   }
 
   ::selection {
-    background: rgb(var(--primary));
-    color: rgb(var(--primary-foreground));
+    background: var(--gold);
+    color: var(--on-primary);
+  }
+
+  /* Tailwind v4 no longer gives buttons a pointer cursor by default. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
   }
 }
 
@@ -91,26 +280,82 @@
     @apply animate-pulse-dot;
   }
 
-  /* A terminal window, like maxime.bzh's experience.log: dark panel surface
-     in both themes. Re-declares the night-side values of the text tokens for
-     its subtree, so text-foreground / text-muted-foreground / text-accent-ink
-     / border-border already used inside it read on the dark surface without
-     per-element overrides. */
+  /*
+   * A terminal window, like maxime.bzh's experience.log: dark panel surface
+   * in both themes. Re-declares the night-side values of the text tokens for
+   * its subtree, so text-foreground / text-muted-foreground / text-accent-ink
+   * / border-border already used inside it read on the dark surface without
+   * per-element overrides. --card doubles as bg-muted (the design system maps
+   * both to it), so inside a panel they are the dark chip surface.
+   */
   .on-panel {
-    --foreground: 243 244 240;
-    --muted: 37 54 64;
-    --muted-foreground: 165 173 174;
-    --accent-ink: 79 179 156;
-    --border: 243 244 240;
-    background: rgb(var(--panel));
-    color: rgb(var(--panel-foreground));
+    --ink: #f3f4f0;
+    --sub: rgba(243, 244, 240, 0.62);
+    --subtle: rgba(243, 244, 240, 0.5);
+    --line: rgba(243, 244, 240, 0.16);
+    --card: #253640;
+    --accent-ink: #4fb39c;
+    background: var(--panel);
+    color: var(--on-panel);
   }
 
-  /* Gold link with a dashed underline -- the site's treatment for links
-     inside its terminal windows. */
+  /*
+   * Gold link with a dashed underline -- the site's treatment for links
+   * inside its terminal windows.
+   */
   .link-dashed {
-    text-decoration: underline dashed rgb(var(--primary) / 0.7);
+    text-decoration: underline dashed color-mix(in srgb, var(--gold) 70%, transparent);
     text-underline-offset: 4px;
+  }
+}
+
+/*
+ * One-shot "pop + fading ring" played once when a booking confirmation card
+ * is first inserted (see MessageBubble.vue) -- deliberately not a loop, just
+ * a brief moment of positive feedback on the one spot in the widget where
+ * something concrete just happened (a real Cal.eu booking).
+ */
+@keyframes celebrate {
+  0% {
+    transform: scale(0.92);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  60% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 14px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+
+/*
+ * Indeterminate progress bar (GitHub/YouTube-style) -- a segment sliding
+ * across a track, no real percentage to report while a reply is generating
+ * (see MessageBubble.vue's blinking cursor for the complementary token-level
+ * signal once content starts arriving).
+ */
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
   }
 }
 

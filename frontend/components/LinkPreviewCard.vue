@@ -37,7 +37,7 @@
       <div class="min-w-0">
         <p
           v-if="loading"
-          class="h-3.5 w-32 animate-pulse rounded bg-muted motion-reduce:animate-none"
+          class="h-3.5 w-32 animate-pulse rounded-sm bg-muted motion-reduce:animate-none"
         />
         <p v-else class="truncate text-xs font-medium text-foreground">{{ preview?.title }}</p>
         <p class="truncate text-[11px] text-muted-foreground">{{ domain }}</p>

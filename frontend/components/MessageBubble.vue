@@ -16,7 +16,7 @@
           style="animation-delay: 0.3s" />
       </div>
       <div v-else
-        class="prose prose-sm max-w-none [--tw-prose-bullets:rgb(var(--muted-foreground))] [--tw-prose-counters:rgb(var(--muted-foreground))] prose-pre:pt-12 sm:prose-pre:pt-4 sm:prose-pre:pr-12 text-inherit text-[15px] leading-[1.65] prose-headings:font-sans prose-headings:font-semibold prose-headings:text-inherit prose-p:my-1 prose-p:text-inherit prose-strong:text-inherit prose-a:text-inherit prose-a:underline prose-a:decoration-dotted prose-a:underline-offset-2 prose-code:font-mono prose-code:text-inherit prose-pre:rounded-2xl prose-pre:bg-panel prose-pre:font-mono prose-pre:text-panel-foreground prose-table:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1"
+        class="prose prose-sm max-w-none [--tw-prose-bullets:var(--color-muted-foreground)] [--tw-prose-counters:var(--color-muted-foreground)] prose-pre:pt-12 sm:prose-pre:pt-4 sm:prose-pre:pr-12 text-inherit text-[15px] leading-[1.65] prose-headings:font-sans prose-headings:font-semibold prose-headings:text-inherit prose-p:my-1 prose-p:text-inherit prose-strong:text-inherit prose-a:text-inherit prose-a:underline prose-a:decoration-dotted prose-a:underline-offset-2 prose-code:font-mono prose-code:text-inherit prose-pre:rounded-2xl prose-pre:bg-panel prose-pre:font-mono prose-pre:text-panel-foreground prose-table:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1"
         v-html="formattedContent" @click="onContentClick" />
       <span v-if="isStreaming && !isTyping"
         class="animate-blink -mb-0.5 ml-0.5 inline-block h-3.5 w-[2px] bg-current align-middle motion-reduce:animate-none"
@@ -122,13 +122,13 @@
           <label class="flex min-w-0 flex-1 flex-col gap-0.5 text-[11px] text-muted-foreground">
             {{ $t('messageBubble.identityDatePlaceholder') }}
             <input v-model="identityDateOnly" type="date" :min="minDateValue"
-              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
+              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-hidden focus:ring-2 focus:ring-accent-ink"
               @keydown.enter="submitIdentity" />
           </label>
           <label class="flex min-w-0 flex-1 flex-col gap-0.5 text-[11px] text-muted-foreground">
             {{ $t('messageBubble.identityTimePlaceholder') }}
             <input v-model="identityTimeOnly" type="time" :min="identityTimeMin" :step="DATE_STEP_SECONDS"
-              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
+              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-hidden focus:ring-2 focus:ring-accent-ink"
               @keydown.enter="submitIdentity" />
           </label>
         </div>
@@ -140,7 +140,7 @@
           {{ $t('messageBubble.businessHoursHint') }}
         </p>
         <button type="button" :disabled="!isIdentityValid"
-          class="self-end min-h-11 rounded-full bg-primary px-5 py-2 font-mono text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:ring-1 disabled:ring-inset disabled:ring-border"
+          class="self-end min-h-11 rounded-full bg-primary px-5 py-2 font-mono text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-primary-foreground disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:ring-1 disabled:ring-inset disabled:ring-border"
           @click="submitIdentity">
           {{ $t('messageBubble.identityValidate') }}
         </button>
@@ -193,17 +193,17 @@
           <label class="flex min-w-0 flex-1 flex-col gap-0.5 text-[11px] text-muted-foreground">
             {{ $t('messageBubble.identityDatePlaceholder') }}
             <input v-model="emailDateOnly" type="date" :min="minDateValue"
-              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
+              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-hidden focus:ring-2 focus:ring-accent-ink"
               @keydown.enter="submitEmail" />
           </label>
           <label class="flex min-w-0 flex-1 flex-col gap-0.5 text-[11px] text-muted-foreground">
             {{ $t('messageBubble.identityTimePlaceholder') }}
             <input v-model="emailTimeOnly" type="time" :min="emailTimeMin" :step="DATE_STEP_SECONDS"
-              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
+              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-hidden focus:ring-2 focus:ring-accent-ink"
               @keydown.enter="submitEmail" />
           </label>
           <button type="button" :disabled="!isEmailFormValid"
-            class="shrink-0 min-h-11 rounded-full bg-primary px-5 py-2 font-mono text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:ring-1 disabled:ring-inset disabled:ring-border"
+            class="shrink-0 min-h-11 rounded-full bg-primary px-5 py-2 font-mono text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-primary-foreground disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:ring-1 disabled:ring-inset disabled:ring-border"
             @click="submitEmail">
             {{ $t('messageBubble.identityValidate') }}
           </button>
@@ -339,9 +339,9 @@ const asksForIdentity = computed(
 // `peer-placeholder-shown` with `!` so the label still floats up while
 // focused-but-empty, regardless of Tailwind's generated rule order.
 const floatingInputClass =
-  'peer w-full rounded-lg border border-border bg-background px-2.5 pb-1.5 pt-5 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink';
+  'peer w-full rounded-lg border border-border bg-background px-2.5 pb-1.5 pt-5 text-base text-foreground focus:outline-hidden focus:ring-2 focus:ring-accent-ink';
 const floatingLabelClass =
-  'pointer-events-none absolute left-2.5 top-1 text-[9px] text-muted-foreground transition-all duration-150 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-xs peer-focus:!top-1 peer-focus:!translate-y-0 peer-focus:!text-[9px]';
+  'pointer-events-none absolute left-2.5 top-1 text-[9px] text-muted-foreground transition-all duration-150 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-xs peer-focus:top-1! peer-focus:translate-y-0! peer-focus:!text-[9px]';
 
 // Visio/telephone segmented toggle -- active side gets the accent
 // treatment, inactive side stays muted, same look across both cards.
@@ -581,7 +581,7 @@ const renderer = new marked.Renderer();
 renderer.code = (token) => {
   const codeHtml = defaultRenderer.code(token);
 
-  return `<div class="code-block-wrapper relative group/code">${codeHtml}<button type="button" class="code-copy-button absolute right-1 top-1 flex h-11 w-11 sm:right-2 sm:top-2 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-white/10 text-slate-300 opacity-100 backdrop-blur-sm transition-opacity hover:bg-white/20 hover:text-white sm:opacity-0 sm:group-hover/code:opacity-100" aria-label="${t('messageBubble.copyCode')}"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>`;
+  return `<div class="code-block-wrapper relative group/code">${codeHtml}<button type="button" class="code-copy-button absolute right-1 top-1 flex h-11 w-11 sm:right-2 sm:top-2 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-white/10 text-slate-300 opacity-100 backdrop-blur-xs transition-opacity hover:bg-white/20 hover:text-white sm:opacity-0 sm:group-hover/code:opacity-100" aria-label="${t('messageBubble.copyCode')}"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>`;
 };
 
 // A wide table (more columns than the bubble's max-w-[80%] fits) would

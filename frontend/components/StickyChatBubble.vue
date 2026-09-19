@@ -11,7 +11,7 @@
     v-if="!embedded"
     to="/chat"
     :aria-label="$t('stickyBubble.start')"
-    class="fixed bottom-4 right-0 z-50 flex size-11 items-center justify-center rounded-l-full border-y border-l-0 border-r border-primary bg-primary text-primary-foreground shadow-lg transition-transform duration-300 hover:scale-105 hover:bg-accent hover:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 sm:hidden"
+    class="fixed bottom-4 right-0 z-50 flex size-11 items-center justify-center rounded-l-full border-y border-l-0 border-r border-primary bg-primary text-primary-foreground shadow-lg transition-transform duration-300 hover:scale-105 hover:bg-accent hover:border-accent focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 sm:hidden"
   >
     <svg
       class="pointer-events-none size-5 translate-x-px"
@@ -64,7 +64,7 @@
         :class="[
           'pointer-events-none translate-x-2 whitespace-nowrap rounded-full bg-card px-3.5 py-2 text-sm font-medium text-card-foreground opacity-0 shadow-lg shadow-foreground/10 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100',
           lastMessagePreview ? 'max-w-xs truncate' : '',
-          showProactiveTeaser ? '!translate-x-0 !opacity-100' : '',
+          showProactiveTeaser ? 'translate-x-0! opacity-100!' : '',
         ]"
       >
         {{ lastMessagePreview ?? $t('stickyBubble.start') }}
@@ -73,7 +73,7 @@
         type="button"
         :aria-label="isOpen ? $t('stickyBubble.close') : $t('stickyBubble.start')"
         :aria-expanded="isOpen"
-        class="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-foreground/20 transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2"
+        class="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-foreground/20 transition-transform hover:scale-105 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2"
         @click="onBubbleClick"
       >
         <span

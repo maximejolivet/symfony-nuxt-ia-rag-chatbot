@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import tailwindcss from '@tailwindcss/vite';
 
 // `process.dev` isn't set in this top-level config-evaluation context (only
 // inside Nuxt runtime code) -- NODE_ENV is the reliable check here.
@@ -22,7 +23,7 @@ export default defineNuxtConfig({
       ],
     },
   },
-  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/i18n', '@nuxt/image'],
+  modules: ['@nuxtjs/i18n', '@nuxt/image'],
   css: ['~/assets/css/main.css'],
   // Security headers on every response. No CSP nonce infrastructure here
   // (would need per-request head injection wired through Nuxt's SSR
@@ -116,6 +117,9 @@ export default defineNuxtConfig({
     },
   },
   vite: {
+    // Tailwind v4 (assets/css/main.css: `@import 'tailwindcss'` + `@theme`) --
+    // configured in CSS, no tailwind.config.js.
+    plugins: [tailwindcss()],
     vue: {
       script: {
         // TypeScript 7 breaks @vue/compiler-sfc's Node-environment detection

@@ -32,14 +32,14 @@
             type="text"
             autocomplete="off"
             :placeholder="$t('heroChatBar.placeholder')"
-            class="min-w-0 flex-1 border-0 bg-transparent px-0 py-3 text-base text-panel-foreground placeholder-muted-foreground caret-primary focus:outline-none focus:ring-0"
+            class="min-w-0 flex-1 border-0 bg-transparent px-0 py-3 text-base text-panel-foreground placeholder:text-muted-foreground caret-primary focus:outline-hidden focus:ring-0"
           />
         </div>
         <button
           type="submit"
           :disabled="!question.trim()"
           :aria-label="$t('heroChatBar.send')"
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-panel disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:ring-1 disabled:ring-inset disabled:ring-border"
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-accent focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-panel disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:ring-1 disabled:ring-inset disabled:ring-border"
         >
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -64,7 +64,7 @@
             </span>
             <button
               type="button"
-              class="group flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-panel-2 focus:outline-none focus-visible:bg-panel-2 focus-visible:ring-2 focus-visible:ring-accent-ink"
+              class="group flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-panel-2 focus:outline-hidden focus-visible:bg-panel-2 focus-visible:ring-2 focus-visible:ring-accent-ink"
               @click="askSuggestion(suggestion)"
             >
               <span class="text-primary" aria-hidden="true">&gt;</span>

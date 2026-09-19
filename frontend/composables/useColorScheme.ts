@@ -24,10 +24,10 @@ const CHANGE_EVENT = 'chatbot:color_scheme_change';
 // this from public/widget.js's ?theme= query param and its live postMessage)
 // while app.vue's root, mounted around it, follows the visitor's own OS
 // preference instead. Since --background &co. are CSS custom properties
-// only ever redefined at `:root` and `.dark` (not also at some explicit
-// "not dark" class), a wrongly-`.dark` app.vue root cascades that value down
-// into any of the panel's own descendants that don't themselves carry
-// `.dark` -- even though the panel's *own* scheme resolved correctly.
+// only ever redefined at `:root` and `[data-theme='night']` (not also at some
+// explicit "not night" selector), a wrongly-night app.vue root cascades that
+// value down into any of the panel's own descendants that don't themselves
+// carry `data-theme` -- even though the panel's *own* scheme resolved correctly.
 // Sharing the same hostScheme input at both call sites keeps them in
 // agreement instead. Read via useHostScheme() below; StickyChatBubble.vue is
 // the only writer.
