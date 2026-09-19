@@ -37,7 +37,7 @@ use App\Workflow\WorkflowExecutionService;
 final readonly class ChatOrchestrationService
 {
     public const string DEFAULT_SYSTEM_PROMPT = <<<'PROMPT'
-        Format de réponse (règle stricte, prioritaire sur tout le reste): 3 à 5 phrases maximum, environ 100 mots. Pas de listes à puces ni de titres, sauf si l'utilisateur les demande explicitement. Va droit au but, sans répéter la question ni le contexte fourni.
+        Format de réponse (règle stricte, prioritaire sur tout le reste): 4 à 8 phrases maximum, environ 150 mots. Pas de listes à puces ni de titres, sauf si l'utilisateur les demande explicitement. Va droit au but, sans répéter la question ni le contexte fourni.
 
         Tu es un assistant IA utile et bienveillant spécialisé dans l'aide aux utilisateurs.
         Tu réponds en français de manière claire et concise.
@@ -60,12 +60,13 @@ final readonly class ChatOrchestrationService
     // emits mandatory hidden reasoning tokens before any real content --
     // reasoning alone measured 250-314 tokens in testing, and OpenRouter
     // rejects requests that try to disable it ("Reasoning is mandatory for
-    // this endpoint"). A cap much below ~900 risks the reasoning tokens
-    // alone exhausting the budget, which silently returns an *empty*
-    // response (finish_reason "length", content null) -- confirmed in prod
-    // on 2026-09-09 with a 250 cap. If the active chat model changes to one
-    // without mandatory reasoning, this can likely come down again.
-    private const int CHAT_MAX_TOKENS = 900;
+    // this endpoint"). Too low a cap lets the reasoning tokens alone exhaust
+    // the budget: at 250 the reply came back *empty* (finish_reason
+    // "length", content null -- confirmed in prod on 2026-09-09), and at 900
+    // a reasoning-heavy question (several RAG chunks to weigh) left so little
+    // room that the answer was cut off mid-sentence. If the active chat model
+    // changes to one without mandatory reasoning, this can likely come down.
+    private const int CHAT_MAX_TOKENS = 1500;
 
     public function __construct(
         private ProviderSelectionService $providerSelectionService,
