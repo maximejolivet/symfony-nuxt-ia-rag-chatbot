@@ -3,10 +3,15 @@
     "title": "Maxime - Chatbot IA",
     "description": "Un assistant conversationnel IA branché sur Maxime, disponible à tout moment."
   },
+  "header": {
+    "portfolio": "Voir le portfolio",
+    "portfolioShort": "Portfolio",
+    "cv": "Curriculum vitæ",
+    "newTab": "(s'ouvre dans un nouvel onglet)"
+  },
   "home": {
     "heading": "Un chatbot qui connaît Maxime par cœur.",
-    "subheading": "Réponses instantanées et fiables, branchées sur mes données, disponibles à toute heure.",
-    "portfolio": "Voir le portfolio"
+    "subheading": "Réponses instantanées et fiables, branchées sur mes données, disponibles à toute heure."
   },
   "heroChatBar": {
     "windowTitle": "assistant.chat",

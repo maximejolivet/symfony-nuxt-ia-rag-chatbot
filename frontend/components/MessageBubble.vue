@@ -16,19 +16,19 @@
           style="animation-delay: 0.3s" />
       </div>
       <div v-else
-        class="prose prose-sm max-w-none text-inherit text-[15px] leading-[1.65] prose-headings:font-sans prose-headings:font-semibold prose-headings:text-inherit prose-p:my-1 prose-p:text-inherit prose-strong:text-inherit prose-a:text-inherit prose-a:underline prose-a:decoration-dotted prose-a:underline-offset-2 prose-code:font-mono prose-code:text-inherit prose-pre:rounded-2xl prose-pre:bg-panel prose-pre:font-mono prose-pre:text-panel-foreground prose-table:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1"
+        class="prose prose-sm max-w-none [--tw-prose-bullets:rgb(var(--muted-foreground))] [--tw-prose-counters:rgb(var(--muted-foreground))] prose-pre:pt-12 sm:prose-pre:pt-4 sm:prose-pre:pr-12 text-inherit text-[15px] leading-[1.65] prose-headings:font-sans prose-headings:font-semibold prose-headings:text-inherit prose-p:my-1 prose-p:text-inherit prose-strong:text-inherit prose-a:text-inherit prose-a:underline prose-a:decoration-dotted prose-a:underline-offset-2 prose-code:font-mono prose-code:text-inherit prose-pre:rounded-2xl prose-pre:bg-panel prose-pre:font-mono prose-pre:text-panel-foreground prose-table:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1"
         v-html="formattedContent" @click="onContentClick" />
       <span v-if="isStreaming && !isTyping"
         class="animate-blink -mb-0.5 ml-0.5 inline-block h-3.5 w-[2px] bg-current align-middle motion-reduce:animate-none"
         aria-hidden="true" />
       <LinkPreviewCard v-for="link in previewLinks" :key="link" :url="link" />
-      <div class="mt-1 flex items-center gap-2">
-        <p :class="['font-mono text-[10px]', isUser ? 'text-primary-foreground/70' : 'text-muted-foreground']">
+      <div class="mt-1 flex flex-wrap items-center gap-x-0.5 sm:gap-2">
+        <p :class="['font-mono text-[11px]', isUser ? 'text-primary-foreground/85' : 'text-muted-foreground']">
           {{ formattedTime }}
         </p>
         <button v-if="!isUser && !isTyping && speechSupported" type="button" :aria-pressed="isSpeaking"
           :title="isSpeaking ? $t('messageBubble.speakStop') : $t('messageBubble.speakStart')"
-          class="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+          class="flex h-9 w-9 items-center justify-center rounded-full sm:h-6 sm:w-6 text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
           @click="$emit('speak', message.id, message.content)">
           <svg v-if="!isSpeaking" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -42,7 +42,7 @@
         </button>
         <button v-if="!isUser && !isTyping" type="button"
           :title="copied ? $t('messageBubble.copied') : $t('messageBubble.copy')" :class="[
-            'flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100',
+            'flex h-9 w-9 items-center justify-center rounded-full sm:h-6 sm:w-6 text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100',
             copied ? 'sm:opacity-100' : '',
           ]" @click="copyToClipboard">
           <svg v-if="!copied" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,7 +55,7 @@
         </button>
         <button v-if="!isUser && !isTyping" type="button" :aria-pressed="message.feedback === 'positive'"
           :title="$t('messageBubble.feedbackPositive')" :class="[
-            'flex h-5 w-5 items-center justify-center rounded-full text-xs leading-none opacity-70 transition-all hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-70 sm:group-focus-within:opacity-70',
+            'flex h-9 w-9 items-center justify-center rounded-full sm:h-6 sm:w-6 text-xs leading-none opacity-70 transition-all hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-70 sm:group-focus-within:opacity-70',
             message.feedback === 'positive' ? 'bg-accent/10 opacity-100 sm:opacity-100' : '',
           ]" @click="
             $emit('feedback', message.id, message.feedback === 'positive' ? null : 'positive')
@@ -64,7 +64,7 @@
         </button>
         <button v-if="!isUser && !isTyping" type="button" :aria-pressed="message.feedback === 'negative'"
           :title="$t('messageBubble.feedbackNegative')" :class="[
-            'flex h-5 w-5 items-center justify-center rounded-full text-xs leading-none opacity-70 transition-all hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-70 sm:group-focus-within:opacity-70',
+            'flex h-9 w-9 items-center justify-center rounded-full sm:h-6 sm:w-6 text-xs leading-none opacity-70 transition-all hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-70 sm:group-focus-within:opacity-70',
             message.feedback === 'negative' ? 'bg-destructive/10 opacity-100 sm:opacity-100' : '',
           ]" @click="
             $emit('feedback', message.id, message.feedback === 'negative' ? null : 'negative')
@@ -72,7 +72,7 @@
           👎
         </button>
         <button v-if="!isUser && !isTyping && isLast" type="button" :title="$t('messageBubble.regenerate')"
-          class="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+          class="flex h-9 w-9 items-center justify-center rounded-full sm:h-6 sm:w-6 text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
           @click="$emit('regenerate')">
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -122,13 +122,13 @@
           <label class="flex min-w-0 flex-1 flex-col gap-0.5 text-[11px] text-muted-foreground">
             {{ $t('messageBubble.identityDatePlaceholder') }}
             <input v-model="identityDateOnly" type="date" :min="minDateValue"
-              class="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
               @keydown.enter="submitIdentity" />
           </label>
           <label class="flex min-w-0 flex-1 flex-col gap-0.5 text-[11px] text-muted-foreground">
             {{ $t('messageBubble.identityTimePlaceholder') }}
             <input v-model="identityTimeOnly" type="time" :min="identityTimeMin" :step="DATE_STEP_SECONDS"
-              class="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
               @keydown.enter="submitIdentity" />
           </label>
         </div>
@@ -140,7 +140,7 @@
           {{ $t('messageBubble.businessHoursHint') }}
         </p>
         <button type="button" :disabled="!isIdentityValid"
-          class="self-end rounded-full bg-primary px-3 py-1 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-40"
+          class="self-end min-h-11 rounded-full bg-primary px-5 py-2 font-mono text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:ring-1 disabled:ring-inset disabled:ring-border"
           @click="submitIdentity">
           {{ $t('messageBubble.identityValidate') }}
         </button>
@@ -193,17 +193,17 @@
           <label class="flex min-w-0 flex-1 flex-col gap-0.5 text-[11px] text-muted-foreground">
             {{ $t('messageBubble.identityDatePlaceholder') }}
             <input v-model="emailDateOnly" type="date" :min="minDateValue"
-              class="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
               @keydown.enter="submitEmail" />
           </label>
           <label class="flex min-w-0 flex-1 flex-col gap-0.5 text-[11px] text-muted-foreground">
             {{ $t('messageBubble.identityTimePlaceholder') }}
             <input v-model="emailTimeOnly" type="time" :min="emailTimeMin" :step="DATE_STEP_SECONDS"
-              class="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+              class="min-h-11 rounded-lg border border-border bg-background px-2.5 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink"
               @keydown.enter="submitEmail" />
           </label>
           <button type="button" :disabled="!isEmailFormValid"
-            class="shrink-0 rounded-full bg-primary px-3 py-1 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            class="shrink-0 min-h-11 rounded-full bg-primary px-5 py-2 font-mono text-sm font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:ring-1 disabled:ring-inset disabled:ring-border"
             @click="submitEmail">
             {{ $t('messageBubble.identityValidate') }}
           </button>
@@ -339,16 +339,16 @@ const asksForIdentity = computed(
 // `peer-placeholder-shown` with `!` so the label still floats up while
 // focused-but-empty, regardless of Tailwind's generated rule order.
 const floatingInputClass =
-  'peer w-full rounded-lg border border-border bg-background px-2.5 pb-1.5 pt-4 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-accent';
+  'peer w-full rounded-lg border border-border bg-background px-2.5 pb-1.5 pt-5 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-accent-ink';
 const floatingLabelClass =
   'pointer-events-none absolute left-2.5 top-1 text-[9px] text-muted-foreground transition-all duration-150 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-xs peer-focus:!top-1 peer-focus:!translate-y-0 peer-focus:!text-[9px]';
 
 // Visio/telephone segmented toggle -- active side gets the accent
 // treatment, inactive side stays muted, same look across both cards.
 const modaliteButtonClass = (active: boolean) => [
-  'rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-semibold transition-colors',
+  'inline-flex min-h-11 items-center rounded-full border px-4 font-mono text-xs font-semibold transition-colors',
   active
-    ? 'border-accent bg-accent/10 text-accent-ink'
+    ? 'border-accent bg-accent/15 text-foreground'
     : 'border-border text-muted-foreground hover:border-accent hover:text-accent-ink',
 ];
 
@@ -581,7 +581,7 @@ const renderer = new marked.Renderer();
 renderer.code = (token) => {
   const codeHtml = defaultRenderer.code(token);
 
-  return `<div class="code-block-wrapper relative group/code">${codeHtml}<button type="button" class="code-copy-button absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-white/10 text-slate-300 opacity-100 backdrop-blur-sm transition-opacity hover:bg-white/20 hover:text-white sm:opacity-0 sm:group-hover/code:opacity-100" aria-label="${t('messageBubble.copyCode')}"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>`;
+  return `<div class="code-block-wrapper relative group/code">${codeHtml}<button type="button" class="code-copy-button absolute right-1 top-1 flex h-11 w-11 sm:right-2 sm:top-2 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-white/10 text-slate-300 opacity-100 backdrop-blur-sm transition-opacity hover:bg-white/20 hover:text-white sm:opacity-0 sm:group-hover/code:opacity-100" aria-label="${t('messageBubble.copyCode')}"><svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button></div>`;
 };
 
 // A wide table (more columns than the bubble's max-w-[80%] fits) would
