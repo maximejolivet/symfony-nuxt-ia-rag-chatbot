@@ -23,4 +23,12 @@ class FaqRepository extends ServiceEntityRepository implements SyliusRepositoryI
     {
         parent::__construct($registry, Faq::class);
     }
+
+    /**
+     * @return Faq[]
+     */
+    public function findActive(): array
+    {
+        return $this->findBy(['isActive' => true], ['priority' => 'ASC']);
+    }
 }

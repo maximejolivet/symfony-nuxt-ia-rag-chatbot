@@ -11,13 +11,16 @@ use App\AiProvider\Client\ToolCall;
 use App\AiProvider\ProviderSelectionService;
 use App\Chat\ChatOrchestrationService;
 use App\Chat\ChatReplyResult;
+use App\Chat\FaqAnswerMatcher;
 use App\Chat\RagContextService;
 use App\Entity\AiAgent;
 use App\Entity\Collection;
+use App\Entity\Faq;
 use App\Entity\Workflow;
 use App\Enum\WorkflowStatus;
 use App\KnowledgeBase\CollectionService;
 use App\Repository\AiProviderConfigRepository;
+use App\Repository\FaqRepository;
 use App\Repository\WorkflowRepository;
 use App\Repository\WorkflowStepRepository;
 use App\VectorConnector\VectorSearchService;
@@ -97,11 +100,13 @@ final class ChatOrchestrationServiceTest extends TestCase
 {
     /**
      * @param array<int, array<string, mixed>> $ragResults
+     * @param Faq[]                            $faqs       active FAQs the matcher sees
      */
     private function service(
         array $ragResults = [],
         ?WorkflowRepository $workflowRepository = null,
         ?WorkflowStepRepository $workflowStepRepository = null,
+        array $faqs = [],
     ): ChatOrchestrationService {
         $providerSelection = new ProviderSelectionService(
             $this->createStub(AiProviderConfigRepository::class),
@@ -138,7 +143,10 @@ final class ChatOrchestrationServiceTest extends TestCase
             'test@example.com',
         );
 
-        return new ChatOrchestrationService($providerSelection, $ragContextService, $workflowExecutionService);
+        $faqRepository = $this->createStub(FaqRepository::class);
+        $faqRepository->method('findActive')->willReturn($faqs);
+
+        return new ChatOrchestrationService($providerSelection, $ragContextService, $workflowExecutionService, new FaqAnswerMatcher($faqRepository));
     }
 
     /**
@@ -158,6 +166,62 @@ final class ChatOrchestrationServiceTest extends TestCase
         self::assertInstanceOf(ChatReplyResult::class, $result);
 
         return $result;
+    }
+
+    public function testExactFaqQuestionReturnsTheFaqAnswerWithoutCallingTheLlm(): void
+    {
+        $faq = new Faq()
+            ->setQuestion('Qui est Maxime et quelle est son expertise ?')
+            ->setAnswer('Maxime est développeur full-stack senior, expert PHP, JavaScript, Drupal et WordPress.');
+        $client = new FakeLlmClient(streamChunks: ['should', 'not', 'be', 'used']);
+        $deltas = [];
+
+        $result = $this->orchestrate(
+            $this->service(faqs: [$faq]),
+            $client,
+            userMessage: '  qui est maxime et quelle est SON expertise  ',
+            onDelta: function (string $chunk) use (&$deltas): void {
+                $deltas[] = $chunk;
+            },
+        );
+
+        self::assertSame('Maxime est développeur full-stack senior, expert PHP, JavaScript, Drupal et WordPress.', $result->content);
+        self::assertSame([$result->content], $deltas);
+        self::assertSame([], $client->streamed);
+        self::assertSame([], $client->lastMessages);
+        self::assertSame('faq', $result->usage['source']);
+        self::assertSame(0, $result->usage['total_tokens']);
+    }
+
+    public function testNonMatchingMessageFallsThroughToTheLlm(): void
+    {
+        $faq = new Faq()->setQuestion('Qui est Maxime ?')->setAnswer('Un développeur.');
+        $client = new FakeLlmClient(streamChunks: ['Réponse LLM']);
+
+        $result = $this->orchestrate(
+            $this->service(faqs: [$faq]),
+            $client,
+            userMessage: 'Maxime est-il bilingue ?',
+            onDelta: static function (string $chunk): void {},
+        );
+
+        self::assertSame('Réponse LLM', $result->content);
+        self::assertSame('estimated', $result->usage['source']);
+    }
+
+    public function testFaqWithAnEmptyAnswerIsIgnored(): void
+    {
+        $faq = new Faq()->setQuestion('Qui est Maxime ?')->setAnswer('   ');
+        $client = new FakeLlmClient(streamChunks: ['Réponse LLM']);
+
+        $result = $this->orchestrate(
+            $this->service(faqs: [$faq]),
+            $client,
+            userMessage: 'Qui est Maxime ?',
+            onDelta: static function (string $chunk): void {},
+        );
+
+        self::assertSame('Réponse LLM', $result->content);
     }
 
     public function testNoAgentAndOnDeltaStreamsIncrementally(): void

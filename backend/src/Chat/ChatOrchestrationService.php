@@ -71,6 +71,7 @@ final readonly class ChatOrchestrationService
         private ProviderSelectionService $providerSelectionService,
         private RagContextService $ragContextService,
         private WorkflowExecutionService $workflowExecutionService,
+        private FaqAnswerMatcher $faqAnswerMatcher,
     ) {}
 
     /**
@@ -115,6 +116,25 @@ final readonly class ChatOrchestrationService
         ?callable $onDelta,
         ?callable $onToolCall = null,
     ): ChatReplyResult {
+        // An exact FAQ question gets its admin-written answer verbatim: no
+        // RAG, no LLM call, no tokens spent. Fires $onDelta once with the
+        // full answer, same contract as the buffered path below.
+        $faqAnswer = $this->faqAnswerMatcher->findAnswer($userMessage);
+        if (null !== $faqAnswer) {
+            if (null !== $onDelta) {
+                $onDelta($faqAnswer);
+            }
+
+            return new ChatReplyResult($faqAnswer, [
+                'prompt_tokens' => 0,
+                'completion_tokens' => 0,
+                'total_tokens' => 0,
+                'source' => 'faq',
+                'provider' => 'faq',
+                'model' => 'faq',
+            ]);
+        }
+
         $ragResults = $this->ragContextService->buildContext($userMessage, $agent);
         $messages = $this->buildMessages($agent, $history, $userMessage, $ragResults, $conversation);
         $toolSpecs = $this->buildToolSpecs($agent);
