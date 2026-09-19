@@ -8,63 +8,56 @@
    * them in rgb(var(--x) / <alpha-value>) and support opacity modifiers
    * (bg-accent/10) -- see the comment there for the full rationale.
    *
-   * Brand palette: warm cream (#f3f4f0) + deep ink-teal (#1d3540), a gold
-   * CTA color and a mint/teal accent that both stay fixed across light and
-   * dark (same reasoning as upstream: gold and accent always sit on a
-   * surface light enough, or are used as a solid fill, that a single ink
-   * foreground reads on either theme, so there's no separate dark variant
-   * to compute). --muted/--muted-foreground below are solid pre-mixed
-   * approximations of the upstream --stripe/--subtle ink-on-background
-   * overlays, since this token system multiplies opaque triplets by a
-   * Tailwind opacity modifier rather than storing rgba() directly.
+   * "Ciré" palette: the yellow oilskin of Breton fishermen (--primary) against
+   * a deep marine navy (--foreground), on a cool fog-paper surface. The yellow
+   * is a fill, never a text color -- it can't reach contrast on paper -- so
+   * text-level emphasis (links, status, focus) goes to --accent, a sea green
+   * that is darkened in light mode and lightened in dark mode. --highlight is
+   * the buoy red, reserved for the rare "look here" moment.
    */
   :root {
-    --background: 243 244 240; /* #f3f4f0 */
-    --foreground: 29 53 64; /* #1d3540, ink */
-    --card: 251 252 250; /* #fbfcfa */
-    --card-foreground: 29 53 64;
-    --muted: 224 227 224; /* ink @ ~9% over background */
-    --muted-foreground: 119 133 138; /* ink @ ~58% over background */
-    --accent: 79 179 156; /* #4fb39c, mint */
-    --accent-foreground: 29 53 64; /* always ink -- accent stays fixed across themes */
-    --primary: 239 199 138; /* #efc78a, gold */
-    --primary-foreground: 29 53 64; /* always ink -- gold stays fixed across themes */
-    --destructive: 179 38 30; /* not part of the brand palette -- a plain error red is
-      the one semantic role it doesn't cover */
-    --border: 29 53 64; /* = foreground, alpha applied in tailwind.config.js */
-    --highlight: 224 138 92; /* #e08a5c, terracotta -- stays fixed across themes, same as gold/accent */
-    --highlight-foreground: 29 53 64; /* always ink, same reasoning as primary/accent foreground */
-    --panel: 36 65 79; /* #24414f, dark surface for content that sits on a sunken panel
-      regardless of page theme (e.g. code/log surfaces) */
-    --panel-2: 22 48 60; /* #16303c */
-    --panel-foreground: 243 244 240; /* #f3f4f0, always light -- panel is dark in both themes */
+    --background: 237 240 238; /* #edf0ee, fog */
+    --foreground: 15 34 56; /* #0f2238, marine navy */
+    --card: 248 249 247; /* #f8f9f7 */
+    --card-foreground: 15 34 56;
+    --muted: 222 228 227; /* navy @ ~9% over background */
+    --muted-foreground: 85 100 111; /* #55646f, slate -- 5.3:1 on --background */
+    --accent: 11 107 102; /* #0b6b66, sea green */
+    --accent-foreground: 248 249 247; /* paper on sea green */
+    --primary: 245 181 10; /* #f5b50a, oilskin yellow */
+    --primary-foreground: 15 34 56; /* navy on yellow, ~9:1, fixed across themes */
+    --destructive: 179 38 30;
+    --border: 15 34 56; /* = foreground, alpha applied in tailwind.config.js */
+    --highlight: 216 57 31; /* #d8391f, buoy red */
+    --highlight-foreground: 248 249 247;
+    --panel: 15 34 56; /* #0f2238, navy slab: header, code/log surfaces */
+    --panel-2: 10 24 41; /* #0a1829 */
+    --panel-foreground: 237 240 238; /* always light -- panel is navy in both themes */
   }
 
   .dark {
-    --background: 21 40 51; /* #152833 */
-    --foreground: 243 244 240; /* #f3f4f0 */
-    --card: 30 57 69; /* #1e3945 */
-    --card-foreground: 243 244 240;
-    --muted: 37 54 64; /* light ink @ ~7% over background */
-    --muted-foreground: 165 173 174; /* light ink @ ~65% over background -- the brand
-      palette's own --subtle (~50%) reads fine on maxime.bzh's small mono labels, but
-      this token also carries real paragraph text (empty states, hero subheading) here,
-      where 50% fell to ~3.6:1 against --card, below the 4.5:1 AA floor */
-    --border: 243 244 240; /* = foreground */
-    --panel: 16 32 42; /* #10202a, darker panel variant for the dark theme */
-    --panel-2: 13 27 35; /* #0d1b23 */
-    /* accent, primary, highlight and panel-foreground intentionally not redefined
-       here -- same reasoning as the brand palette's own --gold/--accent/--highlight,
-       which aren't redefined under its dark theme either. --destructive IS
-       redefined below: unlike those, it's rendered as plain text/borders directly
-       on --background (error banner, retry button, unpin hover) rather than
-       always as a solid fill, so the light-mode red (~2.3:1 on #152833) is
-       effectively invisible -- this lighter red keeps ~5:1. */
+    --background: 10 23 38; /* #0a1726 */
+    --foreground: 237 240 238; /* #edf0ee */
+    --card: 18 38 59; /* #12263b */
+    --card-foreground: 237 240 238;
+    --muted: 27 47 68; /* light ink @ ~8% over background */
+    --muted-foreground: 161 176 188; /* #a1b0bc -- 7.4:1 on --background */
+    --accent: 92 207 194; /* #5ccfc2, sea green lifted for navy */
+    --accent-foreground: 10 23 38; /* navy on lifted green */
+    --border: 237 240 238; /* = foreground */
+    --highlight: 255 122 94; /* #ff7a5e -- buoy red lifted for navy */
+    --highlight-foreground: 10 23 38;
+    --panel: 7 17 29; /* #07111d, one step darker than the page */
+    --panel-2: 4 11 19; /* #040b13 */
+    /* primary (yellow) is intentionally not redefined: it is always a solid
+       fill under navy text, which reads on either theme. --destructive is
+       redefined because it also renders as plain text on --background. */
     --destructive: 248 113 113; /* #f87171 */
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
     /* Static height:100% chain (html -> body -> #__nuxt), so `h-full` on a
        page root (pages/chat.vue) resolves against a stable size instead of
        the viewport-relative `dvh`/`vh` units -- those recompute every time
@@ -79,8 +72,8 @@
   }
 
   ::selection {
-    background: rgb(var(--muted));
-    color: rgb(var(--accent));
+    background: rgb(var(--primary));
+    color: rgb(var(--primary-foreground));
   }
 }
 
@@ -97,29 +90,35 @@
     @apply animate-pulse-dot;
   }
 
-  .hero-wash {
-    background: linear-gradient(180deg, #f3f4f0 0%, #e5f2ee 55%, #f3f4f0 100%);
+  /* Landing field: flat oilskin yellow, no gradient. The one place the
+     brand's loudest color runs edge to edge. */
+  .hero-field {
+    background: rgb(var(--primary));
+    color: rgb(var(--primary-foreground));
   }
 
-  .dark .hero-wash {
-    background: linear-gradient(180deg, #152833 0%, #1c3530 55%, #152833 100%);
+  /* Navy slab. Re-declares the dark-theme values of the text/surface tokens
+     for its subtree, so every text-foreground / text-muted-foreground /
+     text-accent / hover:bg-muted already inside it (both themes) reads on
+     navy without per-element overrides. */
+  .on-panel {
+    --foreground: 237 240 238;
+    --muted: 27 47 68;
+    --muted-foreground: 161 176 188;
+    --accent: 92 207 194;
+    --border: 237 240 238;
+    background: rgb(var(--panel));
+    color: rgb(var(--panel-foreground));
   }
 
-  .hero-aura {
-    background:
-      radial-gradient(closest-side, rgba(79, 179, 156, 0.35), transparent),
-      radial-gradient(closest-side, rgba(239, 199, 138, 0.4), transparent 70%),
-      radial-gradient(closest-side, rgba(224, 138, 92, 0.3), transparent 70%);
-    background-position:
-      35% 40%,
-      65% 35%,
-      50% 65%;
-    background-repeat: no-repeat;
-    background-size:
-      60% 60%,
-      55% 55%,
-      65% 65%;
-    filter: blur(48px);
+  /* Poster headline: Archivo's width axis pushed to its condensed end, at
+     the heavy end of the weight axis. */
+  .display {
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-stretch: 68%;
+    font-variation-settings: 'wdth' 68;
+    font-weight: 800;
+    letter-spacing: -0.01em;
   }
 }
 

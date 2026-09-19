@@ -1,56 +1,49 @@
 <template>
-  <div class="flex w-full flex-col items-center">
+  <div class="w-full">
     <form
-      class="flex w-full items-center gap-2 rounded-full border border-border bg-card p-2 pl-5 shadow-lg shadow-foreground/5 transition-shadow focus-within:shadow-xl"
+      class="flex w-full items-stretch overflow-hidden rounded-lg bg-primary-foreground text-primary focus-within:ring-2 focus-within:ring-primary-foreground focus-within:ring-offset-2 focus-within:ring-offset-primary"
       @submit="onSubmit"
     >
-      <svg
-        class="h-5 w-5 shrink-0 text-muted-foreground"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-        />
-      </svg>
+      <label class="sr-only" for="hero-question">{{ $t('heroChatBar.placeholder') }}</label>
       <input
+        id="hero-question"
         v-model="question"
         type="text"
         :placeholder="$t('heroChatBar.placeholder')"
-        class="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-0 sm:text-sm"
+        class="min-w-0 flex-1 border-0 bg-transparent px-5 py-5 text-base text-primary placeholder-primary/70 focus:outline-none focus:ring-0 sm:text-lg"
       />
       <button
         type="submit"
         :disabled="!question.trim()"
         :aria-label="$t('heroChatBar.send')"
-        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:cursor-not-allowed disabled:opacity-40"
+        class="flex w-16 shrink-0 items-center justify-center text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus:outline-none focus-visible:bg-primary focus-visible:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary"
       >
-        <svg class="h-4 w-4 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+            stroke-width="2.25"
+            d="M12 19V5m0 0l-6 6m6-6l6 6"
           />
         </svg>
       </button>
     </form>
 
-    <div class="mt-3 flex flex-wrap justify-center gap-2">
-      <button
+    <ul v-if="suggestedQuestions.length" class="mt-4 border-t border-primary-foreground/30">
+      <li
         v-for="suggestion in suggestedQuestions"
         :key="suggestion"
-        type="button"
-        class="rounded-full bg-card px-4 py-3 text-sm font-medium text-card-foreground shadow-sm shadow-foreground/5 transition-shadow hover:shadow-md"
-        @click="askSuggestion(suggestion)"
+        class="border-b border-primary-foreground/30"
       >
-        {{ suggestion }}
-      </button>
-    </div>
+        <button
+          type="button"
+          class="w-full px-1 py-3.5 text-left text-base font-medium transition-colors hover:bg-primary-foreground hover:px-4 hover:text-primary focus:outline-none focus-visible:bg-primary-foreground focus-visible:px-4 focus-visible:text-primary motion-reduce:transition-none sm:text-lg"
+          @click="askSuggestion(suggestion)"
+        >
+          {{ suggestion }}
+        </button>
+      </li>
+    </ul>
   </div>
 </template>
 

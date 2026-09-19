@@ -1,45 +1,30 @@
 <template>
-  <main
-    class="hero-wash relative flex min-h-screen items-center justify-center overflow-hidden px-6"
-  >
+  <main class="hero-field relative min-h-screen overflow-hidden">
     <div
-      aria-hidden="true"
-      class="hero-aura pointer-events-none absolute inset-0 animate-aura-drift motion-reduce:animate-none"
-    />
+      class="mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 gap-x-12 px-6 pb-10 pt-12 sm:px-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:pt-16"
+    >
+      <div class="flex flex-col justify-center">
+        <h1
+          class="display text-[clamp(3.5rem,11.5vw,8.5rem)] leading-[0.88] text-balance sm:leading-[0.86]"
+        >
+          {{ $t('home.heading') }}
+        </h1>
 
-    <div class="relative mx-auto flex max-w-2xl flex-col items-center text-center">
+        <p class="mt-8 max-w-[38ch] font-serif text-xl leading-relaxed sm:text-2xl">
+          {{ $t('home.subheading') }}
+        </p>
+
+        <HeroChatBar class="mt-10 max-w-2xl" />
+      </div>
+
       <NuxtImg
         src="/maximejolivet.jpg"
         alt="Maxime"
-        width="112"
-        height="112"
+        width="288"
+        height="360"
         format="webp"
-        class="mb-6 h-20 w-20 animate-breathe rounded-full object-cover shadow-lg shadow-foreground/10 motion-reduce:animate-none sm:h-28 sm:w-28"
+        class="mt-10 hidden aspect-[4/5] w-full self-end rounded-md object-cover object-top lg:block"
       />
-
-      <div class="mb-8 flex items-center gap-2">
-        <span
-          class="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-1.5 text-[13px] font-medium tracking-wide text-accent"
-        >
-          <span class="h-1.5 w-1.5 rounded-full bg-accent" />
-          {{ $t('home.badge') }}
-        </span>
-        <span
-          class="rounded-full bg-accent/10 px-2 py-1 text-[10px] font-bold uppercase leading-none tracking-wide text-accent"
-        >
-          {{ $t('chatbot.betaBadge') }}
-        </span>
-      </div>
-
-      <h1 class="font-serif text-[2.75rem] font-medium leading-[1.05] tracking-tight sm:text-6xl">
-        {{ $t('home.heading') }}
-      </h1>
-
-      <p class="mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
-        {{ $t('home.subheading') }}
-      </p>
-
-      <HeroChatBar class="mt-10 max-w-md" />
     </div>
 
     <StickyChatBubble />

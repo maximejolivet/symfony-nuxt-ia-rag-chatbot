@@ -13,9 +13,9 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
-      // Brand palette: warm cream/ink base, gold CTA, mint accent, terracotta
-      // highlight (see assets/css/main.css for the full rationale and the
-      // `:root`/`.dark` RGB triplet values).
+      // "Ciré" palette: fog paper + marine navy base, oilskin-yellow fill,
+      // sea-green accent, buoy-red highlight (see assets/css/main.css for the
+      // full rationale and the `:root`/`.dark` RGB triplet values).
       //
       // Each token is a CSS variable (RGB triplet) rather than a fixed hex,
       // so dark mode (composables/useColorScheme.ts, `.dark` class on
@@ -59,17 +59,30 @@ export default {
         // both themes.
         border: 'rgb(var(--border) / 0.16)',
       },
+      borderRadius: {
+        // Deliberate scale instead of pill-everything: signage-sharp controls,
+        // slightly softer surfaces; full only for avatars and status lights.
+        sm: '2px',
+        DEFAULT: '4px',
+        md: '6px',
+        lg: '8px',
+        xl: '10px',
+        '2xl': '14px',
+        '3xl': '18px',
+      },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Fraunces', 'ui-serif', 'Georgia', 'serif'],
+        // Archivo: UI + display (its width axis gives the condensed poster
+        // headline, see .display in main.css). Newsreader: reading text --
+        // assistant replies and greetings.
+        sans: ['Archivo', 'system-ui', 'sans-serif'],
+        serif: ['Newsreader', 'ui-serif', 'Georgia', 'serif'],
       },
       animation: {
         'bounce-slow': 'bounce 2s infinite',
         blink: 'blink 1.1s step-end infinite',
         'pulse-dot': 'pulse-dot 1.6s ease-in-out infinite',
         'pulse-ring': 'pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'aura-drift': 'aura-drift 20s ease-in-out infinite',
-        breathe: 'breathe 4s ease-in-out infinite',
+        beacon: 'beacon 6s ease-in-out infinite',
         celebrate: 'celebrate 700ms ease-out',
         'loading-bar': 'loading-bar 1.2s ease-in-out infinite',
       },
@@ -77,10 +90,6 @@ export default {
         blink: {
           '0%, 49%': { opacity: 1 },
           '50%, 100%': { opacity: 0 },
-        },
-        breathe: {
-          '0%, 100%': { transform: 'scale(1)' },
-          '50%': { transform: 'scale(1.06)' },
         },
         // One-shot "pop + fading ring" played once when a booking
         // confirmation card is first inserted (see MessageBubble.vue) --
@@ -109,13 +118,13 @@ export default {
           '70%': { transform: 'scale(1.6)', opacity: 0 },
           '100%': { transform: 'scale(1.6)', opacity: 0 },
         },
-        // Four keyframes looping back to the start (not a 2-point alternate)
-        // so the blob drifts in a loose, organic circle instead of visibly
-        // reversing direction in a straight line every cycle.
-        'aura-drift': {
-          '0%, 100%': { transform: 'translate(-6%, -4%) scale(1)' },
-          '33%': { transform: 'translate(5%, -6%) scale(1.12)' },
-          '66%': { transform: 'translate(-4%, 6%) scale(0.96)' },
+        // Group-flashing light, Fl(2) 6s: two short flashes, then a long dark
+        // rest -- how a lighthouse identifies itself. Used for the online
+        // status dot and the typing indicator, the one recurring motion in
+        // the app.
+        beacon: {
+          '0%, 8%, 20%, 100%': { opacity: 0.25 },
+          '10%, 16%': { opacity: 1 },
         },
       },
     },

@@ -10,15 +10,7 @@
       :class="[
         'relative flex flex-col overflow-hidden transition-all duration-200',
         variant === 'page'
-          ? [
-              'h-full min-h-0 lg:flex-row',
-              // Light mode: the ambient hero-wash/hero-aura gradient behind
-              // this page (pages/chat.vue) is meant to bleed through here,
-              // so no opaque background. Dark mode has no dark equivalent of
-              // that gradient -- an opaque bg-background keeps the bubbles
-              // legible instead of dark text over a bright pastel wash.
-              scheme === 'dark' ? 'bg-background' : '',
-            ]
+          ? ['h-full min-h-0 bg-background lg:flex-row']
           : [
               'rounded-3xl border border-border bg-background shadow-2xl shadow-foreground/10',
               'h-[min(30rem,calc(100vh-6rem))] w-[min(28rem,calc(100vw-2rem))]',
@@ -37,7 +29,7 @@
       </div>
 
       <!-- En-tête (widget flottant uniquement) -->
-      <div v-if="variant !== 'page'" class="border-b border-border bg-card px-4 py-3 sm:px-6">
+      <div v-if="variant !== 'page'" class="on-panel px-4 py-3 sm:px-6">
         <div class="mx-auto flex w-full max-w-3xl items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-3">
             <div class="relative shrink-0">
@@ -47,7 +39,7 @@
                 width="48"
                 height="48"
                 format="webp"
-                class="h-10 w-10 animate-breathe rounded-full object-cover motion-reduce:animate-none sm:h-12 sm:w-12"
+                class="h-10 w-10 rounded-full object-cover motion-reduce:animate-none sm:h-12 sm:w-12"
               />
             </div>
             <div class="min-w-0 leading-tight">
@@ -56,17 +48,17 @@
                   {{ title }}<span class="text-accent">.</span>
                 </p>
                 <span
-                  class="shrink-0 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-bold uppercase leading-none tracking-wide text-accent"
+                  class="shrink-0 rounded-sm border border-accent/60 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-accent"
                 >
                   {{ $t('chatbot.betaBadge') }}
                 </span>
               </div>
-              <p class="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+              <p class="flex items-center gap-1.5 font-sans text-xs text-muted-foreground">
                 <span
                   :class="[
                     'h-1.5 w-1.5 rounded-full',
                     llmStatus === 'online'
-                      ? 'animate-pulse-dot bg-accent motion-reduce:animate-none'
+                      ? 'animate-beacon bg-accent motion-reduce:animate-none'
                       : llmStatus === 'offline'
                         ? 'bg-destructive'
                         : 'bg-muted-foreground',
@@ -182,7 +174,7 @@
             </svg>
           </NuxtLink>
           <span
-            class="rounded-full bg-accent/10 px-3 py-1.5 text-sm font-bold uppercase leading-none tracking-wide text-accent"
+            class="rounded-sm border border-accent/60 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-accent"
           >
             {{ $t('chatbot.betaBadge') }}
           </span>
@@ -197,21 +189,21 @@
               width="96"
               height="96"
               format="webp"
-              class="h-24 w-24 animate-breathe rounded-full object-cover motion-reduce:animate-none"
+              class="h-24 w-24 rounded-full object-cover motion-reduce:animate-none"
             />
           </div>
           <div>
-            <h1 class="mb-1.5 font-serif text-3xl italic text-foreground">
+            <h1 class="mb-1.5 font-sans text-3xl font-bold tracking-tight text-foreground">
               {{ title }}<span class="text-accent">.</span>
             </h1>
             <p class="text-sm leading-relaxed text-muted-foreground">{{ $t('chatbot.emptyGreeting') }}</p>
           </div>
-          <p class="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+          <p class="flex items-center gap-2 font-sans text-xs text-muted-foreground">
             <span
               :class="[
                 'h-1.5 w-1.5 rounded-full',
                 llmStatus === 'online'
-                  ? 'animate-pulse-dot bg-accent motion-reduce:animate-none'
+                  ? 'animate-beacon bg-accent motion-reduce:animate-none'
                   : llmStatus === 'offline'
                     ? 'bg-destructive'
                     : 'bg-muted-foreground',
@@ -390,19 +382,19 @@
           />
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5">
-              <span class="truncate font-serif italic text-foreground">{{ title }}</span>
+              <span class="truncate font-sans font-bold text-foreground">{{ title }}</span>
               <span
-                class="shrink-0 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-bold uppercase leading-none tracking-wide text-accent"
+                class="shrink-0 rounded-sm border border-accent/60 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-accent"
               >
                 {{ $t('chatbot.betaBadge') }}
               </span>
             </div>
-            <p class="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
+            <p class="flex items-center gap-1.5 font-sans text-[10px] text-muted-foreground">
               <span
                 :class="[
                   'h-1.5 w-1.5 rounded-full',
                   llmStatus === 'online'
-                    ? 'animate-pulse-dot bg-accent motion-reduce:animate-none'
+                    ? 'animate-beacon bg-accent motion-reduce:animate-none'
                     : llmStatus === 'offline'
                       ? 'bg-destructive'
                       : 'bg-muted-foreground',
@@ -615,10 +607,10 @@
               width="80"
               height="80"
               format="webp"
-              class="h-14 w-14 animate-breathe rounded-full object-cover motion-reduce:animate-none sm:h-20 sm:w-20"
+              class="h-14 w-14 rounded-full object-cover motion-reduce:animate-none sm:h-20 sm:w-20"
             />
             <div class="space-y-1.5">
-              <h2 class="font-serif text-xl font-medium text-foreground">
+              <h2 class="font-sans text-xl font-bold tracking-tight text-foreground">
                 {{ $t('chatbot.emptyTitle') }}
               </h2>
               <p class="max-w-xs text-sm text-muted-foreground">

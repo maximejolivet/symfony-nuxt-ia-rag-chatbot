@@ -8,22 +8,22 @@
     <NuxtImg v-if="!isUser" src="/maximejolivet.jpg" alt="Maxime" width="36" height="36" format="webp"
       :class="[plain ? 'mt-0.5' : 'mb-1', 'h-7 w-7 shrink-0 rounded-full object-cover sm:h-9 sm:w-9']" />
     <div :class="bubbleClass">
-      <div v-if="isTyping" class="flex gap-1 py-0.5">
-        <span class="h-1.5 w-1.5 animate-bounce-slow rounded-full bg-current motion-reduce:animate-none" />
-        <span class="h-1.5 w-1.5 animate-bounce-slow rounded-full bg-current motion-reduce:animate-none"
-          style="animation-delay: 0.1s" />
-        <span class="h-1.5 w-1.5 animate-bounce-slow rounded-full bg-current motion-reduce:animate-none"
-          style="animation-delay: 0.2s" />
+      <div v-if="isTyping" class="flex gap-1.5 py-1.5">
+        <span class="h-1.5 w-1.5 animate-beacon rounded-full bg-current motion-reduce:animate-none" />
+        <span class="h-1.5 w-1.5 animate-beacon rounded-full bg-current motion-reduce:animate-none"
+          style="animation-delay: 0.15s" />
+        <span class="h-1.5 w-1.5 animate-beacon rounded-full bg-current motion-reduce:animate-none"
+          style="animation-delay: 0.3s" />
       </div>
       <div v-else
-        class="prose prose-sm max-w-none text-inherit font-sans text-sm leading-relaxed prose-headings:font-sans prose-headings:font-semibold prose-headings:text-inherit prose-p:my-1 prose-p:text-inherit prose-strong:text-inherit prose-a:text-inherit prose-a:underline prose-a:decoration-dotted prose-a:underline-offset-2 prose-code:text-inherit prose-table:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1"
+        class="prose prose-sm max-w-none text-inherit text-[15px] leading-[1.65] prose-headings:font-sans prose-headings:font-semibold prose-headings:text-inherit prose-p:my-1 prose-p:text-inherit prose-strong:text-inherit prose-a:text-inherit prose-a:underline prose-a:decoration-dotted prose-a:underline-offset-2 prose-code:text-inherit prose-table:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1"
         v-html="formattedContent" @click="onContentClick" />
       <span v-if="isStreaming && !isTyping"
         class="animate-blink -mb-0.5 ml-0.5 inline-block h-3.5 w-[2px] bg-current align-middle motion-reduce:animate-none"
         aria-hidden="true" />
       <LinkPreviewCard v-for="link in previewLinks" :key="link" :url="link" />
       <div class="mt-1 flex items-center gap-2">
-        <p :class="['font-mono text-[10px]', isUser ? 'text-white/70' : 'text-muted-foreground']">
+        <p :class="['font-sans text-[10px]', isUser ? 'text-primary-foreground/70' : 'text-muted-foreground']">
           {{ formattedTime }}
         </p>
         <button v-if="!isUser && !isTyping && speechSupported" type="button" :aria-pressed="isSpeaking"
@@ -34,7 +34,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" />
           </svg>
-          <svg v-else class="h-3.5 w-3.5 animate-pulse-dot motion-reduce:animate-none" fill="none" stroke="currentColor"
+          <svg v-else class="h-3.5 w-3.5 animate-beacon motion-reduce:animate-none" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M11 5L6 9H2v6h4l5 4V5zM17 9l4 6m0-6l-4 6" />
@@ -307,8 +307,8 @@ const isTyping = computed(() => props.message.isTyping);
 const bubbleClass = computed(() => [
   'group max-w-[80%] px-4 py-2.5',
   isUser.value
-    ? 'rounded-3xl bg-[#1d3540] text-white'
-    : 'rounded-3xl bg-card text-card-foreground shadow-sm shadow-foreground/5',
+    ? 'rounded-2xl rounded-br-sm bg-primary text-primary-foreground'
+    : 'rounded-2xl rounded-bl-sm border border-border bg-card font-serif text-card-foreground',
 ]);
 const wrapperMargin = computed(() => (props.isGrouped ? 'mb-1' : 'mb-3'));
 const formattedTime = computed(() =>
