@@ -20,13 +20,30 @@ describe('useFaqs', () => {
 
   it('populates suggestedQuestions with the FAQ questions from the API', async () => {
     registerEndpoint('/api/faqs', () => ({
-      member: [{ question: 'Question un ?' }, { question: 'Question deux ?' }],
+      member: [
+        { question: 'Question un ?', highlighted: true },
+        { question: 'Question deux ?', highlighted: true },
+      ],
     }));
 
     const { suggestedQuestions, fetchSuggestedQuestions } = useFaqs();
     await fetchSuggestedQuestions();
 
     expect(suggestedQuestions.value).toEqual(['Question un ?', 'Question deux ?']);
+  });
+
+  it('keeps only the highlighted FAQs as suggested questions', async () => {
+    registerEndpoint('/api/faqs', () => ({
+      member: [
+        { question: 'Mise en avant ?', highlighted: true },
+        { question: 'Pas mise en avant ?', highlighted: false },
+      ],
+    }));
+
+    const { suggestedQuestions, fetchSuggestedQuestions } = useFaqs();
+    await fetchSuggestedQuestions();
+
+    expect(suggestedQuestions.value).toEqual(['Mise en avant ?']);
   });
 
   it('only calls the API once even if fetchSuggestedQuestions is called again', async () => {
@@ -58,7 +75,9 @@ describe('useFaqs', () => {
   });
 
   it('shares state across independent useFaqs() calls (single fetch feeds both)', async () => {
-    registerEndpoint('/api/faqs', () => ({ member: [{ question: 'Shared ?' }] }));
+    registerEndpoint('/api/faqs', () => ({
+      member: [{ question: 'Shared ?', highlighted: true }],
+    }));
 
     const first = useFaqs();
     const second = useFaqs();

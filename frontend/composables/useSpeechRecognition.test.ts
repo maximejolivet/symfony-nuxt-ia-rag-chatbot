@@ -27,7 +27,7 @@ describe('useSpeechRecognition: unsupported browser', () => {
     const onTranscript = vi.fn();
     const [recognition, wrapper] = await withSetup(() => useSpeechRecognition(onTranscript));
 
-    expect(recognition.isSupported).toBe(false);
+    expect(recognition.isSupported.value).toBe(false);
 
     recognition.toggleListening();
 
@@ -44,7 +44,7 @@ describe('useSpeechRecognition: supported browser', () => {
 
   it('reports supported via the unprefixed global', async () => {
     const [recognition, wrapper] = await withSetup(() => useSpeechRecognition(vi.fn()));
-    expect(recognition.isSupported).toBe(true);
+    expect(recognition.isSupported.value).toBe(true);
     wrapper.unmount();
   });
 
@@ -53,7 +53,7 @@ describe('useSpeechRecognition: supported browser', () => {
     (window as any).webkitSpeechRecognition = FakeSpeechRecognition;
 
     const [recognition, wrapper] = await withSetup(() => useSpeechRecognition(vi.fn()));
-    expect(recognition.isSupported).toBe(true);
+    expect(recognition.isSupported.value).toBe(true);
     wrapper.unmount();
   });
 
