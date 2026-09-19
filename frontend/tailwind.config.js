@@ -13,9 +13,9 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
-      // "Ciré" palette: fog paper + marine navy base, oilskin-yellow fill,
-      // sea-green accent, buoy-red highlight (see assets/css/main.css for the
-      // full rationale and the `:root`/`.dark` RGB triplet values).
+      // maxime.bzh palette: cream/ink base, gold action color, mint accent,
+      // terracotta highlight, teal-ink terminal panels (see assets/css/main.css for
+      // the full rationale and the `:root`/`.dark` RGB triplet values).
       //
       // Each token is a CSS variable (RGB triplet) rather than a fixed hex,
       // so dark mode (composables/useColorScheme.ts, `.dark` class on
@@ -33,6 +33,9 @@ export default {
           DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
           foreground: 'rgb(var(--accent-foreground) / <alpha-value>)',
         },
+        // Mint as *text*: --accent (#4fb39c) is ~2.3:1 on cream, so text uses
+        // a deeper mint; the bright one stays for fills, dots and borders.
+        'accent-ink': 'rgb(var(--accent-ink) / <alpha-value>)',
         destructive: 'rgb(var(--destructive) / <alpha-value>)',
         highlight: {
           DEFAULT: 'rgb(var(--highlight) / <alpha-value>)',
@@ -59,30 +62,17 @@ export default {
         // both themes.
         border: 'rgb(var(--border) / 0.16)',
       },
-      borderRadius: {
-        // Deliberate scale instead of pill-everything: signage-sharp controls,
-        // slightly softer surfaces; full only for avatars and status lights.
-        sm: '2px',
-        DEFAULT: '4px',
-        md: '6px',
-        lg: '8px',
-        xl: '10px',
-        '2xl': '14px',
-        '3xl': '18px',
-      },
       fontFamily: {
-        // Archivo: UI + display (its width axis gives the condensed poster
-        // headline, see .display in main.css). Newsreader: reading text --
-        // assistant replies and greetings.
-        sans: ['Archivo', 'system-ui', 'sans-serif'],
-        serif: ['Newsreader', 'ui-serif', 'Georgia', 'serif'],
+        // Same pair as maxime.bzh: Space Grotesk for reading, JetBrains Mono for
+        // the machine voice (timestamps, status, prompts, window titles).
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       animation: {
         'bounce-slow': 'bounce 2s infinite',
         blink: 'blink 1.1s step-end infinite',
         'pulse-dot': 'pulse-dot 1.6s ease-in-out infinite',
         'pulse-ring': 'pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        beacon: 'beacon 6s ease-in-out infinite',
         celebrate: 'celebrate 700ms ease-out',
         'loading-bar': 'loading-bar 1.2s ease-in-out infinite',
       },
@@ -117,14 +107,6 @@ export default {
           '0%': { transform: 'scale(0.9)', opacity: 0.6 },
           '70%': { transform: 'scale(1.6)', opacity: 0 },
           '100%': { transform: 'scale(1.6)', opacity: 0 },
-        },
-        // Group-flashing light, Fl(2) 6s: two short flashes, then a long dark
-        // rest -- how a lighthouse identifies itself. Used for the online
-        // status dot and the typing indicator, the one recurring motion in
-        // the app.
-        beacon: {
-          '0%, 8%, 20%, 100%': { opacity: 0.25 },
-          '10%, 16%': { opacity: 1 },
         },
       },
     },

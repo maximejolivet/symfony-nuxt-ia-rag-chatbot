@@ -5,9 +5,12 @@
   },
   "home": {
     "heading": "Un chatbot qui connaît Maxime par cœur.",
-    "subheading": "Réponses instantanées et fiables, branchées sur mes données, disponibles à toute heure."
+    "subheading": "Réponses instantanées et fiables, branchées sur mes données, disponibles à toute heure.",
+    "portfolio": "Voir le portfolio"
   },
   "heroChatBar": {
+    "windowTitle": "assistant.chat",
+    "hint": "# Lance une suggestion ou écris la tienne",
     "placeholder": "Pose ta question sur Maxime...",
     "send": "Envoyer"
   },

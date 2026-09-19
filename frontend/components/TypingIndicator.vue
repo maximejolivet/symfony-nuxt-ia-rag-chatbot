@@ -9,20 +9,20 @@
       class="mb-1 h-7 w-7 shrink-0 rounded-full object-cover sm:h-9 sm:w-9"
     />
     <div
-      class="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3"
+      class="flex items-center gap-2 rounded-2xl rounded-bl-md border border-border bg-card px-4 py-3"
     >
       <span v-if="label" class="font-sans text-xs text-muted-foreground">{{ label }}</span>
       <span v-else class="sr-only">{{ $t('chatbot.assistantTyping') }}</span>
       <span class="flex items-center gap-1" aria-hidden="true">
         <span
-          class="h-1.5 w-1.5 animate-beacon rounded-full bg-muted-foreground motion-reduce:animate-none"
+          class="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-muted-foreground motion-reduce:animate-none"
         />
         <span
-          class="h-1.5 w-1.5 animate-beacon rounded-full bg-muted-foreground motion-reduce:animate-none"
+          class="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-muted-foreground motion-reduce:animate-none"
           style="animation-delay: 0.15s"
         />
         <span
-          class="h-1.5 w-1.5 animate-beacon rounded-full bg-muted-foreground motion-reduce:animate-none"
+          class="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-muted-foreground motion-reduce:animate-none"
           style="animation-delay: 0.3s"
         />
       </span>

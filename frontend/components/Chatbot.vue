@@ -48,17 +48,17 @@
                   {{ title }}<span class="text-accent">.</span>
                 </p>
                 <span
-                  class="shrink-0 rounded-sm border border-accent/60 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-accent"
+                  class="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[10px] leading-none text-accent-ink"
                 >
                   {{ $t('chatbot.betaBadge') }}
                 </span>
               </div>
-              <p class="flex items-center gap-1.5 font-sans text-xs text-muted-foreground">
+              <p class="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
                 <span
                   :class="[
-                    'h-1.5 w-1.5 rounded-full',
+                    'h-2 w-2 rounded-full',
                     llmStatus === 'online'
-                      ? 'animate-beacon bg-accent motion-reduce:animate-none'
+                      ? 'animate-pulse-dot bg-accent motion-reduce:animate-none'
                       : llmStatus === 'offline'
                         ? 'bg-destructive'
                         : 'bg-muted-foreground',
@@ -73,7 +73,7 @@
               type="button"
               @click="onClearMessages"
               :title="$t('chatbot.clearConversation')"
-              class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent-ink"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -89,7 +89,7 @@
               @click="toggleSoundMuted"
               :aria-pressed="soundMuted"
               :title="soundMuted ? $t('chatbot.soundUnmute') : $t('chatbot.soundMute')"
-              class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent-ink"
             >
               <svg
                 v-if="soundMuted"
@@ -118,7 +118,7 @@
               type="button"
               @click="goFullscreen"
               :title="$t('chatbot.fullscreenEnter')"
-              class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent-ink"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -134,7 +134,7 @@
               type="button"
               @click="$emit('close')"
               :title="$t('chatbot.close')"
-              class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent-ink"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -156,13 +156,13 @@
            après. -->
       <aside
         v-if="variant === 'page'"
-        class="hidden w-[360px] shrink-0 flex-col overflow-y-auto border-r border-border bg-card px-8 pb-6 pt-8 lg:flex xl:w-[400px] xl:px-9"
+        class="hidden w-[360px] shrink-0 flex-col overflow-y-auto px-8 pb-6 pt-8 on-panel lg:flex xl:w-[400px] xl:px-9"
       >
         <div class="flex items-center justify-between">
           <NuxtLink
             to="/"
             :title="$t('chatbot.backHome')"
-            class="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent"
+            class="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent-ink"
           >
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -174,7 +174,7 @@
             </svg>
           </NuxtLink>
           <span
-            class="rounded-sm border border-accent/60 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-accent"
+            class="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[10px] leading-none text-accent-ink"
           >
             {{ $t('chatbot.betaBadge') }}
           </span>
@@ -182,7 +182,7 @@
 
         <div class="flex flex-1 flex-col justify-center gap-5 py-6">
           <div class="relative h-24 w-24">
-            <div class="absolute -inset-1.5 rounded-full border border-accent/30" aria-hidden="true" />
+            <div class="absolute -inset-1.5 rounded-full border border-primary/50" aria-hidden="true" />
             <NuxtImg
               src="/maximejolivet.jpg"
               alt="Maxime"
@@ -198,12 +198,12 @@
             </h1>
             <p class="text-sm leading-relaxed text-muted-foreground">{{ $t('chatbot.emptyGreeting') }}</p>
           </div>
-          <p class="flex items-center gap-2 font-sans text-xs text-muted-foreground">
+          <p class="flex items-center gap-2 font-mono text-xs text-muted-foreground">
             <span
               :class="[
-                'h-1.5 w-1.5 rounded-full',
+                'h-2 w-2 rounded-full',
                 llmStatus === 'online'
-                  ? 'animate-beacon bg-accent motion-reduce:animate-none'
+                  ? 'animate-pulse-dot bg-accent motion-reduce:animate-none'
                   : llmStatus === 'offline'
                     ? 'bg-destructive'
                     : 'bg-muted-foreground',
@@ -213,25 +213,18 @@
           </p>
 
           <div v-if="suggestedQuestions.length > 0" class="mt-1 flex flex-col border-t border-border pt-5">
-            <span class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <span class="mb-1 px-2 font-mono text-xs text-muted-foreground">
               {{ $t('chatbot.emptyTitle') }}
             </span>
             <button
               v-for="suggestion in suggestedQuestions"
               :key="suggestion"
               type="button"
-              class="flex items-center justify-between gap-2 border-b border-border py-3 text-left text-sm text-foreground transition-colors last:border-b-0 hover:text-accent"
+              class="group flex items-baseline gap-3 rounded-lg px-2 py-2.5 text-left font-mono text-[13px] leading-snug transition-colors hover:bg-panel-2 focus:outline-none focus-visible:bg-panel-2 focus-visible:ring-2 focus-visible:ring-accent"
               @click="sendMessage(suggestion)"
             >
-              <span class="truncate">{{ suggestion }}</span>
-              <svg class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 12h14M13 6l6 6-6 6"
-                />
-              </svg>
+              <span class="text-primary" aria-hidden="true">&gt;</span>
+              <span class="group-hover:link-dashed">{{ suggestion.replace(/ ([?!:;])/g, '\u00A0$1') }}</span>
             </button>
           </div>
         </div>
@@ -243,7 +236,7 @@
             :title="
               scheme === 'dark' ? $t('chatbot.themeToggleLight') : $t('chatbot.themeToggleDark')
             "
-            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-accent"
+            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-accent-ink"
           >
             <svg
               v-if="scheme === 'light'"
@@ -273,7 +266,7 @@
             @click="toggleSoundMuted"
             :aria-pressed="soundMuted"
             :title="soundMuted ? $t('chatbot.soundUnmute') : $t('chatbot.soundMute')"
-            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-accent"
+            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-accent-ink"
           >
             <svg
               v-if="soundMuted"
@@ -303,7 +296,7 @@
             type="button"
             @click="exportConversation"
             :title="$t('chatbot.exportConversation')"
-            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-accent"
+            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-accent-ink"
           >
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -318,7 +311,7 @@
             type="button"
             @click="onClearMessages"
             :title="$t('chatbot.clearConversation')"
-            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-accent"
+            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-muted hover:text-accent-ink"
           >
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -356,12 +349,12 @@
              d'identité ci-dessus prend le relais dès lg. -->
         <div
           v-if="variant === 'page'"
-          class="relative z-20 flex items-center gap-2 border-b border-border bg-card/95 px-1.5 py-1.5 backdrop-blur-sm lg:hidden"
+          class="on-panel relative z-20 flex items-center gap-2 px-1.5 py-1.5 lg:hidden"
         >
           <NuxtLink
             to="/"
             :title="$t('chatbot.backHome')"
-            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent"
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent-ink"
           >
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -384,17 +377,17 @@
             <div class="flex items-center gap-1.5">
               <span class="truncate font-sans font-bold text-foreground">{{ title }}</span>
               <span
-                class="shrink-0 rounded-sm border border-accent/60 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-accent"
+                class="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[10px] leading-none text-accent-ink"
               >
                 {{ $t('chatbot.betaBadge') }}
               </span>
             </div>
-            <p class="flex items-center gap-1.5 font-sans text-[10px] text-muted-foreground">
+            <p class="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
               <span
                 :class="[
-                  'h-1.5 w-1.5 rounded-full',
+                  'h-2 w-2 rounded-full',
                   llmStatus === 'online'
-                    ? 'animate-beacon bg-accent motion-reduce:animate-none'
+                    ? 'animate-pulse-dot bg-accent motion-reduce:animate-none'
                     : llmStatus === 'offline'
                       ? 'bg-destructive'
                       : 'bg-muted-foreground',
@@ -408,7 +401,7 @@
             @click="showMobileMenu = !showMobileMenu"
             :aria-expanded="showMobileMenu"
             :title="$t('chatbot.moreActions')"
-            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent"
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-accent-ink"
           >
             <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="5" r="1.6" />
@@ -593,7 +586,7 @@
           <div
             v-else-if="messages.length === 0"
             :class="[
-              'flex flex-1 flex-col items-center justify-center gap-6 text-center',
+              'flex flex-1 flex-col items-center gap-6 py-4 text-center',
               // Desktop page variant already shows this same identity/greeting
               // content persistently in the left panel (see <aside> above) --
               // showing it a second time in the empty conversation area would
@@ -607,7 +600,7 @@
               width="80"
               height="80"
               format="webp"
-              class="h-14 w-14 rounded-full object-cover motion-reduce:animate-none sm:h-20 sm:w-20"
+              class="mt-auto h-14 w-14 rounded-full object-cover motion-reduce:animate-none sm:h-20 sm:w-20"
             />
             <div class="space-y-1.5">
               <h2 class="font-sans text-xl font-bold tracking-tight text-foreground">
@@ -617,15 +610,15 @@
                 {{ $t('chatbot.emptyGreeting') }}
               </p>
             </div>
-            <div class="flex flex-wrap justify-center gap-2">
+            <div class="mb-auto flex flex-wrap justify-center gap-2">
               <button
                 v-for="suggestion in suggestedQuestions"
                 :key="suggestion"
                 type="button"
-                class="rounded-full bg-card px-4 py-3 text-sm font-medium text-card-foreground shadow-sm shadow-foreground/5 transition-shadow hover:shadow-md"
+                class="rounded-full border border-border bg-card px-3.5 py-2 font-mono text-xs text-card-foreground transition-colors hover:border-accent hover:text-accent-ink focus:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent"
                 @click="sendMessage(suggestion)"
               >
-                {{ suggestion }}
+                {{ suggestion.replace(/ ([?!:;])/g, '\u00A0$1') }}
               </button>
             </div>
           </div>
@@ -643,7 +636,7 @@
                 class="sticky top-0 z-10 flex w-full justify-center bg-background py-2"
               >
                 <span
-                  class="rounded-full bg-card px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-sm shadow-foreground/5"
+                  class="rounded-full bg-card px-3 py-1 font-mono text-[11px] text-muted-foreground shadow-sm shadow-foreground/5"
                 >
                   {{ item.dateLabel }}
                 </span>
@@ -702,7 +695,7 @@
           type="button"
           :aria-label="$t('chatbot.scrollToTop')"
           :title="$t('chatbot.scrollToTop')"
-          class="absolute top-32 left-1/2 z-20 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-card text-muted-foreground shadow-lg shadow-foreground/10 transition-colors hover:text-accent"
+          class="absolute top-32 left-1/2 z-20 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-card text-muted-foreground shadow-lg shadow-foreground/10 transition-colors hover:text-accent-ink"
           @click="jumpToTop"
         >
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -798,7 +791,7 @@
               <button
                 type="button"
                 :aria-label="$t('chatbot.close')"
-                class="shrink-0 text-muted-foreground transition-colors hover:text-accent"
+                class="shrink-0 text-muted-foreground transition-colors hover:text-accent-ink"
                 @click="dismissDiscoveryHint"
               >
                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -838,7 +831,7 @@
               </p>
               <button
                 type="button"
-                class="shrink-0 whitespace-nowrap rounded-full border border-destructive/30 px-2.5 py-1 font-mono text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10"
+                class="shrink-0 whitespace-nowrap rounded-full border border-destructive/40 px-2.5 py-1 font-mono text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10"
                 @click="retryLastMessage"
               >
                 {{ $t('chatbot.retry') }}
@@ -955,7 +948,7 @@
                       :class="[
                         'flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-colors',
                         index === focusedSlashIndex
-                          ? 'bg-accent/10 text-accent'
+                          ? 'bg-accent/10 text-accent-ink'
                           : 'text-foreground hover:bg-muted',
                       ]"
                       @mouseenter="focusedSlashIndex = index"
@@ -986,7 +979,7 @@
                   type="button"
                   @click="toggleEmojiPicker"
                   :aria-label="$t('chatbot.insertEmoji')"
-                  class="flex h-11 w-11 shrink-0 items-center justify-center text-lg text-muted-foreground transition-colors hover:text-accent"
+                  class="flex h-11 w-11 shrink-0 items-center justify-center text-lg text-muted-foreground transition-colors hover:text-accent-ink"
                 >
                   🙂
                 </button>
@@ -1011,7 +1004,7 @@
                     'hidden h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 lg:flex',
                     isListening
                       ? 'animate-pulse-dot motion-reduce:animate-none text-destructive'
-                      : 'text-muted-foreground hover:text-accent',
+                      : 'text-muted-foreground hover:text-accent-ink',
                   ]"
                 >
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

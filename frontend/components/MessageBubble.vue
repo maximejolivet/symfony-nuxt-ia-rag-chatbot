@@ -9,32 +9,32 @@
       :class="[plain ? 'mt-0.5' : 'mb-1', 'h-7 w-7 shrink-0 rounded-full object-cover sm:h-9 sm:w-9']" />
     <div :class="bubbleClass">
       <div v-if="isTyping" class="flex gap-1.5 py-1.5">
-        <span class="h-1.5 w-1.5 animate-beacon rounded-full bg-current motion-reduce:animate-none" />
-        <span class="h-1.5 w-1.5 animate-beacon rounded-full bg-current motion-reduce:animate-none"
+        <span class="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-current motion-reduce:animate-none" />
+        <span class="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-current motion-reduce:animate-none"
           style="animation-delay: 0.15s" />
-        <span class="h-1.5 w-1.5 animate-beacon rounded-full bg-current motion-reduce:animate-none"
+        <span class="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-current motion-reduce:animate-none"
           style="animation-delay: 0.3s" />
       </div>
       <div v-else
-        class="prose prose-sm max-w-none text-inherit text-[15px] leading-[1.65] prose-headings:font-sans prose-headings:font-semibold prose-headings:text-inherit prose-p:my-1 prose-p:text-inherit prose-strong:text-inherit prose-a:text-inherit prose-a:underline prose-a:decoration-dotted prose-a:underline-offset-2 prose-code:text-inherit prose-table:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1"
+        class="prose prose-sm max-w-none text-inherit text-[15px] leading-[1.65] prose-headings:font-sans prose-headings:font-semibold prose-headings:text-inherit prose-p:my-1 prose-p:text-inherit prose-strong:text-inherit prose-a:text-inherit prose-a:underline prose-a:decoration-dotted prose-a:underline-offset-2 prose-code:font-mono prose-code:text-inherit prose-pre:rounded-2xl prose-pre:bg-panel prose-pre:font-mono prose-pre:text-panel-foreground prose-table:my-2 prose-pre:my-2 prose-ul:my-1 prose-ol:my-1"
         v-html="formattedContent" @click="onContentClick" />
       <span v-if="isStreaming && !isTyping"
         class="animate-blink -mb-0.5 ml-0.5 inline-block h-3.5 w-[2px] bg-current align-middle motion-reduce:animate-none"
         aria-hidden="true" />
       <LinkPreviewCard v-for="link in previewLinks" :key="link" :url="link" />
       <div class="mt-1 flex items-center gap-2">
-        <p :class="['font-sans text-[10px]', isUser ? 'text-primary-foreground/70' : 'text-muted-foreground']">
+        <p :class="['font-mono text-[10px]', isUser ? 'text-primary-foreground/70' : 'text-muted-foreground']">
           {{ formattedTime }}
         </p>
         <button v-if="!isUser && !isTyping && speechSupported" type="button" :aria-pressed="isSpeaking"
           :title="isSpeaking ? $t('messageBubble.speakStop') : $t('messageBubble.speakStart')"
-          class="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+          class="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
           @click="$emit('speak', message.id, message.content)">
           <svg v-if="!isSpeaking" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" />
           </svg>
-          <svg v-else class="h-3.5 w-3.5 animate-beacon motion-reduce:animate-none" fill="none" stroke="currentColor"
+          <svg v-else class="h-3.5 w-3.5 animate-pulse-dot motion-reduce:animate-none" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M11 5L6 9H2v6h4l5 4V5zM17 9l4 6m0-6l-4 6" />
@@ -42,14 +42,14 @@
         </button>
         <button v-if="!isUser && !isTyping" type="button"
           :title="copied ? $t('messageBubble.copied') : $t('messageBubble.copy')" :class="[
-            'flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100',
+            'flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100',
             copied ? 'sm:opacity-100' : '',
           ]" @click="copyToClipboard">
           <svg v-if="!copied" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
-          <svg v-else class="h-3.5 w-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg v-else class="h-3.5 w-3.5 text-accent-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
         </button>
@@ -72,7 +72,7 @@
           👎
         </button>
         <button v-if="!isUser && !isTyping && isLast" type="button" :title="$t('messageBubble.regenerate')"
-          class="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+          class="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-all hover:text-accent-ink sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
           @click="$emit('regenerate')">
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -307,8 +307,8 @@ const isTyping = computed(() => props.message.isTyping);
 const bubbleClass = computed(() => [
   'group max-w-[80%] px-4 py-2.5',
   isUser.value
-    ? 'rounded-2xl rounded-br-sm bg-primary text-primary-foreground'
-    : 'rounded-2xl rounded-bl-sm border border-border bg-card font-serif text-card-foreground',
+    ? 'rounded-3xl rounded-br-md bg-primary text-primary-foreground'
+    : 'rounded-3xl rounded-bl-md border border-border bg-card text-card-foreground',
 ]);
 const wrapperMargin = computed(() => (props.isGrouped ? 'mb-1' : 'mb-3'));
 const formattedTime = computed(() =>
@@ -348,8 +348,8 @@ const floatingLabelClass =
 const modaliteButtonClass = (active: boolean) => [
   'rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-semibold transition-colors',
   active
-    ? 'border-accent bg-accent/10 text-accent'
-    : 'border-border text-muted-foreground hover:border-accent hover:text-accent',
+    ? 'border-accent bg-accent/10 text-accent-ink'
+    : 'border-border text-muted-foreground hover:border-accent hover:text-accent-ink',
 ];
 
 // Deliberately permissive (no RFC 5322 edge cases) -- this only guards
