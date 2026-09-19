@@ -11,7 +11,7 @@ Point d'entrée rapide pour un nouveau contributeur. Pour le détail exhaustif, 
 | Backoffice `/admin`  | Sylius Resource Bundle + Sylius Grid Bundle       | ^1.14 / ^1.16                                 |
 | Assets admin         | AssetMapper + Stimulus + Tailwind (bundle local)  | —                                             |
 | Frontend             | Nuxt / Vue                                        | Nuxt 4.5, Vue 3.5, TypeScript 7.0, Node.js 24 |
-| Style frontend       | `@nuxtjs/tailwindcss`                             | 6.14                                          |
+| Style frontend       | Tailwind CSS (`@tailwindcss/vite`)                | 4.3                                           |
 | Base relationnelle   | MariaDB                                           | 11.4                                          |
 | Base vectorielle     | Qdrant                                            | v1.19.0                                       |
 | File d'attente async | Symfony Messenger + Redis                         | 7-alpine                                      |
@@ -148,7 +148,7 @@ make rebuild SERVICE=<name>    # rebuild un seul service Docker (app, nuxt, data
 - **Classes de service `final`** (ex. `QdrantClient`, `ProviderSelectionService`) : impossible à doubler avec PHPUnit (`ClassIsFinalException`) — les tests injectent un vrai `MockHttpClient`/DBAL fake à la construction plutôt que de mocker la classe elle-même.
 - **Frontend — logique dans les composables, présentation dans les composants** : `use*.ts` (ex. `useChatbot.ts`, cœur fonctionnel) porte toute la logique métier/état, les `.vue` restent présentationnels.
 - **Le frontend ne parle jamais directement au backend depuis le navigateur** : tout passe par le proxy Nitro (`server/api/`), qui applique une **allowlist explicite** de routes (`ALLOWED_ROUTES`) et injecte l'auth Basic — ajouter un nouvel appel API côté widget veut dire l'ajouter à cette allowlist.
-- **Thème clair/sombre par tokens CSS**, pas de hex figés (`assets/css/main.css`, pattern shadcn/ui — variables RGB consommées via `rgb(var(--x) / <alpha-value>)` dans Tailwind).
+- **Thème clair/sombre par tokens CSS**, pas de hex figés : le design system maxime.bzh vit dans `assets/css/main.css` (variables `--bg`, `--ink`, `--gold`… exposées à Tailwind v4 via `@theme inline`, thème nuit sur `[data-theme='night']`). Le backoffice `/admin` (`backend/assets/styles/app.css`) reprend les mêmes tokens en clair uniquement, avec un rouge destructif et un anneau de focus plus foncés pour le contraste (recompiler avec `tailwind:build`).
 - **i18n** : toute chaîne visible vit dans `i18n/locales/fr.json`, jamais en dur dans un composant, même s'il n'existe qu'une seule locale aujourd'hui.
 
 ## 5. Points d'attention
