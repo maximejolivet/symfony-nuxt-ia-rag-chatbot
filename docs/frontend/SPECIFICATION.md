@@ -177,6 +177,8 @@ Sections :
 
 **Astuce de découverte** : bandeau discret ("💡 Tape `/` pour les commandes rapides…, ou Cmd/Ctrl+K…") affiché une seule fois, tous visiteurs/sessions confondus (`localStorage`, clé `chatbot:hint_seen`), après la toute première réponse assistant reçue via `onMessage` — le visiteur est déjà engagé à ce moment-là, contrairement à l'ouverture du panneau où rien ne s'est encore passé. Se referme manuellement, automatiquement après 8s, ou dès que le visiteur découvre `/` par lui-même (`watch` sur `showSlashMenu`).
 
+**Mention du modèle gratuit** (`chatbot.freeModelNotice`, `data-testid="free-model-notice"`) : une ligne sous le champ de saisie, dans les deux variantes (bulle et `/chat`) — « Ce chatbot tourne sur un modèle gratuit, donc patience si la réponse tarde. Si rien ne vient, essayez de renvoyer votre question. » Placée sous le champ et non dans l'écran d'accueil : celui-ci disparaît au premier message, précisément quand une réponse lente rend l'information utile. Les modèles `:free` d'OpenRouter sont sujets à des lenteurs et à des blocages (voir `docs/backend/AI_MODEL_BENCHMARK.md`).
+
 **Commande `/cv`** (remplace une carte de contact `.vcf` retirée depuis) : ouvre le vrai CV en ligne de Maxime (`https://www.maxime.bzh/cv-...pdf`) dans un nouvel onglet — lien direct vers son propre site plutôt qu'une copie re-hébergée ou générée, pour ne jamais devenir obsolète si le PDF change. La base de connaissances RAG contient bien un document "CV" mais c'est une extraction `.txt` pensée pour l'indexation, pas un fichier présentable à un visiteur.
 
 Pas de sélecteur d'agent dans l'UI : l'agent est choisi **automatiquement** par `useChatbot` (voir §5.1) plutôt que par l'utilisateur — un choix délibéré pour un widget mono-agent (voir §1).
@@ -411,7 +413,7 @@ import { Chatbot } from '~/components/Chatbot';
 
 **Vitest** (`vitest.config.ts`, `environment: 'nuxt'` via `@nuxt/test-utils/config`) — un vrai contexte Nuxt est démarré pour chaque fichier de test, donc les imports automatiques du projet (`useState`, `useI18n`, `useRoute`, `$fetch`, composables locaux comme `useFaqs`/`useOnlineStatus`) fonctionnent dans les tests exactement comme dans l'app, sans les importer explicitement. Fichiers `*.test.ts` colocalisés avec le code testé (`composables/useChatbot.test.ts` à côté de `useChatbot.ts`, etc.) plutôt qu'un dossier `tests/` séparé.
 
-Couverture actuelle — les composables, les utilitaires `utils/` et deux composants (`SiteHeader`, `MessageBubble`), pas d'e2e navigateur :
+Couverture actuelle — les composables, les utilitaires `utils/` et trois composants (`SiteHeader`, `MessageBubble`, `Chatbot`), pas d'e2e navigateur :
 - **`useOnlineStatus`** : reflète `navigator.onLine`, réagit aux events `online`/`offline`, arrête de réagir après unmount.
 - **`useDebugMode`** : lecture de `?debug=1` dans l'URL, via `mockNuxtImport('useRoute', ...)`.
 - **`useFaqs`** : peuple `suggestedQuestions` depuis `GET /api/faqs` (mocké avec `registerEndpoint`), ne fetch qu'une fois (`hasFetched`), dégrade silencieusement en cas d'échec, état partagé entre deux appels indépendants (`useState`).
@@ -422,6 +424,7 @@ Couverture actuelle — les composables, les utilitaires `utils/` et deux compos
 - **`useChatbot` — brouillon** : restauration au montage, pas d'écrasement d'un champ déjà rempli, brouillon préservé avant une question du hero, sauvegarde à la frappe, suppression quand le champ est vidé ou le message envoyé, slash et espaces ignorés.
 - **`utils/slots.ts`**, **`utils/ics.ts`** (`slots.test.ts`, `ics.test.ts`) : extraction des créneaux selon les formes de réponse connues (et rien quand la forme est inconnue ou que ce sont les arguments de l'outil qui reviennent en écho), regroupement par jour, génération et repliement de l'`.ics`, repli de la durée.
 - **`MessageBubble`** (`components/MessageBubble.test.ts`) : puces uniquement sur la dernière bulle, hors streaming et hors carte d'identité ; événement `selectSlot` avec la date exacte de Cal.eu ; bouton calendrier et contenu du fichier téléchargé.
+- **`Chatbot`** (`components/Chatbot.test.ts`) : la mention du modèle gratuit sous le champ, dans les deux variantes et après le début de la conversation.
 - **`useNotificationSound`** : `muted` démarre à `false`, lit un choix persisté au montage (même schéma `localStorage` que `useColorScheme`), `toggleMuted()` bascule et persiste, `playMessageSound()` ne lève pas d'erreur pendant que `muted` est actif (le chime est simplement sauté).
 
 Deux techniques de mock spécifiques à connaître avant d'y toucher :

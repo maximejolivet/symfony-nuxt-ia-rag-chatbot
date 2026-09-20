@@ -47,6 +47,7 @@
     "micStop": "Arrêter la dictée",
     "send": "Envoyer",
     "retry": "Réessayer",
+    "freeModelNotice": "Ce chatbot tourne sur un modèle gratuit, donc patience si la réponse tarde. Si rien ne vient, essayez de renvoyer votre question.",
     "newMessage": "Nouveau message",
     "soundMute": "Couper le son des notifications",
     "soundUnmute": "Activer le son des notifications",

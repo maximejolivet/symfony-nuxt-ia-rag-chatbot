@@ -1149,6 +1149,15 @@
                 {{ inputValue.length }}
               </p>
             </div>
+            <!-- Always under the field (not in the empty state, which disappears
+              with the first message -- exactly when a slow reply makes this
+              useful): the model behind the chat is a free one. -->
+            <p
+              class="mt-2 text-center text-[11px] leading-snug text-muted-foreground"
+              data-testid="free-model-notice"
+            >
+              {{ $t('chatbot.freeModelNotice') }}
+            </p>
           </form>
         </div>
       </div>
