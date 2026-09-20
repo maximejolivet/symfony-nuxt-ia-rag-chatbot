@@ -66,11 +66,11 @@ jobs:
       - name: Diagnose Vercel credentials
         continue-on-error: true
         run: |
-          echo "VERCEL_ORG_ID length: ${#VERCEL_ORG_ID} (expected 29)"
-          echo "VERCEL_PROJECT_ID length: ${#VERCEL_PROJECT_ID} (expected 32)"
-          echo "starts with: ${VERCEL_ORG_ID:0:5} / ${VERCEL_PROJECT_ID:0:4}"
-          echo "--- token account:"; vercel whoami
-          echo "--- teams the token can see:"; vercel teams ls
+          echo "VERCEL_TOKEN length: ${#VERCEL_TOKEN} (an access token is ~24 characters)"
+          if [[ "$VERCEL_TOKEN" == eyJ* ]]; then echo "token shape: JWT (looks like an OIDC token, not an access token)"; else echo "token shape: not a JWT"; fi
+          if [[ "$VERCEL_TOKEN" =~ [[:space:]] ]]; then echo "token contains whitespace/newline"; else echo "token has no whitespace"; fi
+          echo "--- token account:"; vercel whoami || true
+          echo "--- teams the token can see:"; vercel teams ls || true
 
       - name: Pull Vercel project settings and environment variables
         run: vercel pull --yes --environment=production
