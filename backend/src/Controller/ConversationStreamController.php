@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Chat\ChatService;
+use App\Chat\EmptyLlmResponseException;
 use App\Chat\MessageSerializer;
 use App\Entity\Conversation;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -64,7 +65,13 @@ final readonly class ConversationStreamController
                 $assistantMessage = $this->chatService->sendMessage($data, $userMessage, $agentId, $onDelta, $onToolCall);
                 $this->emit(['type' => 'ai_complete', 'done' => true, ...MessageSerializer::serialize($assistantMessage)]);
             } catch (\Throwable $e) {
-                $this->emit(['type' => 'error', 'content' => $e->getMessage()]);
+                // `code` lets the widget say "the model returned nothing, try
+                // again" instead of its generic send-failure message.
+                $this->emit([
+                    'type' => 'error',
+                    'content' => $e->getMessage(),
+                    ...($e instanceof EmptyLlmResponseException ? ['code' => 'empty_response'] : []),
+                ]);
             }
 
             $this->emit(['type' => 'done', 'done' => true]);

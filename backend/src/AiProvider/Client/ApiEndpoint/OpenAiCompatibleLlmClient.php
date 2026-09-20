@@ -90,6 +90,7 @@ final readonly class OpenAiCompatibleLlmClient implements LlmClientInterface
                 'provider' => 'api_endpoint',
                 'model' => $this->model,
             ],
+            finishReason: is_string($choice['finish_reason'] ?? null) ? $choice['finish_reason'] : null,
         );
     }
 

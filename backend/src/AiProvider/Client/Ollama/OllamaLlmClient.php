@@ -79,6 +79,7 @@ final readonly class OllamaLlmClient implements LlmClientInterface
                 'provider' => 'ollama',
                 'model' => $this->model,
             ],
+            finishReason: is_string($data['done_reason'] ?? null) ? $data['done_reason'] : null,
         );
     }
 

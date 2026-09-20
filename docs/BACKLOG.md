@@ -492,6 +492,27 @@ Le widget actuel n'exploite qu'une fraction de ce que l'API backend expose déj�
         **Pas de vérification visuelle dans un vrai navigateur** (extension
         Chrome indisponible) : le rendu des puces et de la carte n'a été
         contrôlé que par les tests de composant.
+- [x] **Réponses vides de l'assistant** (2026-09-20) — signalé : des bulles
+      vides apparaissaient de temps en temps. Cause : rien ne vérifiait qu'une
+      réponse n'était pas vide. `OpenAiCompatibleLlmClient` renvoyait
+      `trim($content)` (`''` si le modèle répond `content: null`, cas déjà vécu
+      en production le 2026-09-09 avec `finish_reason: length`, voir
+      `AI_MODEL_BENCHMARK.md`), l'orchestrateur la persistait et la streamait
+      telle quelle, et le frontend affichait une bulle blanche. Correctif :
+      réessai unique avec un budget de tokens doublé, journalisation
+      (`finish_reason`, `completion_tokens`), puis `EmptyLlmResponseException`
+      (frame SSE `error` / `empty_response`, bouton « Réessayer ») ; repli
+      « Votre demande a bien été traitée. » si un outil a déjà tourné (pas de
+      double réservation possible). Le frontend retire aussi toute bulle vide
+      reçue d'un backend plus ancien. 8 tests backend et 3 tests frontend
+      ajoutés (97 et 105 au total, tous verts ; PHPStan niveau 9 et
+      PHP-CS-Fixer propres, baseline inchangé). **Non vérifié en production** :
+      la fréquence réelle des réponses vides n'a pas été mesurée (aucune donnée
+      de production consultée), et le bug n'a pas été reproduit contre un vrai
+      appel OpenRouter ; le correctif repose sur le mécanisme documenté.
+      À surveiller après déploiement : les logs `Empty LLM completion`. Le test
+      local a aussi rencontré un `HTTP 429` d'OpenRouter sur un modèle gratuit
+      (limite de débit), qui donne une erreur et non une bulle vide.
 
 ## Backend (`backend/`)
 

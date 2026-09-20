@@ -107,5 +107,6 @@
   "errors": {
     "sendFailed": "Erreur lors de l'envoi du message. Veuillez réessayer.",
     "offline": "Vous êtes hors ligne. Vérifiez votre connexion puis réessayez."
+    "emptyReply": "L'assistant n'a pas réussi à répondre (le modèle gratuit est parfois surchargé). Réessayez.",
   }
 }

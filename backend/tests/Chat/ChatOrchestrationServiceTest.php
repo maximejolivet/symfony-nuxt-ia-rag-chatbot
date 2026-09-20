@@ -11,6 +11,7 @@ use App\AiProvider\Client\ToolCall;
 use App\AiProvider\ProviderSelectionService;
 use App\Chat\ChatOrchestrationService;
 use App\Chat\ChatReplyResult;
+use App\Chat\EmptyLlmResponseException;
 use App\Chat\FaqAnswerMatcher;
 use App\Chat\RagContextService;
 use App\Entity\AiAgent;
@@ -47,6 +48,9 @@ final class FakeLlmClient implements LlmClientInterface
 
     private int $completeCallCount = 0;
 
+    /** @var int[] the maxTokens of every complete() call, in order */
+    public array $completeMaxTokens = [];
+
     /**
      * @param string[]           $streamChunks
      * @param CompletionResult[] $completionResults returned in order by successive
@@ -63,6 +67,7 @@ final class FakeLlmClient implements LlmClientInterface
     public function complete(array $messages, ?array $tools = null, float $temperature = 0.7, int $maxTokens = 3000): CompletionResult
     {
         $this->lastMessages = $messages;
+        $this->completeMaxTokens[] = $maxTokens;
 
         if ([] !== $this->completionResults) {
             $index = min($this->completeCallCount, count($this->completionResults) - 1);
@@ -146,7 +151,7 @@ final class ChatOrchestrationServiceTest extends TestCase
         $faqRepository = $this->createStub(FaqRepository::class);
         $faqRepository->method('findActive')->willReturn($faqs);
 
-        return new ChatOrchestrationService($providerSelection, $ragContextService, $workflowExecutionService, new FaqAnswerMatcher($faqRepository));
+        return new ChatOrchestrationService($providerSelection, $ragContextService, $workflowExecutionService, new FaqAnswerMatcher($faqRepository), $this->createStub(LoggerInterface::class));
     }
 
     /**
@@ -370,5 +375,150 @@ final class ChatOrchestrationServiceTest extends TestCase
         // complete() call that produces the final answer.
         self::assertSame(['planifier_entretien'], $toolCalls);
         self::assertSame('Entretien confirmé.', $result->content);
+    }
+
+    /**
+     * An agent with an active workflow: it has tools, so replies take the
+     * buffered path (never the token stream) even with an onDelta callback.
+     */
+    private function agentWithTool(): AiAgent
+    {
+        $workflow = new Workflow()->setName('planifier_entretien')->setStatus(WorkflowStatus::Active);
+        $agent = new AiAgent();
+        $agent->addWorkflow($workflow);
+        new \ReflectionProperty(AiAgent::class, 'id')->setValue($agent, 1);
+
+        return $agent;
+    }
+
+    private static function completion(string $content): CompletionResult
+    {
+        return new CompletionResult(new ChatMessage(role: 'assistant', content: $content), ['completion_tokens' => 0], 'length');
+    }
+
+    public function testAnEmptyCompletionIsRetriedOnceWithADoubledTokenBudget(): void
+    {
+        $client = new FakeLlmClient(completionResults: [self::completion(''), self::completion('Bonjour !')]);
+        $delivered = [];
+
+        $result = $this->orchestrate($this->service(), $client, agent: $this->agentWithTool(), onDelta: function (string $chunk) use (&$delivered): void {
+            $delivered[] = $chunk;
+        });
+
+        self::assertSame('Bonjour !', $result->content);
+        self::assertSame([1500, 3000], $client->completeMaxTokens);
+        // The visitor never sees the blank first attempt.
+        self::assertSame(['Bonjour !'], $delivered);
+    }
+
+    public function testAWhitespaceOnlyCompletionCountsAsEmpty(): void
+    {
+        $client = new FakeLlmClient(completionResults: [self::completion("  \n "), self::completion('Réponse')]);
+
+        $result = $this->orchestrate($this->service(), $client);
+
+        self::assertSame('Réponse', $result->content);
+        self::assertCount(2, $client->completeMaxTokens);
+    }
+
+    public function testAReplyThatIsStillEmptyAfterTheRetryIsAnErrorNotABlankMessage(): void
+    {
+        $client = new FakeLlmClient(completionResults: [self::completion(''), self::completion('')]);
+        $delivered = [];
+
+        try {
+            $this->orchestrate($this->service(), $client, agent: $this->agentWithTool(), onDelta: function (string $chunk) use (&$delivered): void {
+                $delivered[] = $chunk;
+            });
+            self::fail('Expected an EmptyLlmResponseException.');
+        } catch (EmptyLlmResponseException $e) {
+            self::assertSame(503, $e->getStatusCode());
+        }
+
+        self::assertSame([], $delivered);
+        self::assertCount(2, $client->completeMaxTokens, 'one retry only, never a loop');
+    }
+
+    public function testAnAnswerThatIsNotEmptyIsNotRetried(): void
+    {
+        $client = new FakeLlmClient(completionResults: [self::completion('Tout de suite.')]);
+
+        $this->orchestrate($this->service(), $client);
+
+        self::assertSame([1500], $client->completeMaxTokens);
+    }
+
+    public function testACompletionThatOnlyCarriesToolCallsIsNotTreatedAsEmpty(): void
+    {
+        $toolOnly = new CompletionResult(
+            new ChatMessage(role: 'assistant', content: '', toolCalls: [new ToolCall(id: 'c1', name: 'unknown_tool', arguments: [])]),
+            [],
+        );
+        $client = new FakeLlmClient(completionResults: [$toolOnly, self::completion('Fini.')]);
+
+        $result = $this->orchestrate($this->service(), $client, agent: $this->agentWithTool());
+
+        self::assertSame('Fini.', $result->content);
+        // No retry between the tool request and the final answer.
+        self::assertSame([1500, 1500], $client->completeMaxTokens);
+    }
+
+    public function testAnEmptyStreamFallsBackToOneBufferedCompletionWithMoreRoom(): void
+    {
+        $client = new FakeLlmClient(completionResult: self::completion('Salut !'), streamChunks: []);
+        $delivered = [];
+
+        $result = $this->orchestrate($this->service(), $client, onDelta: function (string $chunk) use (&$delivered): void {
+            $delivered[] = $chunk;
+        });
+
+        self::assertSame('Salut !', $result->content);
+        self::assertSame(['Salut !'], $delivered);
+        self::assertSame([3000], $client->completeMaxTokens);
+    }
+
+    public function testAnEmptyStreamThatStaysEmptyIsAnError(): void
+    {
+        $client = new FakeLlmClient(completionResult: self::completion(''), streamChunks: []);
+
+        $this->expectException(EmptyLlmResponseException::class);
+
+        $this->orchestrate($this->service(), $client, onDelta: static function (): void {});
+    }
+
+    public function testAnEmptyAnswerAfterAToolRanFallsBackInsteadOfFailingSoARetryCannotBookTwice(): void
+    {
+        $workflow = new Workflow()->setName('planifier_entretien')->setStatus(WorkflowStatus::Active);
+        new \ReflectionProperty(Workflow::class, 'id')->setValue($workflow, 42);
+        $agent = new AiAgent();
+        $agent->addWorkflow($workflow);
+        new \ReflectionProperty(AiAgent::class, 'id')->setValue($agent, 1);
+
+        $workflowRepository = $this->createStub(WorkflowRepository::class);
+        $workflowRepository->method('getActive')->willReturn($workflow);
+        $workflowStepRepository = $this->createStub(WorkflowStepRepository::class);
+        $workflowStepRepository->method('findActiveOrdered')->willReturn([]);
+
+        $toolCallRequest = new CompletionResult(
+            new ChatMessage(
+                role: 'assistant',
+                content: '',
+                toolCalls: [new ToolCall(id: 'call_1', name: 'planifier_entretien', arguments: ['start_time' => '2026-09-01T10:00:00'])],
+            ),
+            [],
+        );
+        $client = new FakeLlmClient(completionResults: [$toolCallRequest, self::completion(''), self::completion('')]);
+
+        $result = $this->orchestrate(
+            $this->service(workflowRepository: $workflowRepository, workflowStepRepository: $workflowStepRepository),
+            $client,
+            agent: $agent,
+        );
+
+        // The booking workflow already ran: an exception here would surface a
+        // "Réessayer" that runs it a second time.
+        self::assertSame('Votre demande a bien été traitée.', $result->content);
+        self::assertCount(1, $result->toolCalls);
+        self::assertSame([1500, 1500, 3000], $client->completeMaxTokens);
     }
 }

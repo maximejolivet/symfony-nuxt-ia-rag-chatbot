@@ -280,6 +280,70 @@ describe('useChatbot: sendMessage happy path', () => {
     wrapper.unmount();
   });
 
+  it('shows a specific message when the model returned nothing (error frame code empty_response)', async () => {
+    stubStreamFetch([
+      sseFrame({
+        type: 'error',
+        content: 'The AI model returned an empty response.',
+        code: 'empty_response',
+      }),
+    ]);
+
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+    await chatbot.sendMessage('Salut');
+
+    expect(chatbot.error.value).toBe(
+      "L'assistant n'a pas réussi à répondre (le modèle gratuit est parfois surchargé). Réessayez.",
+    );
+    expect(chatbot.messages.value).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it('never keeps a blank assistant bubble when an older backend streams nothing', async () => {
+    stubStreamFetch([
+      sseFrame({ type: 'delta', content: '' }),
+      sseFrame({
+        type: 'ai_complete',
+        id: 5,
+        content: '',
+        created_at: '2026-08-22T10:00:00+00:00',
+        metadata: {},
+      }),
+      sseFrame({ type: 'done' }),
+    ]);
+
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+    await chatbot.sendMessage('Salut');
+
+    expect(chatbot.messages.value).toHaveLength(1); // the user message only
+    expect(chatbot.error.value).toContain("n'a pas réussi à répondre");
+    expect(chatbot.isLoading.value).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('keeps a reply with no text when a tool ran (e.g. the booking card)', async () => {
+    stubStreamFetch([
+      sseFrame({
+        type: 'ai_complete',
+        id: 6,
+        content: '',
+        created_at: '2026-08-22T10:00:00+00:00',
+        metadata: {
+          tool_calls: [
+            { tool: 'planifier_entretien', arguments: {}, status: 'completed', output: {} },
+          ],
+        },
+      }),
+    ]);
+
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+    await chatbot.sendMessage('Salut');
+
+    expect(chatbot.messages.value).toHaveLength(2);
+    expect(chatbot.error.value).toBeNull();
+    wrapper.unmount();
+  });
+
   it('sets a generic error when the stream request itself fails (non-ok response)', async () => {
     stubStreamFetch([], { ok: false, status: 500 });
 

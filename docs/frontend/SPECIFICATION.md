@@ -246,6 +246,8 @@ Composable Vue exposant tout l'état et les actions nécessaires à un composant
 
 **Principales actions exposées** (liste non exhaustive — voir le fichier source pour le reste) :
 | Fonction                                | Rôle                                                                                                                          |
+**Réponse vide de l'assistant** : jamais de bulle blanche. Une frame `error` de code `empty_response` (le modèle n'a rien renvoyé, voir `docs/backend/SPECIFICATION.md` §5.3) affiche `errors.emptyReply` avec le bouton « Réessayer », au lieu du message générique d'échec d'envoi. Filet de sécurité côté frontend pour un backend plus ancien (les deux se déploient séparément) : si le flux se termine sans texte et sans appel d'outil, la bulle vide est retirée et la même erreur s'affiche. Une réponse sans texte mais avec un outil exécuté (la carte de réservation) est conservée.
+
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `sendMessage(content)`                   | Push optimiste du message utilisateur, puis délègue à `requestAssistantReply()`                                                  |
 | `requestAssistantReply(content)`         | Lit le flux SSE de `/stream`, construit la bulle assistant en direct depuis les frames `delta`, complète depuis `ai_complete`    |

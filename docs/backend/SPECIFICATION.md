@@ -347,6 +347,8 @@ Chaque appel d'outil est tracé dans `toolTrace` (nom, arguments, statut, sortie
 **Prompt système par défaut** (`ChatOrchestrationService::DEFAULT_SYSTEM_PROMPT`) :
 > *« Tu es un assistant IA utile et bienveillant... Tu réponds en français, de façon claire et concise... Utilise les documents pertinents fournis en contexte... Si tu ne connais pas la réponse, dis-le honnêtement. »*
 
+**Réponse vide du modèle.** Un modèle gratuit à raisonnement caché (`liquid/lfm-2.5-2.6b:free`, voir `docs/backend/AI_MODEL_BENCHMARK.md` §Le piège du raisonnement caché) peut renvoyer un contenu vide quand ce raisonnement consomme tout le budget de tokens (`finish_reason: length`, `content: null`). `ChatOrchestrationService` ne laisse plus passer une réponse blanche : une complétion sans texte ni appel d'outil est **réessayée une fois avec un budget doublé** (`CHAT_MAX_TOKENS` × 2, `EMPTY_RETRY_TOKEN_FACTOR`), un flux (streaming) qui n'a rien émis retombe sur une complétion bufferisée avec ce même budget, et chaque tentative vide est journalisée (`finish_reason`, `completion_tokens`, modèle). Toujours vide après le réessai : `App\Chat\EmptyLlmResponseException` (503, aucune réponse persistée), que `ConversationStreamController` transforme en frame SSE `error` avec `code: "empty_response"`. **Exception** : si un outil a déjà été exécuté (une réservation existe peut-être), l'erreur est remplacée par le message neutre « Votre demande a bien été traitée. » — échouer ici inviterait un « Réessayer » qui réserverait une seconde fois. `CompletionResult` porte pour cela un `finishReason` optionnel, renseigné par les clients OpenAI-compatible et Ollama.
+
 ### 5.4 Points d'entrée de la conversation — `ChatService`
 
 Une façade à deux modes :

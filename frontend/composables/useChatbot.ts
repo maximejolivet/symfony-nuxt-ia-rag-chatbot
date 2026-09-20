@@ -460,6 +460,7 @@ export const useChatbot = ({ apiUrl = '/api/chat', onMessage }: UseChatbotProps 
       let buffer = '';
       let assistantPayload: any = null;
       let streamError: string | null = null;
+      let streamErrorCode: string | null = null;
       let liveMessage: Message | null = null;
 
       while (true) {
@@ -498,11 +499,29 @@ export const useChatbot = ({ apiUrl = '/api/chat', onMessage }: UseChatbotProps 
             liveMessage.content += payload.content;
           }
           if (payload.type === 'ai_complete') assistantPayload = payload;
-          if (payload.type === 'error') streamError = payload.content;
+          if (payload.type === 'error') {
+            streamError = payload.content;
+            streamErrorCode = payload.code ?? null;
+          }
         }
       }
 
-      if (streamError) throw new Error(streamError);
+      if (streamError) throw Object.assign(new Error(streamError), { code: streamErrorCode });
+
+      // Never leave a blank assistant bubble. Current backends answer an empty
+      // model reply with an `error` frame (code `empty_response`, handled
+      // above); this covers one that still streams nothing (frontend and
+      // backend deploy separately). A reply that only ran a tool (a booking
+      // card, say) is not blank.
+      if (
+        !(assistantPayload?.content || liveMessage?.content || '').trim() &&
+        !assistantPayload?.metadata?.tool_calls?.length
+      ) {
+        if (liveMessage) {
+          state.value.messages.splice(state.value.messages.indexOf(liveMessage), 1);
+        }
+        throw Object.assign(new Error('Empty assistant reply'), { code: 'empty_response' });
+      }
 
       if (liveMessage) {
         liveMessage.id = String(assistantPayload?.id ?? liveMessage.id);
@@ -551,7 +570,12 @@ export const useChatbot = ({ apiUrl = '/api/chat', onMessage }: UseChatbotProps 
       if (error instanceof DOMException && 'AbortError' === error.name) return;
 
       console.error("Erreur lors de l'envoi du message:", error);
-      state.value.error = isOnline.value ? t('errors.sendFailed') : t('errors.offline');
+      state.value.error =
+        'empty_response' === (error as { code?: unknown } | null)?.code
+          ? t('errors.emptyReply')
+          : isOnline.value
+            ? t('errors.sendFailed')
+            : t('errors.offline');
     } finally {
       activeRequest = null;
       activeToolCall.value = null;
