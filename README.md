@@ -90,6 +90,90 @@ symfony-nuxt-ia-rag-chatbot/
 
 Détail de l'architecture backend (entités, services, domaines métier) dans [`backend/README.md`](backend/README.md).
 
+### Vue d'ensemble des flux
+
+```mermaid
+flowchart TD
+    user(("Utilisateur"))
+
+    subgraph ux["Expérience utilisateur"]
+        client["Client Nuxt<br/>[Chatbot.vue]"]
+        flux["Flux conversation"]
+    end
+
+    subgraph chat["Chat métier"]
+        orchestration["Orchestration chat"]
+        rag["Contexte RAG"]
+        faq["Réponses FAQ"]
+        workflow["Exécution workflow"]
+    end
+
+    subgraph kb["Base de connaissances"]
+        traitement["Traitement documents"]
+        collections["Collections"]
+        indexation["Indexation documents"]
+        recherche["Recherche vectorielle"]
+        embeddings["Génération embeddings"]
+        qdrant[("Index Qdrant")]
+    end
+
+    subgraph admin["Administration métier"]
+        backoffice["Backoffice Symfony"]
+        relationnel[("Données relationnelles")]
+        apiWorkflows["API workflows"]
+    end
+
+    subgraph ia["Fournisseurs IA"]
+        selection["Sélection provider"]
+        fallback["Fallback LLM"]
+        ollama{{"Ollama"}}
+        openai{{"Endpoint OpenAI"}}
+    end
+
+    user -->|pose question| client
+    client -->|envoie message| flux
+    client -->|reçoit flux| flux
+    flux -->|restitue réponse| client
+    flux -->|oriente chat| orchestration
+
+    orchestration -->|construit contexte| rag
+    orchestration -->|cherche FAQ| faq
+    orchestration -->|exécute outil| workflow
+    orchestration -->|demande LLM| selection
+
+    rag -->|recherche vecteurs| recherche
+    rag -->|résout collection| collections
+    workflow -->|persiste exécution| relationnel
+
+    traitement -->|transmet contenu| indexation
+    indexation -->|vectorise texte| embeddings
+    embeddings -->|écrit vecteurs| qdrant
+    recherche -->|lit index| qdrant
+    embeddings -->|résout embeddings| selection
+
+    backoffice -->|gère données| relationnel
+    backoffice -->|configure providers| selection
+    apiWorkflows -->|déclenche workflow| workflow
+
+    selection -->|résout clients| fallback
+    fallback -->|appelle modèle| ollama
+    fallback -.->|bascule modèle| openai
+
+    classDef person fill:#e0e7ff,stroke:#4f46e5,color:#1e1b4b
+    classDef uxNode fill:#dbeafe,stroke:#2563eb,color:#1e1b4b
+    classDef chatNode fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef kbNode fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef adminNode fill:#ffe4e6,stroke:#e11d48,color:#881337
+    classDef iaNode fill:#e0e7ff,stroke:#4f46e5,color:#1e1b4b
+
+    class user person
+    class client,flux uxNode
+    class orchestration,rag,faq,workflow chatNode
+    class traitement,collections,indexation,recherche,embeddings,qdrant kbNode
+    class backoffice,relationnel,apiWorkflows adminNode
+    class selection,fallback,ollama,openai iaNode
+```
+
 ## Tool-calling
 
 Un `Workflow` associé à un `AiAgent` devient un outil que le LLM peut appeler pendant la conversation : le modèle décide d'invoquer l'outil, le workflow s'exécute (synchrone), son résultat est réinjecté dans la conversation, et le modèle formule sa réponse finale en tenant compte du résultat.
