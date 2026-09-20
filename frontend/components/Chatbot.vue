@@ -1001,13 +1001,13 @@
               <!-- Barre pilule (plein écran, cf. capture goria.ai/chat) -->
               <div v-if="variant === 'page'" class="flex items-center gap-2">
                 <div
-                  class="flex flex-1 items-center gap-1 rounded-3xl bg-card pl-5 pr-2 shadow-lg shadow-foreground/10 transition-shadow focus-within:shadow-xl focus-within:ring-2 focus-within:ring-accent-ink"
+                  class="flex flex-1 items-center gap-1 rounded-3xl bg-card pl-3 pr-2 shadow-lg shadow-foreground/10 transition-shadow focus-within:shadow-xl focus-within:ring-2 focus-within:ring-accent-ink"
                 >
                   <button
                     type="button"
                     @click="toggleEmojiPicker"
                     :aria-label="$t('chatbot.insertEmoji')"
-                    class="flex h-11 w-11 shrink-0 items-center justify-center text-lg text-muted-foreground transition-colors hover:text-accent-ink"
+                    class="flex h-11 w-9 shrink-0 items-center justify-center text-lg text-muted-foreground transition-colors hover:text-accent-ink"
                   >
                     🙂
                   </button>
