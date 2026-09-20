@@ -209,14 +209,34 @@
           </button>
         </div>
       </div>
+      <div v-if="showSlots" role="group" :aria-label="$t('messageBubble.slotsLabel')" class="mt-2 flex flex-col gap-2">
+        <div v-for="day in slotDays" :key="day.key">
+          <p class="mb-1 font-mono text-[11px] capitalize text-muted-foreground">{{ day.dayLabel }}</p>
+          <div class="flex flex-wrap gap-1.5">
+            <button v-for="slot in day.slots" :key="slot.iso" type="button"
+              class="min-h-11 rounded-full border border-border bg-background px-4 py-2 font-mono text-sm text-foreground transition-colors hover:border-accent-ink hover:bg-accent/10 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink"
+              :aria-label="$t('messageBubble.slotOption', { label: slot.fullLabel })"
+              @click="emit('selectSlot', slot.iso, slot.fullLabel)">
+              {{ slot.timeLabel }}
+            </button>
+          </div>
+        </div>
+      </div>
       <div v-if="bookingConfirmation"
-        class="mt-2 flex animate-celebrate items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 motion-reduce:animate-none">
-        <span class="text-base">✅</span>
-        <p class="font-mono text-xs text-card-foreground">
-          {{ $t('messageBubble.interviewConfirmed', { name: bookingConfirmation.attendeeName })
-          }}<br />
-          {{ bookingConfirmation.label }}
-        </p>
+        class="mt-2 animate-celebrate rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 motion-reduce:animate-none">
+        <div class="flex items-center gap-2">
+          <span class="text-base">✅</span>
+          <p class="font-mono text-xs text-card-foreground">
+            {{ $t('messageBubble.interviewConfirmed', { name: bookingConfirmation.attendeeName })
+            }}<br />
+            {{ bookingConfirmation.label }}
+          </p>
+        </div>
+        <button v-if="bookingConfirmation.calendar" type="button"
+          class="mt-2 min-h-11 rounded-full border border-accent/40 bg-background px-4 py-2 font-mono text-xs font-semibold text-foreground transition-colors hover:border-accent-ink hover:bg-accent/10 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink"
+          @click="addToCalendar">
+          📅 {{ $t('messageBubble.addToCalendar') }}
+        </button>
       </div>
       <p v-if="debugMode && message.tokenUsage" class="mt-1.5 font-mono text-[10px] text-muted-foreground"
         :title="$t('messageBubble.debugModeHint')">
@@ -232,6 +252,8 @@
 import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 import type { InterviewBookingSubmission, Message } from '../types/index';
+import { buildIcs, downloadIcs, resolveEventEnd } from '../utils/ics';
+import { extractSlots, groupSlotsByDay } from '../utils/slots';
 
 interface Props {
   message: Message;
@@ -266,6 +288,9 @@ const emit = defineEmits<{
   regenerate: [];
   identity: [submission: InterviewBookingSubmission];
   email: [submission: InterviewBookingSubmission];
+  // A slot chip was picked: the datetime as Cal.eu returned it, plus the
+  // French label shown to the visitor (Chatbot.vue turns both into a message).
+  selectSlot: [iso: string, label: string];
 }>();
 
 const { isSupported: speechSupported } = useSpeechSynthesis();
@@ -550,17 +575,80 @@ const bookingConfirmation = computed(() => {
   const args = call?.arguments as { start_time?: string; attendee_name?: string } | undefined;
   if (!args?.start_time || !args?.attendee_name) return null;
 
+  const start = new Date(args.start_time);
+  // Cal.eu's booking response carries the real end (the event type is offered
+  // in 30 and 60 minutes); resolveEventEnd validates it and falls back to 1h.
+  const rawEnd = (call?.output as { response_data?: { data?: { end?: unknown } } } | undefined)
+    ?.response_data?.data?.end;
+
   return {
     attendeeName: args.attendee_name,
-    label: new Date(args.start_time).toLocaleString('fr-FR', {
+    label: start.toLocaleString('fr-FR', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       hour: '2-digit',
       minute: '2-digit',
     }),
+    // Only offered for a parseable start -- an invalid Date would produce a
+    // corrupt .ics.
+    calendar: Number.isNaN(start.getTime()) ? null : { start, end: resolveEventEnd(start, rawEnd) },
   };
 });
+
+// "Ajouter à mon calendrier": a single-event .ics built in the browser. The
+// UID is derived from the start time, so importing it twice updates the same
+// entry instead of duplicating it.
+const addToCalendar = () => {
+  const calendar = bookingConfirmation.value?.calendar;
+  if (!calendar) return;
+
+  downloadIcs(
+    buildIcs({
+      ...calendar,
+      summary: t('messageBubble.calendarEventTitle'),
+      description: t('messageBubble.calendarEventDescription'),
+      uid: `booking-${calendar.start.getTime()}@ia.maxime.bzh`,
+    }),
+    'echange-maxime-jolivet.ics',
+  );
+};
+
+// Clickable availability, built from what lister_creneaux_disponibles really
+// returned (never from the model's prose -- see BACKLOG, "Valider start_time
+// avant l'appel Cal.eu"). Same "current last assistant bubble, not
+// mid-stream" narrowing as the identity/email cards, and hidden while one of
+// those cards is the expected answer so two competing ways to reply never
+// show at once. Picking a chip sends a normal message (Chatbot.vue), after
+// which this bubble is no longer the last one and the chips disappear.
+const slotDays = computed(() => {
+  const dayFormat: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+
+  return groupSlotsByDay(extractSlots(props.message.toolCalls)).map((day) => ({
+    key: day.key,
+    dayLabel: day.date.toLocaleDateString('fr-FR', dayFormat),
+    slots: day.slots.map((slot) => ({
+      iso: slot.iso,
+      timeLabel: slot.date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      fullLabel: slot.date.toLocaleString('fr-FR', {
+        ...dayFormat,
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    })),
+  }));
+});
+
+const showSlots = computed(
+  () =>
+    slotDays.value.length > 0 &&
+    !isUser.value &&
+    !isTyping.value &&
+    Boolean(props.isLast) &&
+    !props.isStreaming &&
+    !asksForIdentity.value &&
+    !asksForEmail.value,
+);
 
 // Le LLM répond régulièrement en Markdown complet (tableaux, listes,
 // titres, gras...), pas juste du **gras** occasionnel -- marked le parse

@@ -57,6 +57,7 @@
     "assistantTyping": "L'assistant écrit une réponse…",
     "identityMessage": "Je m'appelle {firstName} {lastName}, mon email est {email}, et la date qui m'arrangerait est : {date}.",
     "identityMessageObjet": "L'objet de l'échange : {objet}.",
+    "slotChosenMessage": "Je choisis le créneau du {label} ({iso}).",
     "identityMessageVisio": "Je souhaite un échange en visioconférence.",
     "identityMessageTelephone": "Je souhaite un échange par téléphone.",
     "identityMessageTelephoneNumero": "Mon numéro de téléphone : {telephone}.",
@@ -96,6 +97,11 @@
     "feedbackNegative": "Mauvaise réponse",
     "regenerate": "Régénérer la réponse",
     "interviewConfirmed": "Échange confirmé pour {name}",
+    "addToCalendar": "Ajouter à mon calendrier",
+    "calendarEventTitle": "Échange avec Maxime Jolivet",
+    "calendarEventDescription": "Rendez-vous planifié via l'assistant IA de maxime.bzh.",
+    "slotsLabel": "Créneaux disponibles",
+    "slotOption": "Choisir le créneau du {label}",
     "debugModeHint": "Visible uniquement avec ?debug=1 dans l'URL"
   },
   "errors": {

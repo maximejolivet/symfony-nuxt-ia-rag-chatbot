@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, onMounted } from 'vue';
+import { ref, computed, nextTick, onMounted, watch } from 'vue';
 import type {
   Message,
   MessageSource,
@@ -47,6 +47,31 @@ const persistLastMessagePreview = (message: Message) => {
       ? `${message.content.slice(0, PREVIEW_MAX_LENGTH)}…`
       : message.content,
   );
+};
+
+// The message being typed, so closing the bubble or reloading the page
+// doesn't throw it away (mostly a mobile annoyance: a tab reload or an app
+// switch is enough to lose a long message). Cleared as soon as the input is
+// emptied, which is what sending a message does.
+export const DRAFT_STORAGE_KEY = 'chatbot:draft';
+
+const readDraft = (): string => {
+  try {
+    return localStorage.getItem(DRAFT_STORAGE_KEY) ?? '';
+  } catch {
+    // localStorage unavailable (private mode, disabled) -- no draft to restore.
+    return '';
+  }
+};
+
+const writeDraft = (value: string) => {
+  try {
+    // A half-typed slash command ("/th") isn't a message worth restoring.
+    if (!value.trim() || value.startsWith('/')) localStorage.removeItem(DRAFT_STORAGE_KEY);
+    else localStorage.setItem(DRAFT_STORAGE_KEY, value);
+  } catch {
+    // Drafts just don't persist for this session.
+  }
 };
 
 export const useChatbot = ({ apiUrl = '/api/chat', onMessage }: UseChatbotProps = {}) => {
@@ -620,7 +645,13 @@ export const useChatbot = ({ apiUrl = '/api/chat', onMessage }: UseChatbotProps 
   // conversation on mount. restoreConversation is awaited before flushing
   // pendingMessage so a hero-bar question lands after history is loaded,
   // not overwritten by it.
+  watch(() => state.value.inputValue, writeDraft);
+
   onMounted(async () => {
+    // Not when a hero-bar question is about to be sent: sending empties the
+    // input, which would silently discard the restored draft.
+    if (!state.value.inputValue && !pendingMessage.value) state.value.inputValue = readDraft();
+
     fetchAgents();
     checkLlmStatus();
     await restoreConversation();

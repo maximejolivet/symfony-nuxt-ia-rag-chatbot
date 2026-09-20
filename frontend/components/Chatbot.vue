@@ -680,6 +680,7 @@
                   @regenerate="regenerateLastReply"
                   @identity="onSubmitIdentity"
                   @email="onSubmitEmail"
+                  @select-slot="onSelectSlot"
                 />
               </template>
             </template>
@@ -1048,7 +1049,7 @@
                   type="submit"
                   :disabled="isLoading || awaitingIdentity || awaitingEmail || !inputValue.trim()"
                   :aria-label="$t('chatbot.send')"
-                  class="-ml-3 z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-foreground/10 transition-colors hover:bg-accent hover:text-primary-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-border"
+                  class="-ml-3 z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-foreground/10 transition-colors hover:bg-accent hover:text-primary-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-card disabled:text-muted-foreground disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-border"
                 >
                   <svg
                     v-if="isLoading"
@@ -1595,6 +1596,14 @@ const onSubmitIdentity = (submission: InterviewBookingSubmission) => {
 // MessageBubble.vue's asksForEmail.
 const onSubmitEmail = (submission: InterviewBookingSubmission) => {
   sendMessage(buildBookingMessage(submission));
+};
+
+// A slot chip (MessageBubble.vue) is one more way to say a date in plain
+// words: the visitor-facing label plus the exact datetime Cal.eu offered, so
+// the model can pass that instant to planifier_entretien without redoing a
+// timezone conversion. Same no-backend-change reasoning as onSubmitIdentity.
+const onSelectSlot = (iso: string, label: string) => {
+  sendMessage(t('chatbot.slotChosenMessage', { label, iso }));
 };
 
 // Detected here (not in MessageBubble.vue) because the main input also

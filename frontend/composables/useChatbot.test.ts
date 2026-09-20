@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { registerEndpoint, mockNuxtImport } from '@nuxt/test-utils/runtime';
 import { withSetup } from '../test/withSetup';
-import { useChatbot, CONVERSATION_ID_STORAGE_KEY, LAST_MESSAGE_PREVIEW_KEY } from './useChatbot';
+import {
+  useChatbot,
+  CONVERSATION_ID_STORAGE_KEY,
+  LAST_MESSAGE_PREVIEW_KEY,
+  DRAFT_STORAGE_KEY,
+} from './useChatbot';
 import type { ChatbotState } from '../types/index';
 
 // Real WebAudio isn't available in the test environment (happy-dom); the
@@ -753,6 +758,100 @@ describe('useChatbot: last message preview persistence', () => {
     const stored = localStorage.getItem(LAST_MESSAGE_PREVIEW_KEY);
     expect(stored).toHaveLength(121);
     expect(stored?.endsWith('…')).toBe(true);
+    wrapper.unmount();
+  });
+});
+
+describe('useChatbot: draft persistence', () => {
+  it('restores a stored draft into the input on mount', async () => {
+    localStorage.setItem(DRAFT_STORAGE_KEY, 'Un message à moitié écrit');
+
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+
+    expect(chatbot.inputValue.value).toBe('Un message à moitié écrit');
+    wrapper.unmount();
+  });
+
+  it('starts empty when there is no stored draft', async () => {
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+
+    expect(chatbot.inputValue.value).toBe('');
+    wrapper.unmount();
+  });
+
+  it('does not overwrite text already in the input (state kept across page navigation)', async () => {
+    localStorage.setItem(DRAFT_STORAGE_KEY, 'ancien brouillon');
+    useState<ChatbotState>('chatbot-state').value.inputValue = 'texte déjà saisi';
+
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+
+    expect(chatbot.inputValue.value).toBe('texte déjà saisi');
+    wrapper.unmount();
+  });
+
+  it('keeps the draft untouched when a hero-bar question is about to be sent', async () => {
+    localStorage.setItem(DRAFT_STORAGE_KEY, 'brouillon à garder');
+    useState<string | null>('chatbot-pending-message').value = null;
+    registerEndpoint('/api/conversations', { method: 'POST', handler: () => ({ id: 42 }) });
+    stubStreamFetch([sseFrame({ type: 'done' })]);
+    useState<string | null>('chatbot-pending-message').value = 'Question de la barre du hero';
+
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+    await nextTick();
+
+    expect(chatbot.inputValue.value).toBe('');
+    expect(localStorage.getItem(DRAFT_STORAGE_KEY)).toBe('brouillon à garder');
+    wrapper.unmount();
+  });
+
+  it('saves what is typed', async () => {
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+
+    chatbot.inputValue.value = 'Bonjour, je voudrais';
+    await nextTick();
+
+    expect(localStorage.getItem(DRAFT_STORAGE_KEY)).toBe('Bonjour, je voudrais');
+    wrapper.unmount();
+  });
+
+  it('removes the draft once the input is emptied', async () => {
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+
+    chatbot.inputValue.value = 'brouillon';
+    await nextTick();
+    chatbot.inputValue.value = '';
+    await nextTick();
+
+    expect(localStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
+    wrapper.unmount();
+  });
+
+  it('does not keep a half-typed slash command or a whitespace-only input', async () => {
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+
+    chatbot.inputValue.value = '/th';
+    await nextTick();
+    expect(localStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
+
+    chatbot.inputValue.value = '   ';
+    await nextTick();
+    expect(localStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
+    wrapper.unmount();
+  });
+
+  it('drops the draft when the message is sent', async () => {
+    registerEndpoint('/api/conversations', { method: 'POST', handler: () => ({ id: 42 }) });
+    stubStreamFetch([sseFrame({ type: 'done' })]);
+
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+    chatbot.inputValue.value = 'Salut';
+    await nextTick();
+    expect(localStorage.getItem(DRAFT_STORAGE_KEY)).toBe('Salut');
+
+    await chatbot.sendMessage('Salut');
+    await nextTick();
+
+    expect(localStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
     wrapper.unmount();
   });
 });
