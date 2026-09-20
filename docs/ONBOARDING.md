@@ -165,7 +165,7 @@ make rebuild SERVICE=<name>    # rebuild un seul service Docker (app, nuxt, data
 
 **Baseline PHPStan (871 lignes)** : ne contient plus de bugs de type/nullable/paramètre (nettoyé — voir `.claude/skills/phpstan/SKILL.md`), uniquement des préférences de style `phpstan-strict-rules` (casts, ternaires, comparaisons booléennes strictes). Ne pas y ajouter d'erreur nouvelle sans investiguer d'abord.
 
-**Frontend** : aucun ESLint configuré (Prettier seul) ; tests unitaires des composables, des utilitaires et de trois composants (`SiteHeader`, `MessageBubble`, `Chatbot`), pas d'e2e navigateur ; **pas de déploiement en production** pour l'instant (seul le backend a un pipeline de déploiement, voir `docs/DEPLOYMENT.md`) — le durcissement CSP existant ne protège donc encore personne en pratique.
+**Frontend** : aucun ESLint configuré (Prettier seul) ; tests unitaires des composables, des utilitaires et de trois composants (`SiteHeader`, `MessageBubble`, `Chatbot`), pas d'e2e navigateur ; déploiement en production sur Vercel via `deploy-frontend.yml`, mais **sans CI frontend** (ni lint ni tests avant le déploiement, voir `docs/DEPLOYMENT.md`).
 
 **Rector configuré mais pas branché en CI** — `composer rector:check` est un outil manuel, jamais exécuté automatiquement ; les modernisations qu'il proposerait ne sont pas garanties appliquées.
 

@@ -163,17 +163,55 @@ de ce qu'un déploiement changerait.
 
 ## Frontend (Nuxt)
 
-Déployé sur **Vercel**, projet `chatbot-skills-ia`, aliasé sur
-`https://ia.maxime.bzh` (le domaine public réel du widget/chat, distinct de
-`chatbot.jolivetmaxime.fr` qui reste uniquement l'API o2switch — voir
-`CORS_ALLOW_ORIGIN` plus haut). Les variables d'environnement (`API_URL`,
-`ADMIN_USERNAME`, `ADMIN_PASSWORD`) sont définies côté **Vercel**
-(dashboard ou `vercel env`), pour les environnements Production et Preview —
-elles ne vivent pas dans ce dépôt. Il n'existe **pas** de workflow GitHub
-Actions pour ce déploiement (contrairement au backend ci-dessus) ; le
-déclenchement effectif (auto-deploy Vercel sur push, ou `vercel deploy
---prod` manuel) dépend de la configuration du projet côté Vercel, non
-vérifiable depuis ce dépôt.
+Déployé sur **Vercel**, projet `chatbot-skills-ia` (Root Directory `frontend`,
+preset Nuxt, Node 24), aliasé sur `https://ia.maxime.bzh` (le domaine public
+réel du widget/chat, distinct de `chatbot.jolivetmaxime.fr` qui reste
+uniquement l'API o2switch — voir `CORS_ALLOW_ORIGIN` plus haut). Les
+variables d'environnement (`API_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`)
+sont définies côté **Vercel** (dashboard ou `vercel env`), pour les
+environnements Production et Preview — elles ne vivent pas dans ce dépôt.
+
+La production est déployée par
+[`.github/workflows/deploy-frontend.yml`](../.github/workflows/deploy-frontend.yml),
+déclenché par un push sur `master` touchant `frontend/**` (ou manuellement,
+`workflow_dispatch`). Même enchaînement que le guide GitHub Actions de
+Vercel : `vercel pull` (réglages + variables du projet), `vercel build --prod`
+sur le runner, puis `vercel deploy --prebuilt --prod`. La CLI est lancée
+depuis la **racine du dépôt** et non depuis `frontend/` : le Root Directory du
+projet est déjà `frontend`, la lancer depuis ce dossier chercherait
+`frontend/frontend`. Ce workflow n'exécute ni lint ni tests (contrairement au
+backend, il n'y a pas de CI frontend) : un push sur `master` part en
+production.
+
+Pour éviter un double déploiement (Vercel + Actions), l'auto-deploy Git de
+Vercel est coupé pour `master` par [`frontend/vercel.json`](../frontend/vercel.json)
+(`git.deploymentEnabled`). Les autres branches gardent les déploiements
+*preview* habituels de Vercel.
+
+### Secrets requis (Settings > Secrets and variables > Actions)
+
+| Secret              | Description                                                                                                           |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`      | Jeton d'accès Vercel dédié au déploiement (vercel.com > Account Settings > Tokens), pas un jeton personnel réutilisé |
+| `VERCEL_ORG_ID`     | Identifiant de l'équipe/compte propriétaire du projet (`orgId` de `.vercel/project.json` après `vercel link`)          |
+| `VERCEL_PROJECT_ID` | Identifiant du projet `chatbot-skills-ia` (`projectId` du même fichier)                                                |
+
+```bash
+gh secret set VERCEL_TOKEN        # saisie interactive masquée, rien dans l'historique du shell
+gh secret set VERCEL_ORG_ID -b"team_..."
+gh secret set VERCEL_PROJECT_ID -b"prj_..."
+```
+
+> [!WARNING]
+> Les trois secrets doivent exister **avant** de pousser `deploy-frontend.yml`
+> et `frontend/vercel.json` sur `master` : ce push coupe l'auto-deploy Vercel
+> de `master`, et sans secrets le workflow échoue — plus aucun déploiement
+> de production ne partirait. Pour revenir en arrière, supprimer
+> `frontend/vercel.json` (l'auto-deploy Vercel reprend au push suivant).
+
+Le workflow a été validé en local (`vercel pull` puis `vercel build --prod`
+depuis la racine d'un clone, avec le vrai projet lié) ; l'étape
+`vercel deploy` elle-même n'a pas été exécutée hors de GitHub Actions.
 
 En local, le frontend tourne uniquement via `docker compose` (service
 `nuxt`, voir [`README.md`](../README.md)) ou `npm run dev` (voir
