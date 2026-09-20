@@ -244,10 +244,10 @@ Composable Vue exposant tout l'état et les actions nécessaires à un composant
 
 **Brouillon conservé** (`DRAFT_STORAGE_KEY` = `chatbot:draft`) : le texte en cours de saisie est écrit dans `localStorage` à chaque modification de `inputValue` et restauré au montage, pour qu'un rechargement ou une bulle refermée ne fasse pas perdre un long message. Effacé dès que le champ est vidé (ce que fait l'envoi). Non restauré si un champ est déjà rempli (état `useState` conservé entre `/` et `/chat`) ni si une question de la barre du hero est sur le point d'être envoyée (l'envoi vide le champ et détruirait le brouillon) ; une commande slash à moitié tapée (`/th…`) et une saisie faite d'espaces ne sont pas mémorisées. `localStorage` indisponible : ignoré sans erreur.
 
-**Principales actions exposées** (liste non exhaustive — voir le fichier source pour le reste) :
-| Fonction                                | Rôle                                                                                                                          |
 **Réponse vide de l'assistant** : jamais de bulle blanche. Une frame `error` de code `empty_response` (le modèle n'a rien renvoyé, voir `docs/backend/SPECIFICATION.md` §5.3) affiche `errors.emptyReply` avec le bouton « Réessayer », au lieu du message générique d'échec d'envoi. Filet de sécurité côté frontend pour un backend plus ancien (les deux se déploient séparément) : si le flux se termine sans texte et sans appel d'outil, la bulle vide est retirée et la même erreur s'affiche. Une réponse sans texte mais avec un outil exécuté (la carte de réservation) est conservée.
 
+**Principales actions exposées** (liste non exhaustive — voir le fichier source pour le reste) :
+| Fonction                                | Rôle                                                                                                                          |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `sendMessage(content)`                   | Push optimiste du message utilisateur, puis délègue à `requestAssistantReply()`                                                  |
 | `requestAssistantReply(content)`         | Lit le flux SSE de `/stream`, construit la bulle assistant en direct depuis les frames `delta`, complète depuis `ai_complete`    |
