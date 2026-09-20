@@ -59,6 +59,19 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@59
 
+      # TEMPORARY: the first run failed at `vercel pull` with "Could not
+      # retrieve Project Settings". Prints only non-sensitive facts (lengths,
+      # the account the token belongs to, the teams it can see) to tell a
+      # mistyped ID from a token without access to the team. Remove once fixed.
+      - name: Diagnose Vercel credentials
+        continue-on-error: true
+        run: |
+          echo "VERCEL_ORG_ID length: ${#VERCEL_ORG_ID} (expected 29)"
+          echo "VERCEL_PROJECT_ID length: ${#VERCEL_PROJECT_ID} (expected 32)"
+          echo "starts with: ${VERCEL_ORG_ID:0:5} / ${VERCEL_PROJECT_ID:0:4}"
+          echo "--- token account:"; vercel whoami
+          echo "--- teams the token can see:"; vercel teams ls
+
       - name: Pull Vercel project settings and environment variables
         run: vercel pull --yes --environment=production
 
