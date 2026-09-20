@@ -28,13 +28,13 @@ Une vraie photo de Maxime (`public/maximejolivet.jpg`) sert d'avatar partout où
 | Framework             | **Nuxt 4.5**                                                                                                             | SSR + routage fichier + serveur Nitro intégré                                                                                    |
 | Bundler / dev server  | **Vite 8.2** (via Nuxt)                                                                                                  |                                                                                                                                  |
 | UI                    | **Vue 3.5** (Composition API, `<script setup>`)                                                                          |                                                                                                                                  |
-| Style                 | **`@nuxtjs/tailwindcss` 6.14** (Tailwind CSS)                                                                            | Thème custom (`tailwind.config.js`), classes utilitaires (`assets/css/main.css`)                                                 |
+| Style                 | **Tailwind CSS 4.3** (`@tailwindcss/vite`)                                                                               | Configuré en CSS : `@import 'tailwindcss'` + tokens `@theme inline` dans `assets/css/main.css`, pas de `tailwind.config.js`      |
 | Images                | **`@nuxt/image` 2.1**                                                                                                   | `<NuxtImg>` (optimisation/format `webp`) pour l'avatar photo (`public/maximejolivet.jpg`), utilisé à la place d'un `<img>` brut  |
 | Langage               | **TypeScript 7.0**                                                                                                       |                                                                                                                                  |
-| HTTP client (déclaré) | **axios 1.19**                                                                                                           | Présent en dépendance mais **non utilisé dans le code actuel** — les appels réseau passent tous par `$fetch` (natif Nuxt/ofetch) |
+| HTTP client (déclaré) | **axios 1.20**                                                                                                           | Présent en dépendance mais **non utilisé dans le code actuel** — les appels réseau passent tous par `$fetch` (natif Nuxt/ofetch) |
 | Emojis                | **`unicode-emoji-json` 0.9**                                                                                             | Données statiques (par groupe) pour le sélecteur d'emoji du composant `Chatbot`                                                  |
 | i18n                  | **`@nuxtjs/i18n` 10.6** (vue-i18n 11)                                                                                    | Une seule locale active (`fr`) pour l'instant — infrastructure prête pour une 2ᵉ langue, voir §8.7                               |
-| Tests                 | **Vitest 4** + **`@nuxt/test-utils` 4.1** + **`@vue/test-utils`** (environnement `nuxt`, `happy-dom`)                    | Tests unitaires des composables — voir §8.6                                                                                      |
+| Tests                 | **Vitest 4** + **`@nuxt/test-utils` 4.1** + **`@vue/test-utils`** (environnement `nuxt`, `happy-dom`)                    | Tests unitaires des composables — voir §8.7                                                                                      |
 | Formatage             | **Prettier 3.9** (`.prettierrc.json` : single quotes, semicolons, `printWidth: 100`)                                     |                                                                                                                                  |
 | Devtools              | **`@nuxt/devtools`**                                                                                                     |                                                                                                                                  |
 | Conteneurisation      | Servi comme service `nuxt` dans `backend/compose.yaml` (image `node:24-alpine`, build + `node .output/server/index.mjs`) | Pas de `Dockerfile` propre à ce projet                                                                                           |
@@ -53,23 +53,30 @@ frontend/
 │                                 # pour toute l'app (composables/useColorScheme.ts, §4.2), pas de widget monté ici
 ├── pages/
 │   ├── index.vue                 # Page d'accueil (hero, portrait, HeroChatBar, StickyChatBubble)
-│   └── chat.vue                  # Page plein écran /chat (<Chatbot variant="page" />)
+│   ├── chat.vue                  # Page plein écran /chat (<Chatbot variant="page" />)
+│   └── embed.vue                 # /embed : monte seulement <StickyChatBubble embedded />, chargée en iframe par public/widget.js
 ├── components/
 │   ├── StickyChatBubble.vue     # Bulle flottante + tooltip d'accroche + panneau de conversation
 │   ├── HeroChatBar.vue          # Barre de saisie rapide sur la page d'accueil
 │   ├── Chatbot.vue              # Fenêtre de chat complète (en-tête, historique, saisie, emoji picker)
 │   ├── MessageBubble.vue        # Une bulle de message (utilisateur ou assistant)
 │   ├── TypingIndicator.vue      # Indicateur "en train d'écrire" (3 points animés)
-│   └── LinkPreviewCard.vue      # Carte d'aperçu de lien sous un message (§4.5)
+│   ├── LinkPreviewCard.vue      # Carte d'aperçu de lien sous un message (§4.5)
+│   └── SiteHeader.vue, SiteLogo.vue, BetaBadge.vue, CtaArrow.vue   # En-tête de site et éléments de marque (alignés sur maxime.bzh)
 ├── composables/
 │   ├── useChatbot.ts            # Logique métier du chat : état, envoi de message, agents
 │   ├── useColorScheme.ts        # Thème clair/sombre : résolution + persistance + synchro multi-instance (§4.2)
 │   └── …                        # useFaqs, useDebugMode, useOnlineStatus, useNotificationSound,
 │                                 # useSpeechRecognition/Synthesis (§4.2), §8.7 pour la couverture de tests
-├── server/api/[...path].ts      # Route serveur Nitro — proxy générique vers le backend Symfony
+├── server/api/
+│   ├── [...path].ts             # Proxy Nitro générique vers le backend Symfony (allowlist, §3.4)
+│   ├── conversations/[id]/stream.post.ts   # Proxy dédié du flux SSE (§7.2)
+│   ├── ai_agents.get.ts, faqs.get.ts       # Routes dédiées avec cache 5 min
+│   └── link-preview.get.ts      # Aperçu de lien (propre au frontend)
+├── i18n/locales/fr.json         # Chaînes traduites (§8.8)
+├── public/widget.js             # Script d'intégration du widget sur un site tiers (iframe vers /embed)
 ├── types/index.ts                # Types partagés (Message, AIAgent, ChatbotProps, ChatbotState)
-├── assets/css/main.css           # Directives Tailwind + classes utilitaires custom
-├── tailwind.config.js            # Thème "Minitel" (couleurs, polices, animations)
+├── assets/css/main.css           # Tailwind v4 : `@import 'tailwindcss'`, tokens de thème (`@theme inline`), classes utilitaires custom
 └── nuxt.config.ts                # Config Nuxt (head, modules, runtimeConfig, workaround Vite/TS7)
 ```
 
@@ -396,11 +403,14 @@ import { Chatbot } from '~/components/Chatbot';
 
 **Vitest** (`vitest.config.ts`, `environment: 'nuxt'` via `@nuxt/test-utils/config`) — un vrai contexte Nuxt est démarré pour chaque fichier de test, donc les imports automatiques du projet (`useState`, `useI18n`, `useRoute`, `$fetch`, composables locaux comme `useFaqs`/`useOnlineStatus`) fonctionnent dans les tests exactement comme dans l'app, sans les importer explicitement. Fichiers `*.test.ts` colocalisés avec le code testé (`composables/useChatbot.test.ts` à côté de `useChatbot.ts`, etc.) plutôt qu'un dossier `tests/` séparé.
 
-Couverture actuelle — composables uniquement, pas de test de composant `.vue` ni e2e :
+Couverture actuelle — les composables, plus un seul composant (`SiteHeader`), pas d'e2e navigateur :
 - **`useOnlineStatus`** : reflète `navigator.onLine`, réagit aux events `online`/`offline`, arrête de réagir après unmount.
 - **`useDebugMode`** : lecture de `?debug=1` dans l'URL, via `mockNuxtImport('useRoute', ...)`.
 - **`useFaqs`** : peuple `suggestedQuestions` depuis `GET /api/faqs` (mocké avec `registerEndpoint`), ne fetch qu'une fois (`hasFetched`), dégrade silencieusement en cas d'échec, état partagé entre deux appels indépendants (`useState`).
 - **`useChatbot`** : le plus gros morceau — garde-fous de `sendMessage()` (message vide, déjà en cours d'envoi, hors ligne), le chemin heureux complet (parsing des frames SSE `data: {...}\n\n`, y compris `ai_complete`/`sources`/`token_usage`), un frame `error`, une réponse HTTP non-`ok`, `retryLastMessage()` (rejoue sans dupliquer la bulle utilisateur), `clearMessages()`, `cancelReply()` (abandonne une requête en cours via `AbortController` sans poser d'erreur — le rejet `AbortError` est distingué d'un vrai échec réseau), gate `autoScroll` (`scrollToBottom()` ne fait rien tant que désactivé, `sendMessage()` le remet à `true`), notification desktop (`Notification` global stubbé — déclenchée seulement si `document.hidden` et permission accordée, jamais sinon).
+- **`useColorScheme`** : repli sur le défaut sans préférence, résolution `prefers-color-scheme` sombre, choix mémorisé prioritaire sur l'OS, `toggle()` bascule et persiste, cesse de suivre l'OS une fois un choix explicite fait.
+- **`useSpeechRecognition`** : navigateur non supporté (`toggleListening` sans effet), support via le global standard ou préfixé `webkit`, arrêt au second appel, concaténation des résultats intermédiaires + finaux, arrêt en fin/erreur/démontage.
+- **`SiteHeader`** (`components/SiteHeader.test.ts`, seul test de composant `.vue`) : les deux CTA portfolio/CV, flèche sur le CTA CV uniquement, masqué au scroll vers le bas et réaffiché au scroll vers le haut, toujours visible près du haut de page.
 - **`useNotificationSound`** : `muted` démarre à `false`, lit un choix persisté au montage (même schéma `localStorage` que `useColorScheme`), `toggleMuted()` bascule et persiste, `playMessageSound()` ne lève pas d'erreur pendant que `muted` est actif (le chime est simplement sauté).
 
 Deux techniques de mock spécifiques à connaître avant d'y toucher :

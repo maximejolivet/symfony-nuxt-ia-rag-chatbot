@@ -34,6 +34,8 @@ found 0 vulnerabilities
 | `redis`         | `7-alpine`                       | Version majeure épinglée (7)         |
 | `traefik`       | `v3.5`                           | Épinglé                              |
 | `node`          | `24-alpine`                      | Version majeure épinglée (24)        |
+| `phpmyadmin`    | `latest`                         | Non épinglé (outil de dev local)     |
+| `mailhog/mailhog` | (sans tag)                     | Non épinglé (outil de dev local)     |
 
 ## Authentification
 

@@ -6,7 +6,7 @@
 
 ## Sommaire
 
-74 faites, 9 retirées/rejetées, 2 restantes. Détail complet (rationale, notes de vérification) dans les sections ci-dessous.
+74 faites, 9 retirées/rejetées, 3 restantes. Détail complet (rationale, notes de vérification) dans les sections ci-dessous.
 
 | Statut    | Domaine  | Fonctionnalité                                                  | Résumé                                                                                                                          |
 | --------- | -------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -1600,6 +1600,11 @@ d'intégrateur tiers aujourd'hui).
 - **Droit à l'oubli RGPD outillé** : commande/action admin qui purge en un
   geste toutes les données liées à un visiteur (conversations, messages,
   `SearchQuery` associées) plutôt qu'une suppression manuelle par table.
+  *Partiellement couvert* : la purge par rétention (`app:conversations:purge`, durée
+  `CONVERSATION_RETENTION_DAYS`) et la purge manuelle d'une sélection de conversations dans
+  `/admin/conversations` existent (messages supprimés en cascade). Reste ouvert : purge ciblée
+  *par visiteur* et suppression des `SearchQuery` associées — la commande ne touche que
+  `Conversation`.
 - **Scan anti-injection sur upload de document** : au-delà du durcissement
   déjà en place au moment de l'injection dans le prompt (chunks RAG
   délimités), détecter à l'*ingestion* un document contenant des

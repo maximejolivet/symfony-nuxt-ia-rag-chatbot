@@ -71,7 +71,9 @@ src/
 ├── MessageHandler/            # handlers correspondants, consommés par le worker Messenger
 ├── Enum/                    # enums PHP 8.1 pour chaque champ à choix fermé
 ├── Repository/               # repositories Doctrine (1 par entité)
-├── Controller/               # contrôleurs API Platform custom + Admin/DashboardController
+├── Command/                   # commandes console : app:user:create, app:conversations:purge
+├── EventListener/             # UserStampListener, AuditLogListener, SecurityHeadersListener
+├── Controller/               # contrôleurs API Platform custom + Admin/ (Dashboard, Analytics, AuditLog, Security) + purge admin des conversations
 ├── ApiResource/               # ressources API Platform "virtuelles" (non-entités) : quick-send, recherche/stats vectorielles, statut LLM/embedding, health check agrégé
 ├── Form/                      # formulaires Symfony pour le backoffice
 ├── Grid/                      # définitions de grilles Sylius (colonnes/actions des listes admin)
@@ -631,6 +633,8 @@ Construit avec **Sylius Resource/Grid Bundle** — CRUD générique piloté par 
 
 **Journal d'audit, même schéma** : `App\Controller\Admin\AuditLogController` (route `app_admin_audit_log_index`) liste, paginée manuellement (50/page, pas de dépendance de pagination), la table `audit_log` alimentée par `App\EventListener\AuditLogListener` — voir §10 pour le détail du mécanisme de capture.
 
+**Purge des conversations** : `App\Controller\ConversationBulkDeleteController` (`POST /admin/conversations/purge-selection`, `ROLE_ADMIN`, CSRF) supprime la sélection cochée dans `/admin/conversations` ; son pendant planifié est `bin/console app:conversations:purge [--days=N] [--dry-run] [--force]` (durée par défaut `CONVERSATION_RETENTION_DAYS`, voir §11.4). Les deux passent par la suppression en cascade des `Message` ; la route admin émet `app.conversation.pre_delete` pour que le journal d'audit la capture.
+
 **Recherche/filtrage des messages sur `/admin/conversations/{id}`** : purement client, pas d'aller-retour serveur — la conversation entière est déjà dans le DOM (`templates/admin/conversation/show.html.twig`). Contrôleur Stimulus `conversation-filter` (`assets/controllers/conversation_filter_controller.js`, auto-enregistré par `symfony/stimulus-bundle`, aucune entrée `controllers.json` nécessaire pour un contrôleur custom du projet) : un champ recherche (substring insensible à la casse sur `textContent`) et, seulement si la conversation contient plus d'un rôle, un `<select>` de filtrage par rôle — masque (`hidden`) les `<li>` ne correspondant pas, affiche un message vide si le filtre ne matche aucun message.
 
 Pour ajouter une 14ᵉ ressource : une entité `implements ResourceInterface`, un repository avec `ResourceRepositoryTrait`, une classe `App\Form\XType`, une classe `App\Grid\XGrid` (`#[AsGrid]`), une entrée dans `config/packages/sylius_resource.yaml` et `config/routes/admin.yaml`. Le rendu des champs est mutualisé via `App\Twig\AdminExtension::fieldValue()` (basé sur `PropertyAccessor`, gère nativement enums/dates/bools/relations/collections).
@@ -696,6 +700,10 @@ Services démarrés (`compose.yaml`) :
 | `app`      | API Symfony (serveur PHP intégré, `php -S 0.0.0.0:8000`)             | aucun (retiré — accès uniquement via Traefik, voir ci-dessous) |
 | `database` | MariaDB (`mariadb:${MARIADB_VERSION:-11.4}`)                         | port aléatoire                                                 |
 | `qdrant`   | Base vectorielle                                                     | ports aléatoires (REST/gRPC)                                   |
+| `redis`    | Cache applicatif et transport Messenger `async` (`redis:7-alpine`)   | aucun                                                          |
+| `worker`   | Consumer Messenger (`php bin/console messenger:consume async`)       | aucun                                                          |
+| `mailer`   | MailHog (catcher SMTP de dev)                                        | via Traefik (`mailhog.chatbot.localhost`)                      |
+| `phpmyadmin` | phpMyAdmin sur `database`                                          | via Traefik (`phpmyadmin.chatbot.localhost`)                   |
 | `nuxt`     | Frontend de démo Nuxt (`frontend/`), branché sur `app` via `API_URL` | `3010`                                                         |
 
 `OLLAMA_BASE_URL` est automatiquement pointé vers `http://host.docker.internal:11434` (Ollama tournant sur la machine hôte, hors conteneur). Un réseau Docker externe `chatbot-proxy` (Traefik) est requis (`networks.proxy.external: true`) ; le service échouera à démarrer sans lui, sauf à retirer ce bloc. Créé automatiquement par `make start` (racine du dépôt) ; à défaut, `docker network create chatbot-proxy` une fois.
@@ -756,6 +764,7 @@ Fichier de référence : `.env.example`.
 | `ADMIN_USERNAME`         | `admin`                                                                           | Ne seed que la première ligne `app_user` (migration) ; jamais lu par Symfony au runtime (§10) |
 | `ADMIN_PASSWORD_HASH`    | *(vide — à générer)*                                                              | Hash bcrypt (`bin/console security:hash-password`) — idem, seed uniquement                 |
 | `ADMIN_PASSWORD`         | *(vide — à générer)*                                                              | Contrepartie en clair, jamais lue par Symfony : uniquement pour le proxy Nuxt (Basic Auth) |
+| `CONVERSATION_RETENTION_DAYS` | `90`                                                                          | Durée de rétention par défaut (jours) de `app:conversations:purge` : les conversations inactives au-delà sont supprimées, messages en cascade (§9) |
 | `CAL_EU_API_KEY`         | *(vide)*                                                                          | Clé API Cal.eu (Cal.com-compatible), résolue via `%env(CAL_EU_API_KEY)%` dans l'en-tête `Authorization` de l'étape `api_call` "Reserver sur Cal.eu" du workflow `planifier_entretien` (`WorkflowExecutionService::resolveEnvHeaders()`, voir §7.2) -- jamais stockée en clair dans la ligne `workflow_step`. Le worker Messenger ne relit `.env` qu'à son démarrage (§7.3) : redémarrer le conteneur worker après toute modification de cette variable |
 
 > `DEFAULT_URI` (génération d'URL en CLI) est aussi présent, non lié à l'IA.

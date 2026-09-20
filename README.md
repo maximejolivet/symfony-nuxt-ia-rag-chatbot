@@ -74,6 +74,7 @@ Tous les services sont routés par domaine via Traefik (`*.chatbot.localhost`, r
 | Nuxt/Vue            | http://nuxt.chatbot.localhost                               |
 | Qdrant (dashboard)  | http://qdrant.chatbot.localhost/dashboard                   |
 | phpMyAdmin          | http://phpmyadmin.chatbot.localhost                         |
+| MailHog             | http://mailhog.chatbot.localhost                            |
 | Ollama (sur l'hôte) | http://localhost:11434                                      |
 
 ## Architecture

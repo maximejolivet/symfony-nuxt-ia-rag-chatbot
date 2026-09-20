@@ -47,7 +47,7 @@ symfony-nuxt-ia-rag-chatbot/
 
 `Workflow/` et `Chat/` se référencent mutuellement (tool-calling) ; tous les autres domaines dépendent en cascade de `VectorConnector/` (feuille), jamais l'inverse.
 
-Dossiers transverses : `Controller/` (25, dont les contrôleurs API Platform personnalisés), `Entity/` (17, Doctrine — 16 entités + l'interface `OwnedResourceInterface`), `Repository/` (15), `ApiResource/` (8, endpoints stateless type `HealthAction`/`QuickSendAction`), `Doctrine/` (query extensions type `OwnershipCollectionExtension`), `Security/` (voters), `EventListener/`, `Message/`+`MessageHandler/` (Messenger async), `Form/`+`Grid/` (backoffice Sylius), `Twig/` (extensions), `Enum/` (11, backed enums), `Command/`.
+Dossiers transverses : `Controller/` (26, dont les contrôleurs API Platform personnalisés), `Entity/` (17, Doctrine — 16 entités + l'interface `OwnedResourceInterface`), `Repository/` (15), `ApiResource/` (8, endpoints stateless type `HealthAction`/`QuickSendAction`), `Doctrine/` (query extensions type `OwnershipCollectionExtension`), `Security/` (voters), `EventListener/`, `Message/`+`MessageHandler/` (Messenger async), `Form/`+`Grid/` (backoffice Sylius), `Twig/` (extensions), `Enum/` (11, backed enums), `Command/`.
 
 ### Frontend — composants dumb, composables smart
 
@@ -55,7 +55,7 @@ Dossiers transverses : `Controller/` (25, dont les contrôleurs API Platform per
 frontend/
 ├── components/    Composants Vue présentationnels (Chatbot, MessageBubble, ...)
 ├── composables/   Logique métier (use*.ts) — un composable = une responsabilité
-├── pages/         Routing fichier Nuxt (index, chat)
+├── pages/         Routing fichier Nuxt (index, chat, embed)
 ├── server/api/    Routes Nitro : proxy vers le backend (allowlist), endpoints propres au frontend (link-preview)
 ├── i18n/locales/  Chaînes traduites (une seule locale aujourd'hui : fr)
 └── types/         Types TypeScript partagés
@@ -102,7 +102,7 @@ cd frontend && npm run dev                         # frontend en dev hors Docker
 
 ```bash
 docker exec chatbot-symfony php bin/phpunit         # backend
-cd frontend && npm run test                          # frontend (Vitest, composables uniquement)
+cd frontend && npm run test                          # frontend (Vitest, composables + `SiteHeader`)
 ```
 
 ### Lint / qualité / static analysis
@@ -165,7 +165,7 @@ make rebuild SERVICE=<name>    # rebuild un seul service Docker (app, nuxt, data
 
 **Baseline PHPStan (871 lignes)** : ne contient plus de bugs de type/nullable/paramètre (nettoyé — voir `.claude/skills/phpstan/SKILL.md`), uniquement des préférences de style `phpstan-strict-rules` (casts, ternaires, comparaisons booléennes strictes). Ne pas y ajouter d'erreur nouvelle sans investiguer d'abord.
 
-**Frontend** : aucun ESLint configuré (Prettier seul) ; tests unitaires composables uniquement, aucun test de composant `.vue` ni e2e navigateur ; **pas de déploiement en production** pour l'instant (seul le backend a un pipeline de déploiement, voir `docs/DEPLOYMENT.md`) — le durcissement CSP existant ne protège donc encore personne en pratique.
+**Frontend** : aucun ESLint configuré (Prettier seul) ; tests unitaires des composables et d'un seul composant (`SiteHeader`), pas d'e2e navigateur ; **pas de déploiement en production** pour l'instant (seul le backend a un pipeline de déploiement, voir `docs/DEPLOYMENT.md`) — le durcissement CSP existant ne protège donc encore personne en pratique.
 
 **Rector configuré mais pas branché en CI** — `composer rector:check` est un outil manuel, jamais exécuté automatiquement ; les modernisations qu'il proposerait ne sont pas garanties appliquées.
 

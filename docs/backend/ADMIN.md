@@ -145,6 +145,14 @@ du hit).
   `GET/POST /api/conversations/{id}/messages` (POST : `{message, agent_id?}`, synchrone, renvoie le
   `Message` assistant complet), `POST /api/conversations/{id}/stream` (variante SSE),
   `GET /api/conversations/{id}/sources`, `PATCH /api/conversations/{id}/messages/{messageId}/feedback`.
+  → **Purge** : la liste `/admin/conversations` permet de cocher des lignes puis « Supprimer la
+  sélection » (confirmation JS, irréversible ; messages supprimés en cascade en base). Route dédiée
+  `POST /admin/conversations/purge-selection` (`ConversationBulkDeleteController`, `ROLE_ADMIN`, token
+  CSRF `conversation_purge_selection`) plutôt que l'action `bulk_delete` générique de Sylius, qui
+  n'itère sur rien pour une ressource adossée à une grille (voir la docblock du contrôleur). Elle
+  émet le même événement `app.conversation.pre_delete` que la suppression unitaire : le journal
+  d'audit enregistre donc aussi ces suppressions. Équivalent planifié : la commande
+  `app:conversations:purge` (voir [`backend/README.md`](../../backend/README.md#purge-des-conversations-rétention)).
 - **Messages** (`Message`) — message individuel d'une conversation (`role`:
   `user`/`assistant`/`system`/`tool`, `content`, `metadata`), lecture seule, accessible seulement
   via sa conversation parente.
@@ -169,7 +177,7 @@ du hit).
 
 ## Pages hors menu (routes existantes, non listées dans la sidebar)
 
-`nav()` ne référence que les 4 groupes ci-dessus : toute route admin en dehors de cette liste
+`nav()` ne référence que les 6 groupes ci-dessus : toute route admin en dehors de cette liste
 reste joignable par URL directe mais n'a pas d'entrée dans le menu.
 
 - **Utilisateurs** (`/admin/users`, entité `User`, table `app_user`) — comptes opérateurs du

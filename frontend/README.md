@@ -6,10 +6,11 @@ Widget de chatbot branché sur le backend Symfony (`backend/`). Composant chatbo
 
 - Node.js 24
 - Nuxt 4.5 (Vite 8.2, Vue 3.5, Nitro)
-- `@nuxtjs/tailwindcss` 6.14
+- Tailwind CSS 4.3 (`@tailwindcss/vite`, configuré en CSS dans `assets/css/main.css`)
+- Vitest 4.1 + `@nuxt/test-utils`
 - TypeScript 7.0
 - Prettier 3.9
-- axios pour les appels API
+- axios : déclaré en dépendance mais non utilisé (les appels passent par `$fetch`/`fetch`)
 
 ## Installation
 
@@ -37,6 +38,7 @@ npm run generate   # génération statique
 npm run preview
 npm run format        # Prettier — reformate
 npm run format:check  # Prettier — vérifie sans modifier
+npm run test          # Vitest (composables)
 ```
 
 En Docker (`backend/compose.yaml`), le conteneur build puis sert directement le résultat via `node .output/server/index.mjs`, pas via `npm run dev`.

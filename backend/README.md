@@ -11,7 +11,7 @@ Backend du chatbot IA, en Symfony. Organisé en 5 domaines métier : `ai_provide
 - Redis pour le cache applicatif (`config/packages/cache.yaml` — voir §File d'attente async ci-dessous)
 - Symfony HttpClient pour parler à Ollama / aux endpoints OpenAI-compatibles / à Qdrant
 - smalot/pdfparser (PDF) + ZipArchive (DOCX) pour l'extraction de texte des documents
-- Sylius Resource/Grid Bundle + Symfony Form pour le backoffice (`/admin`), Tailwind CSS (CDN) pour le style
+- Sylius Resource/Grid Bundle + Symfony Form pour le backoffice (`/admin`), AssetMapper + Tailwind CSS v4 (compilé localement, voir §Asset pipeline) pour le style
 - PHP 8.4
 
 ## Installation
@@ -108,7 +108,7 @@ Testé en réel de bout en bout : `quick-send` simple, mémoire conversationnell
 
 ## Backoffice (`/admin`)
 
-Construit avec **Sylius Resource Bundle** (CRUD générique piloté par config : routing, repository, formulaire) et **Sylius Grid Bundle** (définition des colonnes/actions des listes), avec des templates Twig maison (pas de thème Sylius packagé) stylés en **Tailwind CSS** (chargé via CDN, pas d'asset pipeline).
+Construit avec **Sylius Resource Bundle** (CRUD générique piloté par config : routing, repository, formulaire) et **Sylius Grid Bundle** (définition des colonnes/actions des listes), avec des templates Twig maison (pas de thème Sylius packagé) stylés en **Tailwind CSS v4** (compilé localement via AssetMapper, voir §Asset pipeline).
 
 Les 13 ressources du domaine sont gérables : `AiProviderConfig`, `VectorIndex`, `DocumentCategory`, `Faq`, `Collection`, `Workflow` (+ `WorkflowStep` imbriqué), `AiAgent`, `Conversation`, `User` en CRUD complet ; `SearchQuery`, `WorkflowExecution`, `Message` en lecture seule (mêmes restrictions que côté API) ; `Document` en lecture/édition/suppression seulement (la création reste réservée à `POST /api/documents`, qui gère l'upload multipart et le pipeline d'indexation — pas reproduit dans un formulaire générique).
 
@@ -235,6 +235,18 @@ bin/console messenger:consume async`) consomme en continu.
 > o2switch) même si un Redis externe existe désormais pour le cache
 > ci-dessous — les deux usages sont indépendants, rien n'empêche de
 > pointer Messenger vers ce même Redis plus tard sans passer par le cache.
+
+## Purge des conversations (rétention)
+
+Les conversations collectent le prénom/nom/email du visiteur : elles ne sont pas conservées indéfiniment. `App\Command\PurgeConversationsCommand` supprime celles dont `updatedAt` est plus ancien que la durée de rétention ; leurs `Message` disparaissent en cascade au niveau base (`onDelete: CASCADE`), en un seul `DELETE` DQL.
+
+```bash
+docker exec chatbot-symfony php bin/console app:conversations:purge --dry-run   # compte sans supprimer
+docker exec chatbot-symfony php bin/console app:conversations:purge --days=30   # confirmation interactive
+docker exec chatbot-symfony php bin/console app:conversations:purge --force     # sans confirmation (cron)
+```
+
+Sans `--days`, la durée vient de `CONVERSATION_RETENTION_DAYS` (`90` dans `.env.example`). En non-interactif (cron), la commande refuse de supprimer sans `--force`. Côté backoffice, la liste `/admin/conversations` offre une purge manuelle de la sélection (voir [`docs/backend/ADMIN.md`](../docs/backend/ADMIN.md)). Le déclenchement périodique en production n'est pas automatisé par le pipeline : voir [`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md).
 
 ## Cache applicatif (Redis)
 
