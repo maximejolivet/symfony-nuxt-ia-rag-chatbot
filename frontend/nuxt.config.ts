@@ -14,6 +14,12 @@ export default defineNuxtConfig({
       // set via useHead() in app.vue instead of statically here -- this
       // config is evaluated before the i18n module's runtime is available.
       link: [
+        // SVG first: modern browsers pick it and it follows the browser's
+        // light/dark tab strip (public/favicon.svg). The .ico is the fallback
+        // for the rest; both are drawn from components/SiteLogo.vue.
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
