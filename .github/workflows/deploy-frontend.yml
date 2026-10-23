@@ -59,23 +59,16 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@59
 
-      # TEMPORARY: the first run failed at `vercel pull` with "Could not
-      # retrieve Project Settings". Prints only non-sensitive facts (lengths,
-      # the account the token belongs to, the teams it can see) to tell a
-      # mistyped ID from a token without access to the team. Remove once fixed.
-      - name: Diagnose Vercel credentials
-        continue-on-error: true
-        run: |
-          echo "VERCEL_TOKEN length: ${#VERCEL_TOKEN} (an access token is ~24 characters)"
-          if [[ "$VERCEL_TOKEN" == eyJ* ]]; then echo "token shape: JWT (looks like an OIDC token, not an access token)"; else echo "token shape: not a JWT"; fi
-          if [[ "$VERCEL_TOKEN" =~ [[:space:]] ]]; then echo "token contains whitespace/newline"; else echo "token has no whitespace"; fi
-          echo "--- token account:"; vercel whoami || true
-          echo "--- teams the token can see:"; vercel teams ls || true
-
       - name: Pull Vercel project settings and environment variables
         run: vercel pull --yes --environment=production
 
+      # `vercel build` runs on the runner, not on Vercel, so Nitro does not see
+      # VERCEL=1 and falls back to the node-server preset (writes .output/).
+      # Vercel then finds no "dist" directory. Force the vercel preset so the
+      # Build Output API (.vercel/output) is produced.
       - name: Build
+        env:
+          NITRO_PRESET: vercel
         run: vercel build --prod
 
       - name: Deploy to production
