@@ -1,0 +1,35 @@
+# Static analysis (bugs, vulnerabilities, code smells) on SonarCloud for the
+# backend and frontend. Runs on push to master/develop and on PRs. Needs the
+# SONAR_TOKEN repository secret; the project itself is configured in
+# sonar-project.properties.
+
+name: SonarCloud
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: sonarcloud-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sonarcloud:
+    name: SonarCloud scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history so SonarCloud can blame lines and detect new code.
+          fetch-depth: 0
+
+      - name: SonarCloud scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
