@@ -6,7 +6,7 @@
 
 ## Sommaire
 
-74 faites, 9 retirées/rejetées, 2 restantes. Détail complet (rationale, notes de vérification) dans les sections ci-dessous.
+77 faites, 9 retirées/rejetées, 3 restantes. Détail complet (rationale, notes de vérification) dans les sections ci-dessous.
 
 | Statut    | Domaine  | Fonctionnalité                                                  | Résumé                                                                                                                          |
 | --------- | -------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -67,6 +67,9 @@
 | ✅ Fait    | Frontend | États de progression pendant le tool-calling                    | le chemin bufferisé (LLM → exécution d'un workflow → second appel LLM) n'émettait aucun `delta`, donc rien à part le…           |
 | ✅ Fait    | Frontend | Astuce de découverte des commandes                              | ce widget a accumulé plusieurs raccourcis puissants (commandes slash, Cmd/Ctrl+K) qu'un visiteur ne devine jamais seul.…        |
 | ✅ Fait    | Frontend | Commande `/cv`                                                  | ouvre le vrai CV en ligne de Maxime (`https://www.maxime.bzh/cv-...pdf`, trouvé en suivant le lien fourni par lui —…            |
+| ✅ Fait    | Frontend | Créneaux cliquables                                             | les créneaux renvoyés par `lister_creneaux_disponibles` s'affichent en puces sous la réponse (un clic envoie le créneau choisi), au lieu d'être retapés.              |
+| ✅ Fait    | Frontend | « Ajouter à mon calendrier »                                    | la carte « Entretien confirmé » télécharge un `.ics` généré côté navigateur (début/nom des arguments, fin lue dans la réponse Cal.eu, sinon 1 h).                     |
+| ✅ Fait    | Frontend | Brouillon de saisie conservé                                    | le texte en cours est mémorisé (`localStorage`) et restauré après un rechargement ou une bulle refermée.                                                              |
 | 🚫 Retiré  | Frontend | Afficher les sources RAG                                        | (commit `318b03a`) : le backend force `metadata.sources_hidden = true` sur tous les messages, les sources ne remontent que…     |
 | 🚫 Retiré  | Frontend | Afficher `tool_calls` (trace générique)                         | les workflows réels (`planifier_entretien` → API Cal.eu avec les coordonnées du recruteur, `enregistrer_identite`)…             |
 | 🚫 Retiré  | Frontend | Mode compact                                                    | implémentée puis retirée à la demande explicite, sans remplacement.                                                             |
@@ -463,6 +466,53 @@ Le widget actuel n'exploite qu'une fraction de ce que l'API backend expose déj�
       ~5 ms (cache hit, >100x plus rapide) ; endpoints non concernés
       (`quick-send`, `llm-status`) toujours au vert, donc pas d'effet de
       bord sur le catch-all générique.
+- [x] **Créneaux cliquables, « Ajouter à mon calendrier », brouillon de
+      saisie** (2026-09-20) — trois améliorations UX du chat, frontend
+      uniquement, sans changement backend.
+      - *Créneaux cliquables* : `MessageBubble.vue` lit la sortie réelle de
+        `lister_creneaux_disponibles` (`toolCalls[].output.response_data`,
+        `utils/slots.ts`), jamais le texte du modèle — cohérent avec l'item
+        « Valider `start_time` avant l'appel Cal.eu » (le texte peut annoncer
+        un créneau non retourné par l'outil). Un clic envoie un message
+        ordinaire avec le libellé français et la date exacte de Cal.eu
+        (décalage horaire inclus). **Non vérifié contre une vraie réponse de
+        `api.cal.eu/v2/slots`** : le workflow vit en base, pas dans le dépôt
+        (Docker était arrêté). L'extracteur suit le format documenté de l'API
+        Cal.com-compatible ; une forme inconnue n'affiche simplement aucune
+        puce. À confirmer au premier vrai appel.
+      - *Calendrier* : `utils/ics.ts` (un `VEVENT`, UTC, repliement 75 octets),
+        `UID` dérivé de l'heure de début (réimport = mise à jour). Durée lue
+        dans `response_data.data.end` si valide, sinon 1 h (type d'événement
+        proposé en 30 et 60 minutes).
+      - *Brouillon* : `DRAFT_STORAGE_KEY` dans `useChatbot.ts`, restauré au
+        montage sauf champ déjà rempli ou question du hero en attente.
+      - Tests : 37 ajoutés (99 au total, tous verts, exécutés dans une copie
+        isolée du dossier — `node_modules` du dépôt contient les binaires du
+        conteneur, voir `docs/frontend/SPECIFICATION.md` §8.7).
+        **Pas de vérification visuelle dans un vrai navigateur** (extension
+        Chrome indisponible) : le rendu des puces et de la carte n'a été
+        contrôlé que par les tests de composant.
+- [x] **Réponses vides de l'assistant** (2026-09-20) — signalé : des bulles
+      vides apparaissaient de temps en temps. Cause : rien ne vérifiait qu'une
+      réponse n'était pas vide. `OpenAiCompatibleLlmClient` renvoyait
+      `trim($content)` (`''` si le modèle répond `content: null`, cas déjà vécu
+      en production le 2026-09-09 avec `finish_reason: length`, voir
+      `AI_MODEL_BENCHMARK.md`), l'orchestrateur la persistait et la streamait
+      telle quelle, et le frontend affichait une bulle blanche. Correctif :
+      réessai unique avec un budget de tokens doublé, journalisation
+      (`finish_reason`, `completion_tokens`), puis `EmptyLlmResponseException`
+      (frame SSE `error` / `empty_response`, bouton « Réessayer ») ; repli
+      « Votre demande a bien été traitée. » si un outil a déjà tourné (pas de
+      double réservation possible). Le frontend retire aussi toute bulle vide
+      reçue d'un backend plus ancien. 8 tests backend et 3 tests frontend
+      ajoutés (97 et 105 au total, tous verts ; PHPStan niveau 9 et
+      PHP-CS-Fixer propres, baseline inchangé). **Non vérifié en production** :
+      la fréquence réelle des réponses vides n'a pas été mesurée (aucune donnée
+      de production consultée), et le bug n'a pas été reproduit contre un vrai
+      appel OpenRouter ; le correctif repose sur le mécanisme documenté.
+      À surveiller après déploiement : les logs `Empty LLM completion`. Le test
+      local a aussi rencontré un `HTTP 429` d'OpenRouter sur un modèle gratuit
+      (limite de débit), qui donne une erreur et non une bulle vide.
 
 ## Backend (`backend/`)
 
@@ -1600,6 +1650,11 @@ d'intégrateur tiers aujourd'hui).
 - **Droit à l'oubli RGPD outillé** : commande/action admin qui purge en un
   geste toutes les données liées à un visiteur (conversations, messages,
   `SearchQuery` associées) plutôt qu'une suppression manuelle par table.
+  *Partiellement couvert* : la purge par rétention (`app:conversations:purge`, durée
+  `CONVERSATION_RETENTION_DAYS`) et la purge manuelle d'une sélection de conversations dans
+  `/admin/conversations` existent (messages supprimés en cascade). Reste ouvert : purge ciblée
+  *par visiteur* et suppression des `SearchQuery` associées — la commande ne touche que
+  `Conversation`.
 - **Scan anti-injection sur upload de document** : au-delà du durcissement
   déjà en place au moment de l'injection dans le prompt (chunks RAG
   délimités), détecter à l'*ingestion* un document contenant des

@@ -1,6 +1,6 @@
 # Documentation — Chatbot IA
 
-![docs](https://img.shields.io/badge/docs-12%20pages-informational)
+![docs](https://img.shields.io/badge/docs-13%20pages-informational)
 ![format](https://img.shields.io/badge/format-Markdown-000000?logo=markdown&logoColor=white)
 
 Index de tous les fichiers Markdown du dépôt.
@@ -22,6 +22,7 @@ Index de tous les fichiers Markdown du dépôt.
 
 ## Frontend
 
+- [frontend/README.md](../frontend/README.md) — installation, props et intégration du widget Nuxt (composant Vue, `widget.js` embarqué)
 - [docs/frontend/SPECIFICATION.md](frontend/SPECIFICATION.md) — cahier des charges du frontend Nuxt/Vue (widget de chat)
 
 ## Chantier
@@ -32,5 +33,7 @@ Index de tous les fichiers Markdown du dépôt.
 ## Outillage
 
 - [.claude/skills/semantic-commit-messages/SKILL.md](../.claude/skills/semantic-commit-messages/SKILL.md) — format des messages de commit sémantiques
+- [.claude/skills/phpstan/SKILL.md](../.claude/skills/phpstan/SKILL.md) — passe PHPStan sur le backend (niveau 9, baseline)
+- [.claude/skills/update-docs/SKILL.md](../.claude/skills/update-docs/SKILL.md) — mise à jour des fichiers Markdown de documentation
 - [docs/backend/bruno/](backend/bruno/) — collection [Bruno](https://www.usebruno.com/) de l'API
   (`IA & Vecteurs`, `Base de connaissances`, `Workflows`, `Chat`, `Hors menu`)

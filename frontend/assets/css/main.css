@@ -85,7 +85,16 @@
   --panel: #24414f;
   --panel-2: #16303c;
   --stripe: rgba(29, 53, 64, 0.09);
-  color-scheme: light;
+  /*
+   * No `color-scheme` on the root on purpose. app.vue sets a reactive
+   * <meta name="color-scheme"> (light/dark, following the host page when
+   * embedded), and a CSS `color-scheme` on :root would override it. The night
+   * theme is applied on a wrapper <div>, never on <html>, so
+   * `:root[data-theme='night']` below never matches: a hardcoded `light` here
+   * kept the /embed document light inside a dark host page, and a browser
+   * then paints the iframe's transparent margin opaque white (an iframe whose
+   * color-scheme differs from its embedder's loses its transparent canvas).
+   */
 }
 
 :root[data-theme='night'] {

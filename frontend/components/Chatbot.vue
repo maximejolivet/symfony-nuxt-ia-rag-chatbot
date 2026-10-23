@@ -680,6 +680,7 @@
                   @regenerate="regenerateLastReply"
                   @identity="onSubmitIdentity"
                   @email="onSubmitEmail"
+                  @select-slot="onSelectSlot"
                 />
               </template>
             </template>
@@ -1000,13 +1001,13 @@
               <!-- Barre pilule (plein écran, cf. capture goria.ai/chat) -->
               <div v-if="variant === 'page'" class="flex items-center gap-2">
                 <div
-                  class="flex flex-1 items-center gap-1 rounded-3xl bg-card pl-5 pr-2 shadow-lg shadow-foreground/10 transition-shadow focus-within:shadow-xl focus-within:ring-2 focus-within:ring-accent-ink"
+                  class="flex flex-1 items-center gap-1 rounded-3xl bg-card pl-3 pr-2 shadow-lg shadow-foreground/10 transition-shadow focus-within:shadow-xl focus-within:ring-2 focus-within:ring-accent-ink"
                 >
                   <button
                     type="button"
                     @click="toggleEmojiPicker"
                     :aria-label="$t('chatbot.insertEmoji')"
-                    class="flex h-11 w-11 shrink-0 items-center justify-center text-lg text-muted-foreground transition-colors hover:text-accent-ink"
+                    class="flex h-11 w-9 shrink-0 items-center justify-center text-lg text-muted-foreground transition-colors hover:text-accent-ink"
                   >
                     🙂
                   </button>
@@ -1048,7 +1049,7 @@
                   type="submit"
                   :disabled="isLoading || awaitingIdentity || awaitingEmail || !inputValue.trim()"
                   :aria-label="$t('chatbot.send')"
-                  class="-ml-3 z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-foreground/10 transition-colors hover:bg-accent hover:text-primary-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-transparent disabled:text-muted-foreground disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-border"
+                  class="-ml-3 z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-foreground/10 transition-colors hover:bg-accent hover:text-primary-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-card disabled:text-muted-foreground disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-border"
                 >
                   <svg
                     v-if="isLoading"
@@ -1148,6 +1149,15 @@
                 {{ inputValue.length }}
               </p>
             </div>
+            <!-- Always under the field (not in the empty state, which disappears
+              with the first message -- exactly when a slow reply makes this
+              useful): the model behind the chat is a free one. -->
+            <p
+              class="mt-2 text-center text-[11px] leading-snug text-muted-foreground"
+              data-testid="free-model-notice"
+            >
+              {{ $t('chatbot.freeModelNotice') }}
+            </p>
           </form>
         </div>
       </div>
@@ -1595,6 +1605,14 @@ const onSubmitIdentity = (submission: InterviewBookingSubmission) => {
 // MessageBubble.vue's asksForEmail.
 const onSubmitEmail = (submission: InterviewBookingSubmission) => {
   sendMessage(buildBookingMessage(submission));
+};
+
+// A slot chip (MessageBubble.vue) is one more way to say a date in plain
+// words: the visitor-facing label plus the exact datetime Cal.eu offered, so
+// the model can pass that instant to planifier_entretien without redoing a
+// timezone conversion. Same no-backend-change reasoning as onSubmitIdentity.
+const onSelectSlot = (iso: string, label: string) => {
+  sendMessage(t('chatbot.slotChosenMessage', { label, iso }));
 };
 
 // Detected here (not in MessageBubble.vue) because the main input also

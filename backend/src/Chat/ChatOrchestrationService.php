@@ -3,6 +3,7 @@
 namespace App\Chat;
 
 use App\AiProvider\Client\ChatMessage;
+use App\AiProvider\Client\CompletionResult;
 use App\AiProvider\Client\LlmClientInterface;
 use App\AiProvider\Client\Ollama\OllamaLlmClient;
 use App\AiProvider\Client\ApiEndpoint\OpenAiCompatibleLlmClient;
@@ -14,6 +15,7 @@ use App\Entity\Conversation;
 use App\Entity\Workflow;
 use App\Enum\AiProviderUsage;
 use App\Workflow\WorkflowExecutionService;
+use Psr\Log\LoggerInterface;
 
 /**
  * The real tool-calling loop: asks the LLM for a completion, and if the model
@@ -68,11 +70,22 @@ final readonly class ChatOrchestrationService
     // changes to one without mandatory reasoning, this can likely come down.
     private const int CHAT_MAX_TOKENS = 1500;
 
+    // An empty completion is almost always the hidden reasoning above eating
+    // the whole budget (or a flaky free-tier response), so the single retry
+    // gets more room rather than the same budget again.
+    private const int EMPTY_RETRY_TOKEN_FACTOR = 2;
+
+    // Only when a tool already ran (a booking may exist by now) and the model
+    // still has nothing to say: failing here would invite a "Réessayer" that
+    // books twice, so the visitor gets this neutral line instead.
+    private const string TOOL_DONE_FALLBACK = 'Votre demande a bien été traitée.';
+
     public function __construct(
         private ProviderSelectionService $providerSelectionService,
         private RagContextService $ragContextService,
         private WorkflowExecutionService $workflowExecutionService,
         private FaqAnswerMatcher $faqAnswerMatcher,
+        private LoggerInterface $logger,
     ) {}
 
     /**
@@ -148,15 +161,16 @@ final readonly class ChatOrchestrationService
         $toolTrace = [];
 
         for ($i = 0; $i < self::MAX_TOOL_ITERATIONS; ++$i) {
-            $result = $llmClient->complete($messages, $toolSpecs ?: null, maxTokens: self::CHAT_MAX_TOKENS);
+            $result = $this->completeRetryingOnEmpty($llmClient, $messages, $toolSpecs ?: null);
             $messages[] = $result->message;
 
             if (!$result->message->toolCalls) {
+                $content = $this->requireContent($result->message->content, $toolTrace);
                 if (null !== $onDelta) {
-                    $onDelta($result->message->content);
+                    $onDelta($content);
                 }
 
-                return new ChatReplyResult($result->message->content, $result->usage, $toolTrace, $sources);
+                return new ChatReplyResult($content, $result->usage, $toolTrace, $sources);
             }
 
             foreach ($result->message->toolCalls as $call) {
@@ -192,12 +206,62 @@ final readonly class ChatOrchestrationService
         }
 
         // Iteration budget exhausted -- force a final answer without further tool access.
-        $final = $llmClient->complete($messages, maxTokens: self::CHAT_MAX_TOKENS);
+        $final = $this->completeRetryingOnEmpty($llmClient, $messages, null);
+        $content = $this->requireContent($final->message->content, $toolTrace);
         if (null !== $onDelta) {
-            $onDelta($final->message->content);
+            $onDelta($content);
         }
 
-        return new ChatReplyResult($final->message->content, $final->usage, $toolTrace, $sources);
+        return new ChatReplyResult($content, $final->usage, $toolTrace, $sources);
+    }
+
+    /**
+     * complete() that gives a blank final answer (no text, no tool call) one
+     * more chance with a larger token budget -- see EMPTY_RETRY_TOKEN_FACTOR.
+     * A completion that only carries tool calls is not blank.
+     *
+     * @param ChatMessage[]   $messages
+     * @param ToolSpec[]|null $tools
+     */
+    private function completeRetryingOnEmpty(LlmClientInterface $llmClient, array $messages, ?array $tools): CompletionResult
+    {
+        $result = $llmClient->complete($messages, $tools, maxTokens: self::CHAT_MAX_TOKENS);
+        if ([] !== $result->message->toolCalls || '' !== trim($result->message->content)) {
+            return $result;
+        }
+
+        $this->logEmptyCompletion($result, self::CHAT_MAX_TOKENS);
+
+        return $llmClient->complete($messages, $tools, maxTokens: self::CHAT_MAX_TOKENS * self::EMPTY_RETRY_TOKEN_FACTOR);
+    }
+
+    /**
+     * The text to show for a final answer. Blank after the retry means the
+     * model really produced nothing: an error, unless a tool already ran (see
+     * TOOL_DONE_FALLBACK).
+     *
+     * @param array<int, array<string, mixed>> $toolTrace
+     */
+    private function requireContent(string $content, array $toolTrace): string
+    {
+        if ('' !== trim($content)) {
+            return $content;
+        }
+        if ([] !== $toolTrace) {
+            return self::TOOL_DONE_FALLBACK;
+        }
+
+        throw new EmptyLlmResponseException();
+    }
+
+    private function logEmptyCompletion(CompletionResult $result, int $maxTokens): void
+    {
+        $this->logger->warning('Empty LLM completion, retrying with a larger token budget', [
+            'finish_reason' => $result->finishReason,
+            'completion_tokens' => $result->usage['completion_tokens'] ?? null,
+            'model' => $result->usage['model'] ?? null,
+            'max_tokens' => $maxTokens,
+        ]);
     }
 
     /**
@@ -217,6 +281,20 @@ final readonly class ChatOrchestrationService
         foreach ($llmClient->stream($messages, maxTokens: self::CHAT_MAX_TOKENS) as $chunk) {
             $content .= $chunk;
             $onDelta($chunk);
+        }
+
+        if ('' === trim($content)) {
+            // Nothing came through the stream: same cause and same remedy as
+            // completeRetryingOnEmpty(), but via one buffered call (streaming
+            // exposes no finish reason or usage to explain or reuse).
+            $this->logger->warning('Empty LLM stream, retrying once with a larger token budget', [
+                'max_tokens' => self::CHAT_MAX_TOKENS,
+            ]);
+            $retry = $llmClient->complete($messages, null, maxTokens: self::CHAT_MAX_TOKENS * self::EMPTY_RETRY_TOKEN_FACTOR);
+            $content = $this->requireContent($retry->message->content, []);
+            $onDelta($content);
+
+            return new ChatReplyResult($content, $retry->usage, [], $sources);
         }
 
         $promptTokens = TokenEstimator::estimate(json_encode($messages) ?: '');

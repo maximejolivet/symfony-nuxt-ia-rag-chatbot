@@ -47,6 +47,7 @@
     "micStop": "Arrêter la dictée",
     "send": "Envoyer",
     "retry": "Réessayer",
+    "freeModelNotice": "Ce chatbot tourne sur un modèle gratuit, donc patience si la réponse tarde. Si rien ne vient, essayez de renvoyer votre question.",
     "newMessage": "Nouveau message",
     "soundMute": "Couper le son des notifications",
     "soundUnmute": "Activer le son des notifications",
@@ -57,6 +58,7 @@
     "assistantTyping": "L'assistant écrit une réponse…",
     "identityMessage": "Je m'appelle {firstName} {lastName}, mon email est {email}, et la date qui m'arrangerait est : {date}.",
     "identityMessageObjet": "L'objet de l'échange : {objet}.",
+    "slotChosenMessage": "Je choisis le créneau du {label} ({iso}).",
     "identityMessageVisio": "Je souhaite un échange en visioconférence.",
     "identityMessageTelephone": "Je souhaite un échange par téléphone.",
     "identityMessageTelephoneNumero": "Mon numéro de téléphone : {telephone}.",
@@ -96,10 +98,16 @@
     "feedbackNegative": "Mauvaise réponse",
     "regenerate": "Régénérer la réponse",
     "interviewConfirmed": "Échange confirmé pour {name}",
+    "addToCalendar": "Ajouter à mon calendrier",
+    "calendarEventTitle": "Échange avec Maxime Jolivet",
+    "calendarEventDescription": "Rendez-vous planifié via l'assistant IA de maxime.bzh.",
+    "slotsLabel": "Créneaux disponibles",
+    "slotOption": "Choisir le créneau du {label}",
     "debugModeHint": "Visible uniquement avec ?debug=1 dans l'URL"
   },
   "errors": {
     "sendFailed": "Erreur lors de l'envoi du message. Veuillez réessayer.",
+    "emptyReply": "L'assistant n'a pas réussi à répondre (le modèle gratuit est parfois surchargé). Réessayez.",
     "offline": "Vous êtes hors ligne. Vérifiez votre connexion puis réessayez."
   }
 }

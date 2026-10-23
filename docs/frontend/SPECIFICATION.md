@@ -14,7 +14,7 @@ Ce frontend **ne contient aucune logique métier IA** : il n'appelle pas de LLM,
 
 ### 1.1 Identité visuelle
 
-Le head HTML (`nuxt.config.ts`) définit un titre **"Maxime - Chatbot IA"** et charge les polices Google Fonts *IBM Plex Sans* / *IBM Plex Mono*. Palette Tailwind en variables CSS (`assets/css/main.css`, tokens `--background`/`--foreground`/`--card`/`--muted`/`--accent`/`--primary`/`--destructive`/`--border`, triplet RGB pour supporter les modificateurs d'opacité `bg-accent/10`), claire par défaut (encre `#17151f` sur blanc cassé, accent indigo `#3a3170`) et sombre au choix du visiteur (encre devient le fond, lilas `#efebfb` devient le texte — voir `composables/useColorScheme.ts`, §4.2), appliquée à l'app entière (`app.vue`, §3.1), pas composant par composant.
+Le head HTML (`nuxt.config.ts`) définit un titre **"Maxime - Chatbot IA"** et charge les polices Google Fonts *IBM Plex Sans* / *IBM Plex Mono*. Favicon : le logo de `SiteLogo.vue` (`public/favicon.svg`, monochrome, encre `#1d3540` sur onglet clair et blanc cassé `#f3f4f0` sur onglet sombre via `prefers-color-scheme`), avec `favicon.ico` (16/32/48) et `apple-touch-icon.png` (180 px) en tuile `#1d3540` pour les navigateurs sans SVG — déclarés dans `nuxt.config.ts`. Les trois sont dérivés à la main du même tracé : si le logo change, les régénérer. Palette Tailwind en variables CSS (`assets/css/main.css`, tokens `--background`/`--foreground`/`--card`/`--muted`/`--accent`/`--primary`/`--destructive`/`--border`, triplet RGB pour supporter les modificateurs d'opacité `bg-accent/10`), claire par défaut (encre `#17151f` sur blanc cassé, accent indigo `#3a3170`) et sombre au choix du visiteur (encre devient le fond, lilas `#efebfb` devient le texte — voir `composables/useColorScheme.ts`, §4.2), appliquée à l'app entière (`app.vue`, §3.1), pas composant par composant.
 
 Une vraie photo de Maxime (`public/maximejolivet.jpg`) sert d'avatar partout où une identité visuelle est attendue — en-tête et écran vide de `Chatbot.vue`, `TypingIndicator.vue`, à côté de chaque réponse assistant dans `MessageBubble.vue`, portrait du hero sur `pages/index.vue` — rendue via `<NuxtImg>` (module **`@nuxt/image`**, `nuxt.config.ts` `modules`) plutôt qu'une balise `<img>` brute, pour l'optimisation (`format="webp"`) et le redimensionnement déclaratifs (`width`/`height`).
 
@@ -28,13 +28,13 @@ Une vraie photo de Maxime (`public/maximejolivet.jpg`) sert d'avatar partout où
 | Framework             | **Nuxt 4.5**                                                                                                             | SSR + routage fichier + serveur Nitro intégré                                                                                    |
 | Bundler / dev server  | **Vite 8.2** (via Nuxt)                                                                                                  |                                                                                                                                  |
 | UI                    | **Vue 3.5** (Composition API, `<script setup>`)                                                                          |                                                                                                                                  |
-| Style                 | **`@nuxtjs/tailwindcss` 6.14** (Tailwind CSS)                                                                            | Thème custom (`tailwind.config.js`), classes utilitaires (`assets/css/main.css`)                                                 |
+| Style                 | **Tailwind CSS 4.3** (`@tailwindcss/vite`)                                                                               | Configuré en CSS : `@import 'tailwindcss'` + tokens `@theme inline` dans `assets/css/main.css`, pas de `tailwind.config.js`      |
 | Images                | **`@nuxt/image` 2.1**                                                                                                   | `<NuxtImg>` (optimisation/format `webp`) pour l'avatar photo (`public/maximejolivet.jpg`), utilisé à la place d'un `<img>` brut  |
 | Langage               | **TypeScript 7.0**                                                                                                       |                                                                                                                                  |
-| HTTP client (déclaré) | **axios 1.19**                                                                                                           | Présent en dépendance mais **non utilisé dans le code actuel** — les appels réseau passent tous par `$fetch` (natif Nuxt/ofetch) |
+| HTTP client (déclaré) | **axios 1.20**                                                                                                           | Présent en dépendance mais **non utilisé dans le code actuel** — les appels réseau passent tous par `$fetch` (natif Nuxt/ofetch) |
 | Emojis                | **`unicode-emoji-json` 0.9**                                                                                             | Données statiques (par groupe) pour le sélecteur d'emoji du composant `Chatbot`                                                  |
 | i18n                  | **`@nuxtjs/i18n` 10.6** (vue-i18n 11)                                                                                    | Une seule locale active (`fr`) pour l'instant — infrastructure prête pour une 2ᵉ langue, voir §8.7                               |
-| Tests                 | **Vitest 4** + **`@nuxt/test-utils` 4.1** + **`@vue/test-utils`** (environnement `nuxt`, `happy-dom`)                    | Tests unitaires des composables — voir §8.6                                                                                      |
+| Tests                 | **Vitest 4** + **`@nuxt/test-utils` 4.1** + **`@vue/test-utils`** (environnement `nuxt`, `happy-dom`)                    | Tests unitaires des composables — voir §8.7                                                                                      |
 | Formatage             | **Prettier 3.9** (`.prettierrc.json` : single quotes, semicolons, `printWidth: 100`)                                     |                                                                                                                                  |
 | Devtools              | **`@nuxt/devtools`**                                                                                                     |                                                                                                                                  |
 | Conteneurisation      | Servi comme service `nuxt` dans `backend/compose.yaml` (image `node:24-alpine`, build + `node .output/server/index.mjs`) | Pas de `Dockerfile` propre à ce projet                                                                                           |
@@ -53,23 +53,30 @@ frontend/
 │                                 # pour toute l'app (composables/useColorScheme.ts, §4.2), pas de widget monté ici
 ├── pages/
 │   ├── index.vue                 # Page d'accueil (hero, portrait, HeroChatBar, StickyChatBubble)
-│   └── chat.vue                  # Page plein écran /chat (<Chatbot variant="page" />)
+│   ├── chat.vue                  # Page plein écran /chat (<Chatbot variant="page" />)
+│   └── embed.vue                 # /embed : monte seulement <StickyChatBubble embedded />, chargée en iframe par public/widget.js
 ├── components/
 │   ├── StickyChatBubble.vue     # Bulle flottante + tooltip d'accroche + panneau de conversation
 │   ├── HeroChatBar.vue          # Barre de saisie rapide sur la page d'accueil
 │   ├── Chatbot.vue              # Fenêtre de chat complète (en-tête, historique, saisie, emoji picker)
 │   ├── MessageBubble.vue        # Une bulle de message (utilisateur ou assistant)
 │   ├── TypingIndicator.vue      # Indicateur "en train d'écrire" (3 points animés)
-│   └── LinkPreviewCard.vue      # Carte d'aperçu de lien sous un message (§4.5)
+│   ├── LinkPreviewCard.vue      # Carte d'aperçu de lien sous un message (§4.5)
+│   └── SiteHeader.vue, SiteLogo.vue, BetaBadge.vue, CtaArrow.vue   # En-tête de site et éléments de marque (alignés sur maxime.bzh)
 ├── composables/
 │   ├── useChatbot.ts            # Logique métier du chat : état, envoi de message, agents
 │   ├── useColorScheme.ts        # Thème clair/sombre : résolution + persistance + synchro multi-instance (§4.2)
 │   └── …                        # useFaqs, useDebugMode, useOnlineStatus, useNotificationSound,
 │                                 # useSpeechRecognition/Synthesis (§4.2), §8.7 pour la couverture de tests
-├── server/api/[...path].ts      # Route serveur Nitro — proxy générique vers le backend Symfony
+├── server/api/
+│   ├── [...path].ts             # Proxy Nitro générique vers le backend Symfony (allowlist, §3.4)
+│   ├── conversations/[id]/stream.post.ts   # Proxy dédié du flux SSE (§7.2)
+│   ├── ai_agents.get.ts, faqs.get.ts       # Routes dédiées avec cache 5 min
+│   └── link-preview.get.ts      # Aperçu de lien (propre au frontend)
+├── i18n/locales/fr.json         # Chaînes traduites (§8.8)
+├── public/widget.js             # Script d'intégration du widget sur un site tiers (iframe vers /embed)
 ├── types/index.ts                # Types partagés (Message, AIAgent, ChatbotProps, ChatbotState)
-├── assets/css/main.css           # Directives Tailwind + classes utilitaires custom
-├── tailwind.config.js            # Thème "Minitel" (couleurs, polices, animations)
+├── assets/css/main.css           # Tailwind v4 : `@import 'tailwindcss'`, tokens de thème (`@theme inline`), classes utilitaires custom
 └── nuxt.config.ts                # Config Nuxt (head, modules, runtimeConfig, workaround Vite/TS7)
 ```
 
@@ -170,6 +177,8 @@ Sections :
 
 **Astuce de découverte** : bandeau discret ("💡 Tape `/` pour les commandes rapides…, ou Cmd/Ctrl+K…") affiché une seule fois, tous visiteurs/sessions confondus (`localStorage`, clé `chatbot:hint_seen`), après la toute première réponse assistant reçue via `onMessage` — le visiteur est déjà engagé à ce moment-là, contrairement à l'ouverture du panneau où rien ne s'est encore passé. Se referme manuellement, automatiquement après 8s, ou dès que le visiteur découvre `/` par lui-même (`watch` sur `showSlashMenu`).
 
+**Mention du modèle gratuit** (`chatbot.freeModelNotice`, `data-testid="free-model-notice"`) : une ligne sous le champ de saisie, dans les deux variantes (bulle et `/chat`) — « Ce chatbot tourne sur un modèle gratuit, donc patience si la réponse tarde. Si rien ne vient, essayez de renvoyer votre question. » Placée sous le champ et non dans l'écran d'accueil : celui-ci disparaît au premier message, précisément quand une réponse lente rend l'information utile. Les modèles `:free` d'OpenRouter sont sujets à des lenteurs et à des blocages (voir `docs/backend/AI_MODEL_BENCHMARK.md`).
+
 **Commande `/cv`** (remplace une carte de contact `.vcf` retirée depuis) : ouvre le vrai CV en ligne de Maxime (`https://www.maxime.bzh/cv-...pdf`) dans un nouvel onglet — lien direct vers son propre site plutôt qu'une copie re-hébergée ou générée, pour ne jamais devenir obsolète si le PDF change. La base de connaissances RAG contient bien un document "CV" mais c'est une extraction `.txt` pensée pour l'indexation, pas un fichier présentable à un visiteur.
 
 Pas de sélecteur d'agent dans l'UI : l'agent est choisi **automatiquement** par `useChatbot` (voir §5.1) plutôt que par l'utilisateur — un choix délibéré pour un widget mono-agent (voir §1).
@@ -204,6 +213,10 @@ Affiche un message unique, alignement à droite (`bg-accent`/`text-white`) pour 
 
 **Carte de réservation d'entretien** (`asksForIdentity`/`asksForEmail`, props `awaitingIdentity`/`awaitingEmail` calculées par `Chatbot.vue`) : le modèle n'a pas de signal structuré pour "je m'apprête à demander les coordonnées" (l'identité du visiteur n'est plus un tool call séparé, ce sont juste des arguments — `attendee_name`/`attendee_email`/`start_time`/`objet` — que l'agent rassemble avant d'appeler `planifier_entretien`, voir §7.2) ; `Chatbot.vue` détecte donc **par heuristique texte** que la dernière bulle assistant contient "prénom"/"email" + un `?` pour afficher l'une ou l'autre carte (jamais les deux à la fois : `awaitingEmail` exclut le cas déjà couvert par `awaitingIdentity`). Les deux cartes collectent les mêmes champs — prénom, nom, email, objet de l'échange, modalité (visio/téléphone, avec numéro requis seulement pour téléphone), date + heure (deux `<input>` natifs séparés, combinés en `YYYY-MM-DDTHH:mm` local) — avec validation côté client avant d'activer le bouton (email via regex permissive, créneau dans les plages ouvrées 9h–12h30/13h30–19h30 et hors week-end, un pas de 30 min sur le sélecteur d'heure pour matcher le grain des créneaux Cal.eu). À la validation, `Chatbot.vue` (`buildBookingMessage`) transforme ces champs en une phrase en langage naturel (`chatbot.identityMessage` + variantes) envoyée comme un message utilisateur normal — aucun appel API dédié, le modèle la relit comme du texte libre. Une fois `planifier_entretien` exécuté avec `start_time`/`attendee_name` en arguments, `bookingConfirmation` (computed) affiche la carte "✅ Entretien confirmé" (voir §6).
 
+**Créneaux cliquables** (`slotDays`/`showSlots`, événement `selectSlot`) : quand l'agent vient d'appeler `lister_creneaux_disponibles`, la bulle affiche les créneaux sous forme de puces (jour en titre, heure sur la puce, cibles tactiles `min-h-11`) plutôt que de laisser le visiteur les retaper. Les créneaux viennent **de la sortie réelle de l'outil** (`toolCalls[].output.response_data`, la réponse brute de Cal.eu, voir `utils/slots.ts`), jamais du texte du modèle — voir le point « Valider `start_time` avant l'appel Cal.eu » de `docs/BACKLOG.md`. `extractSlots()` accepte `{ "YYYY-MM-DD": [{ start }] }`, `data.slots` avec `time`, et une liste plate ; une forme non reconnue ne produit aucune puce (rien ne casse). `groupSlotsByDay()` ne garde que les créneaux futurs, 3 jours au plus, 4 créneaux par jour répartis sur la journée. Même restriction que les cartes d'identité : dernière bulle assistant, hors streaming, et masquées tant qu'une carte d'identité/email est la réponse attendue. Un clic envoie un message ordinaire (`Chatbot.vue::onSelectSlot`, clé `chatbot.slotChosenMessage`) contenant le libellé français **et** la date exacte renvoyée par Cal.eu avec son décalage horaire, pour que le modèle la transmette telle quelle à `planifier_entretien`. Aucun changement backend. Sur la forme exacte de la réponse Cal.eu : le workflow vit en base, pas dans le dépôt — l'extracteur repose sur le format documenté de l'API Cal.com-compatible, non vérifié contre une vraie réponse de `api.cal.eu/v2/slots`.
+
+**« Ajouter à mon calendrier »** : la carte « Entretien confirmé » propose un fichier `.ics` (`utils/ics.ts`, un seul `VEVENT`, heures en UTC, lignes repliées à 75 octets, échappement RFC 5545) généré côté navigateur. Début et nom viennent des arguments de `planifier_entretien` (`start_time`, `attendee_name`) ; la fin vient de `response_data.data.end` si elle est valide (après le début, moins de 4 h), sinon 1 h — l'événement Cal.eu existe en 30 et 60 minutes. L'`UID` est dérivé de l'heure de début : réimporter le fichier met l'entrée à jour au lieu de la dupliquer. Bouton masqué si `start_time` n'est pas une date valide.
+
 ### 4.4 `TypingIndicator.vue`
 
 Indicateur "en train d'écrire" façon Messenger (avatar + 3 points qui rebondissent en cascade, `animate-bounce-slow` avec délais échelonnés). Affiché entre le dernier message et le champ de saisie tant que `isLoading === true`.
@@ -230,6 +243,10 @@ Composable Vue exposant tout l'état et les actions nécessaires à un composant
 **État interne** (`ChatbotState`, `useState` partagé — survit à une navigation entre `/` et `/chat` sans perdre le fil) : `messages[]`, `isLoading`, `inputValue`, `error`, `selectedAgentId`, `agents[]`. Le `conversation_id` réel vit séparément (autre `useState`), persisté en `localStorage` (`CONVERSATION_ID_STORAGE_KEY`) pour survivre à un rechargement de page.
 
 **Persistance et streaming réels** : le premier `sendMessage()` crée une vraie `Conversation` côté backend (`POST /api/conversations`), puis chaque tour de parole passe par `POST /api/conversations/{id}/stream` (SSE réel — `fetch` + `ReadableStream`, pas `$fetch`, pour pouvoir lire le flux au fil de l'eau) plutôt que par `/api/chat/quick-send` (voir §7.2 : cet endpoint existe toujours côté backend mais n'est plus appelé par ce widget). Au montage, `restoreConversation()` récupère l'historique complet (`GET /api/conversations/{id}/messages`) si un `conversation_id` existe déjà en `localStorage`.
+
+**Brouillon conservé** (`DRAFT_STORAGE_KEY` = `chatbot:draft`) : le texte en cours de saisie est écrit dans `localStorage` à chaque modification de `inputValue` et restauré au montage, pour qu'un rechargement ou une bulle refermée ne fasse pas perdre un long message. Effacé dès que le champ est vidé (ce que fait l'envoi). Non restauré si un champ est déjà rempli (état `useState` conservé entre `/` et `/chat`) ni si une question de la barre du hero est sur le point d'être envoyée (l'envoi vide le champ et détruirait le brouillon) ; une commande slash à moitié tapée (`/th…`) et une saisie faite d'espaces ne sont pas mémorisées. `localStorage` indisponible : ignoré sans erreur.
+
+**Réponse vide de l'assistant** : jamais de bulle blanche. Une frame `error` de code `empty_response` (le modèle n'a rien renvoyé, voir `docs/backend/SPECIFICATION.md` §5.3) affiche `errors.emptyReply` avec le bouton « Réessayer », au lieu du message générique d'échec d'envoi. Filet de sécurité côté frontend pour un backend plus ancien (les deux se déploient séparément) : si le flux se termine sans texte et sans appel d'outil, la bulle vide est retirée et la même erreur s'affiche. Une réponse sans texte mais avec un outil exécuté (la carte de réservation) est conservée.
 
 **Principales actions exposées** (liste non exhaustive — voir le fichier source pour le reste) :
 | Fonction                                | Rôle                                                                                                                          |
@@ -396,11 +413,18 @@ import { Chatbot } from '~/components/Chatbot';
 
 **Vitest** (`vitest.config.ts`, `environment: 'nuxt'` via `@nuxt/test-utils/config`) — un vrai contexte Nuxt est démarré pour chaque fichier de test, donc les imports automatiques du projet (`useState`, `useI18n`, `useRoute`, `$fetch`, composables locaux comme `useFaqs`/`useOnlineStatus`) fonctionnent dans les tests exactement comme dans l'app, sans les importer explicitement. Fichiers `*.test.ts` colocalisés avec le code testé (`composables/useChatbot.test.ts` à côté de `useChatbot.ts`, etc.) plutôt qu'un dossier `tests/` séparé.
 
-Couverture actuelle — composables uniquement, pas de test de composant `.vue` ni e2e :
+Couverture actuelle — les composables, les utilitaires `utils/` et trois composants (`SiteHeader`, `MessageBubble`, `Chatbot`), pas d'e2e navigateur :
 - **`useOnlineStatus`** : reflète `navigator.onLine`, réagit aux events `online`/`offline`, arrête de réagir après unmount.
 - **`useDebugMode`** : lecture de `?debug=1` dans l'URL, via `mockNuxtImport('useRoute', ...)`.
 - **`useFaqs`** : peuple `suggestedQuestions` depuis `GET /api/faqs` (mocké avec `registerEndpoint`), ne fetch qu'une fois (`hasFetched`), dégrade silencieusement en cas d'échec, état partagé entre deux appels indépendants (`useState`).
 - **`useChatbot`** : le plus gros morceau — garde-fous de `sendMessage()` (message vide, déjà en cours d'envoi, hors ligne), le chemin heureux complet (parsing des frames SSE `data: {...}\n\n`, y compris `ai_complete`/`sources`/`token_usage`), un frame `error`, une réponse HTTP non-`ok`, `retryLastMessage()` (rejoue sans dupliquer la bulle utilisateur), `clearMessages()`, `cancelReply()` (abandonne une requête en cours via `AbortController` sans poser d'erreur — le rejet `AbortError` est distingué d'un vrai échec réseau), gate `autoScroll` (`scrollToBottom()` ne fait rien tant que désactivé, `sendMessage()` le remet à `true`), notification desktop (`Notification` global stubbé — déclenchée seulement si `document.hidden` et permission accordée, jamais sinon).
+- **`useColorScheme`** : repli sur le défaut sans préférence, résolution `prefers-color-scheme` sombre, choix mémorisé prioritaire sur l'OS, `toggle()` bascule et persiste, cesse de suivre l'OS une fois un choix explicite fait.
+- **`useSpeechRecognition`** : navigateur non supporté (`toggleListening` sans effet), support via le global standard ou préfixé `webkit`, arrêt au second appel, concaténation des résultats intermédiaires + finaux, arrêt en fin/erreur/démontage.
+- **`SiteHeader`** (`components/SiteHeader.test.ts`) : les deux CTA portfolio/CV, flèche sur le CTA CV uniquement, masqué au scroll vers le bas et réaffiché au scroll vers le haut, toujours visible près du haut de page.
+- **`useChatbot` — brouillon** : restauration au montage, pas d'écrasement d'un champ déjà rempli, brouillon préservé avant une question du hero, sauvegarde à la frappe, suppression quand le champ est vidé ou le message envoyé, slash et espaces ignorés.
+- **`utils/slots.ts`**, **`utils/ics.ts`** (`slots.test.ts`, `ics.test.ts`) : extraction des créneaux selon les formes de réponse connues (et rien quand la forme est inconnue ou que ce sont les arguments de l'outil qui reviennent en écho), regroupement par jour, génération et repliement de l'`.ics`, repli de la durée.
+- **`MessageBubble`** (`components/MessageBubble.test.ts`) : puces uniquement sur la dernière bulle, hors streaming et hors carte d'identité ; événement `selectSlot` avec la date exacte de Cal.eu ; bouton calendrier et contenu du fichier téléchargé.
+- **`Chatbot`** (`components/Chatbot.test.ts`) : la mention du modèle gratuit sous le champ, dans les deux variantes et après le début de la conversation.
 - **`useNotificationSound`** : `muted` démarre à `false`, lit un choix persisté au montage (même schéma `localStorage` que `useColorScheme`), `toggleMuted()` bascule et persiste, `playMessageSound()` ne lève pas d'erreur pendant que `muted` est actif (le chime est simplement sauté).
 
 Deux techniques de mock spécifiques à connaître avant d'y toucher :

@@ -93,7 +93,7 @@ Deux pipelines distincts, le second déclenché par le premier :
 | `DEPLOY_PROJECT_PATH`    | `/home/{{user}}/repositories/chatbot-skills-ia/backend`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `O2SWITCH_API_LOGIN`     | Identifiant cPanel (même valeur que `DEPLOY_SSH_USER`, mais un secret séparé — utilisé uniquement par l'API de whitelist SSH, sans rapport avec la clé SSH)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `O2SWITCH_API_TOKEN`     | Token API cPanel (cPanel > Sécurité > Gestionnaire de jetons API > Créer) — pas le mot de passe cPanel                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `DEPLOY_ENV_FILE`        | Contenu complet du `.env` de production : **`APP_ENV=prod`** (sans ça, un `.env` vide ou incomplet fait retomber Symfony en `dev`, qui référence des bundles dev-only absents du build `--no-dev` déployé -- le workflow force déjà `--env=prod` sur les migrations par défense en profondeur, mais mieux vaut ne pas en dépendre), `DATABASE_URL` (instance MariaDB o2switch, `serverVersion=11.4.12-MariaDB`), `ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH` (`bin/console security:hash-password`), `QDRANT_HOST`/`QDRANT_PORT`/`QDRANT_API_KEY` (Qdrant Cloud), `AI_PROVIDER=api_endpoint` + `AI_API_*` (ou configurer une ligne `AiProviderConfig` après le premier déploiement), `CORS_ALLOW_ORIGIN` pour l'origine réelle du frontend (`https://ia.maxime.bzh`, le frontend Nuxt public sur Vercel -- pas `chatbot.jolivetmaxime.fr`, qui n'est que le domaine de l'API elle-même), `MESSENGER_TRANSPORT_DSN` (`sync://` tant qu'aucun worker persistant n'existe côté o2switch -- voir `backend/README.md` §File d'attente async), `REDIS_URL` (Redis externe managé Upstash, `rediss://` -- voir plus haut ; requis par `config/packages/cache.yaml`, sans lien avec `MESSENGER_TRANSPORT_DSN` ci-dessus), `MAILER_DSN` (`null://null` tant qu'aucun fournisseur transactionnel n'est branché -- le mail est silencieusement jeté plutôt qu'une erreur ; lu par `config/packages/mailer.yaml`), `MAILER_FROM_ADDRESS` (adresse "From", injectée via `#[Autowire(env:)]` à la fois dans `App\Chat\ChatService` et `App\Workflow\WorkflowExecutionService`), `CAL_EU_API_KEY` (jeton `Authorization: Bearer ...` lu au moment de l'exécution par `WorkflowExecutionService::resolveEnvHeaders()` pour l'étape "Réserver sur Cal.eu" du workflow `planifier_entretien`, cible `https://api.cal.eu/v2/bookings`), `OWNER_NOTIFICATION_EMAIL` (email de notification "nouvelle conversation", injecté via `#[Autowire(env:)]` dans `ChatService` -- vide = fonctionnalité désactivée, mais la variable doit exister). Ces cinq variables ont toutes manqué entièrement de `.env.prod` en même temps (pas juste une valeur vide) : `MAILER_FROM_ADDRESS`/`OWNER_NOTIFICATION_EMAIL` sont résolues dès que Symfony instancie `ChatService` (donc dès la première requête `chat`/`conversations`, `ChatService` étant sur le chemin de tous les endpoints de conversation), et `REDIS_URL` dès que n'importe quel des trois pools cache est sollicité (§ci-dessus) -- **aucune de ces variables n'est réellement optionnelle en prod**, même celles qui semblent inertes (`MAILER_DSN=null://null`). |
+| `DEPLOY_ENV_FILE`        | Contenu complet du `.env` de production : **`APP_ENV=prod`** (sans ça, un `.env` vide ou incomplet fait retomber Symfony en `dev`, qui référence des bundles dev-only absents du build `--no-dev` déployé -- le workflow force déjà `--env=prod` sur les migrations par défense en profondeur, mais mieux vaut ne pas en dépendre), `DATABASE_URL` (instance MariaDB o2switch, `serverVersion=11.4.12-MariaDB`), `ADMIN_USERNAME`/`ADMIN_PASSWORD_HASH` (`bin/console security:hash-password`), `QDRANT_HOST`/`QDRANT_PORT`/`QDRANT_API_KEY` (Qdrant Cloud), `AI_PROVIDER=api_endpoint` + `AI_API_*` (ou configurer une ligne `AiProviderConfig` après le premier déploiement), `CORS_ALLOW_ORIGIN` pour l'origine réelle du frontend (`https://ia.maxime.bzh`, le frontend Nuxt public sur Vercel -- pas `chatbot.jolivetmaxime.fr`, qui n'est que le domaine de l'API elle-même), `MESSENGER_TRANSPORT_DSN` (`sync://` tant qu'aucun worker persistant n'existe côté o2switch -- voir `backend/README.md` §File d'attente async), `REDIS_URL` (Redis externe managé Upstash, `rediss://` -- voir plus haut ; requis par `config/packages/cache.yaml`, sans lien avec `MESSENGER_TRANSPORT_DSN` ci-dessus), `MAILER_DSN` (`null://null` tant qu'aucun fournisseur transactionnel n'est branché -- le mail est silencieusement jeté plutôt qu'une erreur ; lu par `config/packages/mailer.yaml`), `MAILER_FROM_ADDRESS` (adresse "From", injectée via `#[Autowire(env:)]` à la fois dans `App\Chat\ChatService` et `App\Workflow\WorkflowExecutionService`), `CAL_EU_API_KEY` (jeton `Authorization: Bearer ...` lu au moment de l'exécution par `WorkflowExecutionService::resolveEnvHeaders()` pour l'étape "Réserver sur Cal.eu" du workflow `planifier_entretien`, cible `https://api.cal.eu/v2/bookings`), `CONVERSATION_RETENTION_DAYS` (rétention en jours des conversations, `90` par défaut dans `.env.example` ; lue par `app:conversations:purge`, voir « Purge planifiée » ci-dessous), `OWNER_NOTIFICATION_EMAIL` (email de notification "nouvelle conversation", injecté via `#[Autowire(env:)]` dans `ChatService` -- vide = fonctionnalité désactivée, mais la variable doit exister). Ces cinq variables ont toutes manqué entièrement de `.env.prod` en même temps (pas juste une valeur vide) : `MAILER_FROM_ADDRESS`/`OWNER_NOTIFICATION_EMAIL` sont résolues dès que Symfony instancie `ChatService` (donc dès la première requête `chat`/`conversations`, `ChatService` étant sur le chemin de tous les endpoints de conversation), et `REDIS_URL` dès que n'importe quel des trois pools cache est sollicité (§ci-dessus) -- **aucune de ces variables n'est réellement optionnelle en prod**, même celles qui semblent inertes (`MAILER_DSN=null://null`). |
 
 Définir ces secrets via `gh secret set <NAME>` ou l'UI GitHub (Settings >
 Secrets and variables > Actions).
@@ -141,6 +141,16 @@ contenu) :
 gh secret list
 ```
 
+### Purge planifiée des conversations
+
+La rétention des conversations (`CONVERSATION_RETENTION_DAYS`, 90 jours par défaut) n'est **pas** appliquée automatiquement : ni `deploy-backend.yml` ni le serveur ne planifient de tâche. Il faut programmer à la main une tâche cron cPanel (Tâches Cron) qui lance la commande en `--force` (sans quoi elle refuse de supprimer en non-interactif) :
+
+```bash
+php bin/console app:conversations:purge --force --env=prod
+```
+
+Aperçu sans suppression : `--dry-run`. Détail de la commande : [`backend/README.md`](../backend/README.md#purge-des-conversations-rétention).
+
 ### Lancer un dry-run
 
 ```bash
@@ -153,17 +163,55 @@ de ce qu'un déploiement changerait.
 
 ## Frontend (Nuxt)
 
-Déployé sur **Vercel**, projet `chatbot-skills-ia`, aliasé sur
-`https://ia.maxime.bzh` (le domaine public réel du widget/chat, distinct de
-`chatbot.jolivetmaxime.fr` qui reste uniquement l'API o2switch — voir
-`CORS_ALLOW_ORIGIN` plus haut). Les variables d'environnement (`API_URL`,
-`ADMIN_USERNAME`, `ADMIN_PASSWORD`) sont définies côté **Vercel**
-(dashboard ou `vercel env`), pour les environnements Production et Preview —
-elles ne vivent pas dans ce dépôt. Il n'existe **pas** de workflow GitHub
-Actions pour ce déploiement (contrairement au backend ci-dessus) ; le
-déclenchement effectif (auto-deploy Vercel sur push, ou `vercel deploy
---prod` manuel) dépend de la configuration du projet côté Vercel, non
-vérifiable depuis ce dépôt.
+Déployé sur **Vercel**, projet `chatbot-skills-ia` (Root Directory `frontend`,
+preset Nuxt, Node 24), aliasé sur `https://ia.maxime.bzh` (le domaine public
+réel du widget/chat, distinct de `chatbot.jolivetmaxime.fr` qui reste
+uniquement l'API o2switch — voir `CORS_ALLOW_ORIGIN` plus haut). Les
+variables d'environnement (`API_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`)
+sont définies côté **Vercel** (dashboard ou `vercel env`), pour les
+environnements Production et Preview — elles ne vivent pas dans ce dépôt.
+
+La production est déployée par
+[`.github/workflows/deploy-frontend.yml`](../.github/workflows/deploy-frontend.yml),
+déclenché par un push sur `master` touchant `frontend/**` (ou manuellement,
+`workflow_dispatch`). Même enchaînement que le guide GitHub Actions de
+Vercel : `vercel pull` (réglages + variables du projet), `vercel build --prod`
+sur le runner, puis `vercel deploy --prebuilt --prod`. La CLI est lancée
+depuis la **racine du dépôt** et non depuis `frontend/` : le Root Directory du
+projet est déjà `frontend`, la lancer depuis ce dossier chercherait
+`frontend/frontend`. Ce workflow n'exécute ni lint ni tests (contrairement au
+backend, il n'y a pas de CI frontend) : un push sur `master` part en
+production.
+
+Pour éviter un double déploiement (Vercel + Actions), l'auto-deploy Git de
+Vercel est coupé pour `master` par [`frontend/vercel.json`](../frontend/vercel.json)
+(`git.deploymentEnabled`). Les autres branches gardent les déploiements
+*preview* habituels de Vercel.
+
+### Secrets requis (Settings > Secrets and variables > Actions)
+
+| Secret              | Description                                                                                                           |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`      | Jeton d'accès Vercel dédié au déploiement (vercel.com > Account Settings > Tokens), pas un jeton personnel réutilisé |
+| `VERCEL_ORG_ID`     | Identifiant de l'équipe/compte propriétaire du projet (`orgId` de `.vercel/project.json` après `vercel link`)          |
+| `VERCEL_PROJECT_ID` | Identifiant du projet `chatbot-skills-ia` (`projectId` du même fichier)                                                |
+
+```bash
+gh secret set VERCEL_TOKEN        # saisie interactive masquée, rien dans l'historique du shell
+gh secret set VERCEL_ORG_ID -b"team_..."
+gh secret set VERCEL_PROJECT_ID -b"prj_..."
+```
+
+> [!WARNING]
+> Les trois secrets doivent exister **avant** de pousser `deploy-frontend.yml`
+> et `frontend/vercel.json` sur `master` : ce push coupe l'auto-deploy Vercel
+> de `master`, et sans secrets le workflow échoue — plus aucun déploiement
+> de production ne partirait. Pour revenir en arrière, supprimer
+> `frontend/vercel.json` (l'auto-deploy Vercel reprend au push suivant).
+
+Le workflow a été validé en local (`vercel pull` puis `vercel build --prod`
+depuis la racine d'un clone, avec le vrai projet lié) ; l'étape
+`vercel deploy` elle-même n'a pas été exécutée hors de GitHub Actions.
 
 En local, le frontend tourne uniquement via `docker compose` (service
 `nuxt`, voir [`README.md`](../README.md)) ou `npm run dev` (voir
