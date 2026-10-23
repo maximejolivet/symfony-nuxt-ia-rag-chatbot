@@ -30,7 +30,7 @@ symfony-nuxt-ia-rag-chatbot/
 ├── frontend/    Widget chatbot Nuxt 4 (composant + proxy serveur)
 ├── traefik/     Reverse proxy, domaines par service
 ├── docs/        Cahiers des charges, backlog, collection Bruno
-└── .github/     CI (lint/test/phpstan/audit), déploiement, scripts d'install
+└── .github/     CI (lint/test/phpstan/audit, SonarCloud), déploiement, scripts d'install
 ```
 
 ### Backend — organisation par domaine métier, pas par couche technique
@@ -124,7 +124,7 @@ make audit           # composer audit + npm outdated/audit
 make actionlint       # lint des workflows GitHub Actions
 ```
 
-Ces commandes sont exactement ce que `ci-backend.yml`/`audit.yml` exécutent en CI — un `composer cs:check && composer phpstan && php bin/phpunit` local reproduit le gate avant de pousser.
+Ces commandes reproduisent ce que `ci-backend.yml`/`audit.yml` exécutent en CI, à une exception près : le `npm audit` de `audit.yml` ne bloque que sur les critical (`--audit-level=critical`), alors que `make audit` affiche aussi les 7 high de la chaîne Nuxt (voir [SECURITY.md](../SECURITY.md)). Un `composer cs:check && composer phpstan && php bin/phpunit` local reproduit le gate backend avant de pousser. L'analyse SonarCloud ([`sonarcloud.yml`](../.github/workflows/sonarcloud.yml)) n'a pas d'équivalent local.
 
 ### Autres
 

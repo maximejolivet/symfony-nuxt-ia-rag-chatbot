@@ -16,14 +16,15 @@ interface UseChatbotProps {
 // Links directly to Maxime's real, live CV (confirmed with him -- the
 // knowledge base only holds a plain-.txt extraction meant for RAG
 // indexing, not something to hand a visitor) rather than mirroring or
-// re-hosting a copy: it never goes stale if he updates the PDF on his own
-// site, and there's nothing here to keep in sync. No Blob/<a download>
+// re-hosting a copy: it never goes stale if he updates the CV on his own
+// site, and there's nothing here to keep in sync. The CV lives on a locale-
+// prefixed page (/fr/cv): a bare /cv does not resolve on maxime.bzh. No Blob/<a download>
 // technique like exportConversation() -- download only works reliably
 // same-origin, this is a plain cross-origin navigation instead. Exported
 // (Nuxt auto-imports it) so the site header's CV button and the /cv slash
 // command can never point at two different files.
 export const CV_URL =
-  'https://www.maxime.bzh/cv-maximejolivet-developpeur-web-fullstack-senior-lead-dev-tech-lead-ia.pdf';
+  'https://www.maxime.bzh/fr/cv';
 
 // Keeps the conversation alive across page reloads/navigation within the
 // same browser -- otherwise a visitor who refreshes mid-chat (or who already

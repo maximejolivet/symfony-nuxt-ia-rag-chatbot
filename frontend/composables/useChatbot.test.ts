@@ -978,7 +978,7 @@ describe('useChatbot: openCV', () => {
     chatbot.openCV();
 
     expect(open).toHaveBeenCalledWith(
-      'https://www.maxime.bzh/cv-maximejolivet-developpeur-web-fullstack-senior-lead-dev-tech-lead-ia.pdf',
+      'https://www.maxime.bzh/fr/cv',
       '_blank',
       'noopener',
     );

@@ -85,7 +85,7 @@ symfony-nuxt-ia-rag-chatbot/
 ├── frontend/      # Composant chatbot Nuxt 4 + TailwindCSS
 ├── traefik/       # Reverse proxy : domaines par service (*.chatbot.localhost)
 ├── docs/          # Guide d'onboarding, cahiers des charges, backlog, collection API (Bruno)
-└── .github/       # CI (lint/tests/PHPStan/audit), déploiement, scripts d'installation
+└── .github/       # CI (lint/tests/PHPStan/audit, SonarCloud), déploiement, scripts d'installation
 ```
 
 Détail de l'architecture backend (entités, services, domaines métier) dans [`backend/README.md`](backend/README.md).
