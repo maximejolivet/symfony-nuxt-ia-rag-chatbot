@@ -6,6 +6,18 @@
 ![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php&logoColor=white)
 ![Frontend deploy](https://img.shields.io/badge/frontend-vercel-black?logo=vercel)
 
+## Vue d'ensemble des workflows GitHub Actions
+
+| Workflow | Fichier | Déclencheur | Rôle |
+| --- | --- | --- | --- |
+| CI (backend) | [`ci-backend.yml`](../.github/workflows/ci-backend.yml) | push/PR sur `backend/**` | Lint, tests, PHPStan, CS-Fixer, `composer audit` |
+| Deploy chat-ia (backend) | [`deploy-backend.yml`](../.github/workflows/deploy-backend.yml) | `workflow_run` après CI sur `master`, ou manuel | Déploiement SSH vers o2switch |
+| Deploy chat-ia (frontend) | [`deploy-frontend.yml`](../.github/workflows/deploy-frontend.yml) | push sur `master` touchant `frontend/**`, ou manuel | Déploiement Vercel |
+| Dependency audit | [`audit.yml`](../.github/workflows/audit.yml) | PR, ou manuel | `composer audit --locked` et `npm audit` (seuil critical côté npm, voir [SECURITY.md](../SECURITY.md)) |
+| SonarCloud | [`sonarcloud.yml`](../.github/workflows/sonarcloud.yml) | push sur `master`/`develop`, PR | Analyse statique backend et frontend (`sonar-project.properties`), secret `SONAR_TOKEN` |
+
+Renovate (`renovate.json`, app `renovate`) n'est pas un workflow : il ouvre des PR de mise à jour de dépendances sur `develop`, à partir de la config `config:recommended`.
+
 ## Backend (Symfony)
 
 Deux pipelines distincts, le second déclenché par le premier :

@@ -1,7 +1,7 @@
 # Sécurité
 
 ![composer audit](https://img.shields.io/badge/composer%20audit-0%20advisories-brightgreen)
-![npm audit](https://img.shields.io/badge/npm%20audit-0%20vulnerabilities-brightgreen)
+![npm audit](https://img.shields.io/badge/npm%20audit-7%20high%2C%200%20critical-orange)
 [![Security Policy](https://img.shields.io/badge/security%20policy-see%20below-informational)](#signalement-dune-vulnérabilité)
 
 ## Signalement d'une vulnérabilité
@@ -21,9 +21,9 @@ Toutes les dépendances directes sont à jour (`doctrine/orm` 3.6.8, `symfony/me
 
 ### Frontend Nuxt (`npm audit`)
 
-```
-found 0 vulnerabilities
-```
+Constat au 2026-10-23 (`npm audit --package-lock-only`) : **7 vulnérabilités high, 0 critical**. Toutes sont transitives, sauf `nuxt` (direct) : `nuxt`, `@nuxt/vite-builder`, `@nuxt/vite-server`, `@nuxt/nitro-server`, `nitropack`, `listhen`, `node-forge`. Elles viennent de la chaîne Nuxt 4.x, qui n'a pas encore de version corrigée.
+
+Le job `npm audit` de [`.github/workflows/audit.yml`](.github/workflows/audit.yml) n'échoue donc que sur les **critical** (`--audit-level=critical`), en attendant une version Nuxt corrigée. `make audit` lance `npm audit` sans ce seuil et affiche donc ces 7 high. Revenir au seuil par défaut dès qu'un Nuxt 4.x corrigé sort.
 
 ### Images Docker
 
