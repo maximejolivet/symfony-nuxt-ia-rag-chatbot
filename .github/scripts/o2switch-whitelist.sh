@@ -21,11 +21,30 @@ CPANEL="https://${CPANEL_HOST}:2083"
 # no error message pointing at why.
 CURL_OPTS=(--connect-timeout 10 --max-time 30 -H "Authorization: cpanel ${O2SWITCH_API_LOGIN}:${O2SWITCH_API_TOKEN}")
 
+# GET a cPanel endpoint, retrying on transport errors (timeouts, refused
+# connections, resets). The o2switch API is occasionally slow to answer from
+# GitHub's runners, and a single timeout used to abort the whole deploy.
+# Prints the body on success; returns 1 once every attempt has failed.
+o2_get() {
+    local url=$1 attempt body
+    for attempt in 1 2 3; do
+        if body=$(curl -sX GET "${CURL_OPTS[@]}" "$url"); then
+            printf '%s' "$body"
+            return 0
+        fi
+        echo "o2switch call failed (attempt $attempt/3), retrying in 5s..." >&2
+        sleep 5
+    done
+    return 1
+}
+
 echo "Fetching currently whitelisted IPs..."
-LIST_HTTP=$(curl -sX GET "${CURL_OPTS[@]}" -o /tmp/o2switch-list.json -w '%{http_code}' "$CPANEL/$ENDPOINT/list")
-RESPONSE=$(cat /tmp/o2switch-list.json)
+if ! RESPONSE=$(o2_get "$CPANEL/$ENDPOINT/list"); then
+    echo "::error::o2switch list endpoint unreachable after 3 attempts." >&2
+    exit 5
+fi
 if ! echo "$RESPONSE" | jq empty 2>/dev/null; then
-    echo "::error::o2switch list endpoint returned non-JSON (HTTP $LIST_HTTP). First 500 chars of body below:" >&2
+    echo "::error::o2switch list endpoint returned non-JSON. First 500 chars of body below:" >&2
     echo "$RESPONSE" | head -c 500 >&2
     echo >&2
     exit 5
@@ -45,14 +64,23 @@ COUNT=$(echo "$RESPONSE" | jq -r '.data.count // 0')
 if [ "$COUNT" -ge 5 ]; then
     OLDEST=$(echo "$RESPONSE" | jq -r '.data.list | sort_by(.updateDate) | .[0].address')
     echo "Quota reached ($COUNT/5) -- removing oldest CI IP: $OLDEST (in & out)"
-    curl -sX GET "${CURL_OPTS[@]}" "$CPANEL/$ENDPOINT/remove?address=$OLDEST&direction=in&port=22" | jq -r '.message // .status'
-    sleep 2
-    curl -sX GET "${CURL_OPTS[@]}" "$CPANEL/$ENDPOINT/remove?address=$OLDEST&direction=out&port=22" | jq -r '.message // .status'
-    sleep 2
+    for direction in in out; do
+        # A failed removal must not abort the run: the add below will still
+        # report a clear error if the quota really is full.
+        if ! body=$(o2_get "$CPANEL/$ENDPOINT/remove?address=$OLDEST&direction=$direction&port=22"); then
+            echo "::warning::Could not remove $OLDEST ($direction) -- continuing." >&2
+        else
+            echo "$body" | jq -r '.message // .status' || true
+        fi
+        sleep 2
+    done
 fi
 
 echo "Whitelisting runner IP $RUNNER_IP..."
-ADD_RESPONSE=$(curl -sX GET "${CURL_OPTS[@]}" "$CPANEL/$ENDPOINT/add?address=$RUNNER_IP&port=22")
+if ! ADD_RESPONSE=$(o2_get "$CPANEL/$ENDPOINT/add?address=$RUNNER_IP&port=22"); then
+    echo "::error::Failed to reach o2switch to whitelist $RUNNER_IP after 3 attempts." >&2
+    exit 1
+fi
 echo "$ADD_RESPONSE" | jq
 
 # Fail loudly instead of silently letting a later SSH step fail with an
