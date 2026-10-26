@@ -55,10 +55,6 @@
       </div>
     </section>
 
-    <footer class="px-6 pb-6 font-sans text-xs text-muted-foreground sm:px-10">
-      <p>{{ $t('home.apiFooter', { url: apiUrl }) }}</p>
-    </footer>
-
     <StickyChatBubble />
   </main>
 </template>
@@ -66,8 +62,6 @@
 <script setup lang="ts">
 const { t } = useI18n();
 const heading = computed(() => t('home.heading'));
-// Public runtime config: API_URL is exposed to the browser on purpose here.
-const apiUrl = useRuntimeConfig().public.apiUrl;
 
 // The badge announces the assistant; the hero chat bar is that assistant.
 const focusChat = () => document.getElementById('hero-question')?.focus();
