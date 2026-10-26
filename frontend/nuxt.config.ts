@@ -4,7 +4,6 @@ import tailwindcss from '@tailwindcss/vite';
 // `process.dev` isn't set in this top-level config-evaluation context (only
 // inside Nuxt runtime code) -- NODE_ENV is the reliable check here.
 const isDev = 'production' !== process.env.NODE_ENV;
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -106,8 +105,7 @@ export default defineNuxtConfig({
       // instead of the docker-compose-only hostname below, so a prod host
       // that forgets to set API_URL still points somewhere real.
       apiUrl:
-        process.env.API_URL ||
-        (isDev ? 'http://chatbot-symfony:8000' : 'https://chatbot.jolivetmaxime.fr'),
+        process.env.API_URL
     },
   },
   // Vercel's default serverless function duration (10s on Hobby) is too
