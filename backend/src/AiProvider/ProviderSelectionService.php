@@ -89,7 +89,7 @@ final readonly class ProviderSelectionService
                         apiKey: $this->aiApiKey,
                         model: $this->aiApiModel,
                         timeout: $this->aiApiTimeout,
-                        fallbackModels: array_values(array_filter(array_map('trim', explode(',', (string) $this->aiApiFallbackModels)), static fn (string $m): bool => '' !== $m)),
+                        fallbackModels: array_values(array_filter(array_map('trim', explode(',', (string) $this->aiApiFallbackModels)), static fn(string $m): bool => '' !== $m)),
                     );
                 } catch (\InvalidArgumentException $e) {
                     $this->logger->warning('API endpoint LLM client unavailable ({error}); falling back to Ollama.', ['error' => $e->getMessage()]);
