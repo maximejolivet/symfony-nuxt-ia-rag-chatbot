@@ -5,10 +5,12 @@ namespace App\AiProvider\Client\ApiEndpoint;
 use App\AiProvider\Client\ChatMessage;
 use App\AiProvider\Client\CompletionResult;
 use App\AiProvider\Client\LlmClientInterface;
+use App\AiProvider\Client\LlmRateLimitedException;
 use App\AiProvider\Client\TokenEstimator;
 use App\AiProvider\Client\ToolCall;
 use App\AiProvider\Client\ToolSpec;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -21,12 +23,18 @@ final readonly class OpenAiCompatibleLlmClient implements LlmClientInterface
 {
     private HttpClientInterface $httpClient;
 
+    /**
+     * @param string[] $fallbackModels OpenRouter-style server-side fallbacks: tried in order by the
+     *                                 provider when the primary model fails (e.g. 429), sent as the
+     *                                 `models` array. Empty = no `models` field (other endpoints unaffected).
+     */
     public function __construct(
         public string $apiEndpoint,
         public string $apiKey,
         public string $model,
         public int $timeout = 30,
         ?HttpClientInterface $httpClient = null,
+        public array $fallbackModels = [],
     ) {
         if ('' === $apiKey) {
             throw new \InvalidArgumentException('API key not configured for this provider.');
@@ -42,6 +50,7 @@ final readonly class OpenAiCompatibleLlmClient implements LlmClientInterface
             'temperature' => $temperature,
             'max_tokens' => $maxTokens,
         ];
+        $payload += $this->fallbackPayload();
         $toolSpecs = $this->toToolSpecs($tools);
         if ($toolSpecs) {
             $payload['tools'] = $toolSpecs;
@@ -52,7 +61,11 @@ final readonly class OpenAiCompatibleLlmClient implements LlmClientInterface
             'headers' => $this->headers(),
             'timeout' => $this->timeout,
         ]);
-        $result = $response->toArray();
+        try {
+            $result = $response->toArray();
+        } catch (HttpExceptionInterface $e) {
+            throw $this->translateUpstreamError($e);
+        }
 
         $choice = $result['choices'][0] ?? [];
         $messageData = $choice['message'] ?? [];
@@ -103,44 +116,65 @@ final readonly class OpenAiCompatibleLlmClient implements LlmClientInterface
                 'temperature' => $temperature,
                 'max_tokens' => $maxTokens,
                 'stream' => true,
-            ],
+            ] + $this->fallbackPayload(),
             'headers' => $this->headers(),
             'timeout' => $this->timeout,
         ]);
 
         $buffer = '';
-        foreach ($this->httpClient->stream($response) as $chunk) {
-            $buffer .= $chunk->getContent();
-            while (false !== ($pos = strpos($buffer, "\n"))) {
-                $line = trim(substr($buffer, 0, $pos));
-                $buffer = substr($buffer, $pos + 1);
-                if ('' === $line) {
-                    continue;
-                }
-                if (str_starts_with($line, 'data: ')) {
-                    $line = substr($line, 6);
-                }
-                if ('[DONE]' === trim($line)) {
-                    return;
-                }
-                $data = json_decode($line, true);
-                if (!is_array($data)) {
-                    continue;
-                }
-                $choices = $data['choices'] ?? [];
-                if (!$choices) {
-                    continue;
-                }
-                $delta = $choices[0]['delta'] ?? [];
-                $content = $delta['content'] ?? '';
-                if ('' !== $content) {
-                    yield $content;
-                }
-                if (!empty($choices[0]['finish_reason'])) {
-                    return;
+        try {
+            foreach ($this->httpClient->stream($response) as $chunk) {
+                $buffer .= $chunk->getContent();
+                while (false !== ($pos = strpos($buffer, "\n"))) {
+                    $line = trim(substr($buffer, 0, $pos));
+                    $buffer = substr($buffer, $pos + 1);
+                    if ('' === $line) {
+                        continue;
+                    }
+                    if (str_starts_with($line, 'data: ')) {
+                        $line = substr($line, 6);
+                    }
+                    if ('[DONE]' === trim($line)) {
+                        return;
+                    }
+                    $data = json_decode($line, true);
+                    if (!is_array($data)) {
+                        continue;
+                    }
+                    $choices = $data['choices'] ?? [];
+                    if (!$choices) {
+                        continue;
+                    }
+                    $delta = $choices[0]['delta'] ?? [];
+                    $content = $delta['content'] ?? '';
+                    if ('' !== $content) {
+                        yield $content;
+                    }
+                    if (!empty($choices[0]['finish_reason'])) {
+                        return;
+                    }
                 }
             }
+        } catch (HttpExceptionInterface $e) {
+            throw $this->translateUpstreamError($e);
         }
+    }
+
+    /**
+     * @return array{models?: string[]}
+     */
+    private function fallbackPayload(): array
+    {
+        return [] === $this->fallbackModels ? [] : ['models' => [$this->model, ...$this->fallbackModels]];
+    }
+
+    /**
+     * Upstream 429 becomes LlmRateLimitedException; any other HTTP error is
+     * rethrown untouched so existing handling keeps working.
+     */
+    private function translateUpstreamError(HttpExceptionInterface $e): \Throwable
+    {
+        return 429 === $e->getResponse()->getStatusCode() ? new LlmRateLimitedException($e) : $e;
     }
 
     public function checkStatus(): array
