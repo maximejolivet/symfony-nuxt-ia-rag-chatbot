@@ -280,6 +280,24 @@ describe('useChatbot: sendMessage happy path', () => {
     wrapper.unmount();
   });
 
+  it('asks to wait when the provider is rate-limited (error frame code rate_limited)', async () => {
+    stubStreamFetch([
+      sseFrame({
+        type: 'error',
+        content: 'The AI model is rate-limited by its provider.',
+        code: 'rate_limited',
+      }),
+    ]);
+
+    const [chatbot, wrapper] = await withSetup(() => useChatbot());
+    await chatbot.sendMessage('Salut');
+
+    expect(chatbot.error.value).toBe(
+      'Le modèle gratuit est saturé pour le moment (limite du fournisseur atteinte). Patientez une minute, puis réessayez.',
+    );
+    wrapper.unmount();
+  });
+
   it('shows a specific message when the model returned nothing (error frame code empty_response)', async () => {
     stubStreamFetch([
       sseFrame({

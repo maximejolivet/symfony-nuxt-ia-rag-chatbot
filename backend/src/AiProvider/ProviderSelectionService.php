@@ -44,6 +44,9 @@ final readonly class ProviderSelectionService
         private string $ollamaEmbeddingModel,
         #[Autowire(env: 'OLLAMA_ANALYSIS_MODEL')]
         private string $ollamaAnalysisModel,
+        // Comma-separated server-side fallbacks (OpenRouter `models`), env path only.
+        #[Autowire(env: 'default::AI_API_FALLBACK_MODELS')]
+        private ?string $aiApiFallbackModels = null,
     ) {}
 
     /**
@@ -86,6 +89,7 @@ final readonly class ProviderSelectionService
                         apiKey: $this->aiApiKey,
                         model: $this->aiApiModel,
                         timeout: $this->aiApiTimeout,
+                        fallbackModels: array_values(array_filter(array_map('trim', explode(',', (string) $this->aiApiFallbackModels)), static fn (string $m): bool => '' !== $m)),
                     );
                 } catch (\InvalidArgumentException $e) {
                     $this->logger->warning('API endpoint LLM client unavailable ({error}); falling back to Ollama.', ['error' => $e->getMessage()]);

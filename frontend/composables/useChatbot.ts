@@ -571,12 +571,15 @@ export const useChatbot = ({ apiUrl = '/api/chat', onMessage }: UseChatbotProps 
       if (error instanceof DOMException && 'AbortError' === error.name) return;
 
       console.error("Erreur lors de l'envoi du message:", error);
+      const code = (error as { code?: unknown } | null)?.code;
       state.value.error =
-        'empty_response' === (error as { code?: unknown } | null)?.code
+        'empty_response' === code
           ? t('errors.emptyReply')
-          : isOnline.value
-            ? t('errors.sendFailed')
-            : t('errors.offline');
+          : 'rate_limited' === code
+            ? t('errors.rateLimited')
+            : isOnline.value
+              ? t('errors.sendFailed')
+              : t('errors.offline');
     } finally {
       activeRequest = null;
       activeToolCall.value = null;

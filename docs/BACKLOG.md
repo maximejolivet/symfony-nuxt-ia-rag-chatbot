@@ -1739,6 +1739,21 @@ d'intégrateur tiers aujourd'hui).
 
 ### Résilience des providers IA
 
+- [ ] **Repli quand OpenRouter renvoie 429 (modèle `:free` saturé)** — code
+  livré : un 429 amont remonte en frame SSE `rate_limited` (message « modèle
+  saturé, patientez »), et `AI_API_FALLBACK_MODELS` envoie un tableau `models`
+  à OpenRouter (env uniquement). **Reste à faire en prod, hors code :**
+  1. Ajouter dans `/admin/ai-provider-configs` une 2ᵉ config active
+     `api_endpoint`/`chat`, même endpoint et même clé, avec un modèle `:free`
+     différent du principal (`isDefault` désactivé) ; la tester avec « tester
+     cet endpoint ».
+  2. Vérifier les logs `LLM provider #0 ... failed, trying next` après une
+     saturation réelle, puis confirmer qu'une réponse vient du modèle de repli.
+  3. Valider le tool-calling du modèle de repli avant de l'activer (voir
+     `docs/backend/AI_MODEL_BENCHMARK.md`) ; éviter `google/gemma-4-*` et
+     `nvidia/nemotron-3-nano-omni-*` (déjà 429 / en erreur au benchmark).
+  Si le repli chaîné ne suffit pas (latence d'un aller-retour par tentative),
+  ajouter un champ `fallbackModels` sur `AiProviderConfig`.
 - **Chaîne de fallback automatique** entre providers (Ollama local → API
   externe compatible OpenAI) si le provider actif ne répond plus, plutôt
   qu'un simple statut `offline` affiché passivement dans l'en-tête.

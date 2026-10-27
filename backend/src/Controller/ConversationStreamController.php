@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Chat\ChatService;
+use App\AiProvider\Client\LlmRateLimitedException;
 use App\Chat\EmptyLlmResponseException;
 use App\Chat\MessageSerializer;
 use App\Entity\Conversation;
@@ -66,11 +67,17 @@ final readonly class ConversationStreamController
                 $this->emit(['type' => 'ai_complete', 'done' => true, ...MessageSerializer::serialize($assistantMessage)]);
             } catch (\Throwable $e) {
                 // `code` lets the widget say "the model returned nothing, try
-                // again" instead of its generic send-failure message.
+                // again" (or "the provider is saturated") instead of its
+                // generic send-failure message.
+                $code = match (true) {
+                    $e instanceof EmptyLlmResponseException => 'empty_response',
+                    $e instanceof LlmRateLimitedException => 'rate_limited',
+                    default => null,
+                };
                 $this->emit([
                     'type' => 'error',
                     'content' => $e->getMessage(),
-                    ...($e instanceof EmptyLlmResponseException ? ['code' => 'empty_response'] : []),
+                    ...(null !== $code ? ['code' => $code] : []),
                 ]);
             }
 
