@@ -47,7 +47,7 @@ jobs:
       # Pins to the exact commit ci-backend.yml just validated, not
       # whatever master happens to be when this job starts -- avoids a race
       # if another push landed on master between the two workflows.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
