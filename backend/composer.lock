@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0981dcfe210c0e0c456ab2ef74e5b533",
+    "content-hash": "0f87fd33e8462b19d510809ce13139bf",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -2902,21 +2902,22 @@
         },
         {
             "name": "pagerfanta/core",
-            "version": "v4.8.0",
+            "version": "v4.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Pagerfanta/core.git",
-                "reference": "9d014cecdfdb8f377ce4923df9603b741b7353ea"
+                "reference": "f77157ff2154b6e053ba0601dabf1a8058ab914e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Pagerfanta/core/zipball/9d014cecdfdb8f377ce4923df9603b741b7353ea",
-                "reference": "9d014cecdfdb8f377ce4923df9603b741b7353ea",
+                "url": "https://api.github.com/repos/Pagerfanta/core/zipball/f77157ff2154b6e053ba0601dabf1a8058ab914e",
+                "reference": "f77157ff2154b6e053ba0601dabf1a8058ab914e",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": "^8.1"
+                "php": "^8.1",
+                "symfony/deprecation-contracts": "^2.1 || ^3.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "^10.5"
@@ -2939,32 +2940,33 @@
                 "pagerfanta"
             ],
             "support": {
-                "source": "https://github.com/Pagerfanta/core/tree/v4.8.0"
+                "source": "https://github.com/Pagerfanta/core/tree/v4.11.0"
             },
-            "time": "2026-01-22T13:51:30+00:00"
+            "time": "2026-10-29T17:10:24+00:00",
+            "published-time": "2026-10-29T18:32:38+00:00"
         },
         {
             "name": "pagerfanta/doctrine-orm-adapter",
-            "version": "v4.8.0",
+            "version": "v4.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Pagerfanta/doctrine-orm-adapter.git",
-                "reference": "0d7374a1dc10a5ddf8878cb791f1b220cd072714"
+                "reference": "16db882fde8707ed7cd0f413a9d08969c8ff595d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Pagerfanta/doctrine-orm-adapter/zipball/0d7374a1dc10a5ddf8878cb791f1b220cd072714",
-                "reference": "0d7374a1dc10a5ddf8878cb791f1b220cd072714",
+                "url": "https://api.github.com/repos/Pagerfanta/doctrine-orm-adapter/zipball/16db882fde8707ed7cd0f413a9d08969c8ff595d",
+                "reference": "16db882fde8707ed7cd0f413a9d08969c8ff595d",
                 "shasum": ""
             },
             "require": {
                 "doctrine/orm": "^2.14 || ^3.0",
-                "pagerfanta/core": "^3.7 || ^4.0",
+                "pagerfanta/core": "^4.10",
                 "php": "^8.1"
             },
             "require-dev": {
                 "phpunit/phpunit": "^10.5",
-                "symfony/cache": "^5.4 || ^6.4 || ^7.3 || ^8.0"
+                "symfony/cache": "^5.4 || ^6.4 || ^7.4 || ^8.1"
             },
             "type": "library",
             "autoload": {
@@ -2986,9 +2988,10 @@
                 "pagerfanta"
             ],
             "support": {
-                "source": "https://github.com/Pagerfanta/doctrine-orm-adapter/tree/v4.8.0"
+                "source": "https://github.com/Pagerfanta/doctrine-orm-adapter/tree/v4.11.0"
             },
-            "time": "2026-01-22T13:44:13+00:00"
+            "time": "2026-10-09T12:41:36+00:00",
+            "published-time": "2026-10-29T18:32:55+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -4713,7 +4716,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-16T14:15:10+00:00"
+            "time": "2026-09-16T14:15:10+00:00",
+            "published-time": "2026-11-04T11:25:34+00:00"
         },
         {
             "name": "symfony/doctrine-bridge",
@@ -13548,5 +13552,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }
