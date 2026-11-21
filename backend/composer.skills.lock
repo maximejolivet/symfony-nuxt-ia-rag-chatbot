@@ -2,15 +2,15 @@
     "version": 1,
     "plugin-version": "v2.1.1",
     "content-hash": "02e80265b0c363f58fe046f395818bb75232bf2b292d845cfb1ac9f6bbf8c347",
-    "generated-at": "2026-08-26T16:36:57+00:00",
+    "generated-at": "2026-11-21T15:36:06+00:00",
     "packages": [
         {
             "name": "php-modernization",
             "source": "netresearch/php-modernization-skill",
             "type": "github",
-            "commit": "21d01a98c1cb24e386c163b792b2d237f2242917",
+            "commit": "5196fd695df9688e691865e013a47a1d3263ee15",
             "path": "skills/php-modernization",
-            "checksum": "sha256:bd7beb6b069e80c4aec6581afdbba51fe33c4a464297adb126b20b876dc0cade",
+            "checksum": "sha256:45c0ba0c88ba8897f31aa7c334c6a14b7a0cec5bad66b7701d8b06cb3024d21b",
             "install-path": "vendor/agent-skills/installed/php-modernization",
             "url": "https://github.com/netresearch/php-modernization-skill.git",
             "ref": "main",
