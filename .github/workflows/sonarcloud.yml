@@ -24,7 +24,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           # Full history so SonarCloud can blame lines and detect new code.
           fetch-depth: 0

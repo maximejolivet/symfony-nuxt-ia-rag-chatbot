@@ -46,7 +46,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # Matches the Node version set on the Vercel project (24.x) -- the
       # build below runs on this runner, not on Vercel's.
