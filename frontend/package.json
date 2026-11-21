@@ -19,7 +19,7 @@
     "@nuxtjs/i18n": "^10.6.0",
     "@tailwindcss/typography": "^0.5.20",
     "axios": "^1.20.0",
-    "isomorphic-dompurify": "^3.23.0",
+    "isomorphic-dompurify": "^4.0.0",
     "marked": "^18.0.11",
     "nuxt": "^4.5.1",
     "unicode-emoji-json": "^0.9.0"
