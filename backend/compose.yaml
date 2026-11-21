@@ -82,7 +82,7 @@ services:
       - proxy
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     networks:
       - default
 
